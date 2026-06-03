@@ -1,0 +1,130 @@
+.hero {
+  position: relative;
+  padding: 0;
+}
+
+.media {
+  position: relative;
+  min-height: 620px;
+  display: flex;
+  align-items: flex-end;
+  background-image:
+    linear-gradient(180deg, rgba(22, 41, 59, 0.05) 0%, rgba(22, 41, 59, 0.18) 45%, rgba(22, 41, 59, 0.72) 100%),
+    url('/hero.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.inner {
+  position: relative;
+  padding-bottom: 56px;
+  max-width: 720px;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--navy);
+  font-size: 13.5px;
+  font-weight: 600;
+  padding: 7px 14px;
+  border-radius: 999px;
+  margin-bottom: 22px;
+}
+
+.h1 {
+  color: #fff;
+  font-size: clamp(36px, 5.4vw, 62px);
+  letter-spacing: -0.03em;
+}
+
+.sub {
+  color: rgba(255, 255, 255, 0.92);
+  font-size: clamp(17px, 2vw, 21px);
+  margin-top: 20px;
+  max-width: 33ch;
+}
+
+.cta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 13px;
+  margin-top: 32px;
+}
+
+/* Trust strip */
+.trust {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 28px 40px;
+  padding: 26px 0;
+}
+
+.trustItem {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--ink);
+}
+
+.trustIc {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 11px;
+  background: var(--accent-tint);
+  color: var(--accent-press);
+  flex: none;
+}
+
+@media (max-width: 760px) {
+  .media {
+    min-height: 520px;
+  }
+
+  .inner {
+    padding-bottom: 40px;
+  }
+
+  .cta {
+    margin-top: 24px;
+
+    > a,
+    > button {
+      flex: 1 1 100%;
+      justify-content: center;
+    }
+  }
+
+  .trust {
+    gap: 16px 24px;
+    padding: 20px 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .media {
+    min-height: 460px;
+  }
+
+  .pill {
+    font-size: 12px;
+    padding: 6px 12px;
+    margin-bottom: 16px;
+  }
+
+  .sub {
+    max-width: none;
+  }
+
+  .trustItem {
+    font-size: 14px;
+    flex: 1 1 100%;
+  }
+}

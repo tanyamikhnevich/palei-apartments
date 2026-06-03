@@ -1,0 +1,16 @@
+.cover {
+  position: relative;
+  overflow: hidden;
+  background: var(--sand);
+  background-image: repeating-linear-gradient(
+    -45deg,
+    transparent,
+    transparent 11px,
+    rgba(30, 58, 82, 0.045) 11px,
+    rgba(30, 58, 82, 0.045) 22px
+  );
+}
+
+.img {
+  object-fit: cover;
+}

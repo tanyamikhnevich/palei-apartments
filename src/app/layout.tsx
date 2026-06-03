@@ -1,0 +1,28 @@
+import type { Metadata } from 'next';
+import '@/styles/globals.scss';
+import { LanguageProvider } from '@/i18n/LanguageProvider';
+import LocaleDocument from '@/i18n/LocaleDocument';
+
+export const metadata: Metadata = {
+  title: 'Palei Apartments — Bat Yam & Tel Aviv',
+  description:
+    'Boutique short-term rentals near the Mediterranean — comfortable apartments in Bat Yam and Tel Aviv.',
+};
+
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+};
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en" suppressHydrationWarning>
+      <body>
+        <LanguageProvider>
+          <LocaleDocument />
+          {children}
+        </LanguageProvider>
+      </body>
+    </html>
+  );
+}

@@ -1,0 +1,153 @@
+.wrap {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  overflow: hidden;
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  min-width: 640px;
+  border-collapse: collapse;
+}
+
+.thead th {
+  text-align: left;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  font-weight: 700;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--line);
+  background: var(--bg);
+  white-space: nowrap;
+}
+
+.tbody td {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--line);
+  font-size: 14.5px;
+  vertical-align: middle;
+}
+
+.tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.tbody tr {
+  transition: background 0.12s;
+
+  &:hover {
+    background: var(--sand);
+  }
+}
+
+.nameCell {
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.thumb {
+  width: 48px;
+  height: 36px;
+  border-radius: 8px;
+  flex: none;
+}
+
+.muted {
+  color: var(--ink-soft);
+}
+
+.price b {
+  font-size: 15px;
+}
+
+.actions {
+  display: flex;
+  gap: 7px;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.switch {
+  width: 42px;
+  height: 24px;
+  border-radius: 999px;
+  background: var(--line-2);
+  border: none;
+  position: relative;
+  transition: background 0.18s;
+  cursor: pointer;
+  flex: none;
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+    transition: transform 0.18s var(--ease);
+  }
+
+  &.switchOn {
+    background: #3fa564;
+
+    &::after {
+      transform: translateX(18px);
+    }
+  }
+}
+
+.iconBtn {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: 1px solid var(--line-2);
+  background: var(--surface);
+  color: var(--navy);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: 0.15s;
+
+  &:hover {
+    background: var(--sand);
+    border-color: var(--navy);
+  }
+
+  &.danger:hover {
+    background: #fbe9e4;
+    border-color: #d9876f;
+    color: #b1542f;
+  }
+}
+
+.right {
+  text-align: right;
+}
+
+@media (max-width: 480px) {
+  .thead th,
+  .tbody td {
+    padding: 12px 14px;
+    font-size: 13.5px;
+  }
+
+  .thumb {
+    width: 40px;
+    height: 30px;
+  }
+
+  .iconBtn {
+    width: 40px;
+    height: 40px;
+  }
+}

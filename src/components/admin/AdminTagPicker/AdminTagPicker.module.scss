@@ -1,0 +1,29 @@
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  border: 1px solid var(--line-2);
+  background: var(--surface);
+  color: var(--ink-soft);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 8px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: 0.15s;
+
+  &:hover {
+    border-color: var(--navy);
+    color: var(--ink);
+  }
+
+  &.on {
+    background: var(--navy);
+    color: #fff;
+    border-color: var(--navy);
+  }
+}

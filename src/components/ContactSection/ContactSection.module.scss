@@ -1,0 +1,154 @@
+.section {
+  padding: 96px 0;
+  background: var(--sand);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1.05fr;
+  gap: 56px;
+  align-items: start;
+}
+
+/* Aside */
+.feats {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-top: 26px;
+}
+
+.feat {
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  gap: 13px;
+  align-items: start;
+}
+
+.featIcon {
+  width: 40px;
+  height: 40px;
+  border-radius: 11px;
+  display: grid;
+  place-items: center;
+  background: var(--sand-2);
+  color: var(--navy);
+}
+
+.featTitle {
+  font-size: 15.5px;
+  margin-bottom: 2px;
+}
+
+.featDesc {
+  color: var(--ink-soft);
+  font-size: 14px;
+}
+
+.whatsapp {
+  margin-top: 28px;
+
+  button,
+  a {
+    background: #25d366 !important;
+    color: #fff !important;
+
+    &:hover {
+      background: #1eb858 !important;
+    }
+  }
+}
+
+/* Form card */
+.formCard {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  padding: 32px;
+  box-shadow: var(--shadow-sm);
+}
+
+.formStack {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.formRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.formNote {
+  font-size: 13px;
+  color: var(--ink-soft);
+  text-align: center;
+}
+
+/* Success state */
+.sent {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.sentIcon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: #e6f0e8;
+  color: #2f6b43;
+  display: grid;
+  place-items: center;
+  margin: 0 auto 18px;
+}
+
+.sentTitle {
+  font-size: 22px;
+}
+
+.sentDesc {
+  color: var(--ink-soft);
+  margin-top: 8px;
+}
+
+.sentCta {
+  margin-top: 22px;
+}
+
+@media (max-width: 1000px) {
+  .grid {
+    grid-template-columns: 1fr;
+    gap: 36px;
+  }
+
+  .formRow {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .section {
+    padding: 64px 0;
+  }
+
+  .formCard {
+    padding: 24px 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .section {
+    padding: 48px 0;
+  }
+
+  .formCard {
+    padding: 20px 16px;
+  }
+
+  .whatsapp :global(a),
+  .whatsapp :global(button) {
+    width: 100%;
+    justify-content: center;
+  }
+}

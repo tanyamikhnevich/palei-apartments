@@ -1,0 +1,118 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import Image from 'next/image';
+import Button from '@/components/ui/Button/Button';
+import Icon from '@/components/ui/Icon/Icon';
+import { useLanguage } from '@/i18n/LanguageProvider';
+import { LOCALES, LOCALE_LABELS } from '@/i18n/types';
+import styles from './Header.module.scss';
+
+const NAV = [
+  { key: 'nav.apartments', href: '/apartments' },
+  { key: 'nav.about', href: '#about' },
+  { key: 'nav.location', href: '#location' },
+  { key: 'nav.contact', href: '#contact' },
+] as const;
+
+function LangSwitch() {
+  const { locale, setLocale, t } = useLanguage();
+
+  return (
+    <div className={styles.lang} role="group" aria-label={t('nav.language')}>
+      {LOCALES.map((l) => (
+        <button
+          key={l}
+          type="button"
+          className={`${styles.langBtn} ${locale === l ? styles.langOn : ''}`}
+          onClick={() => setLocale(l)}
+          aria-pressed={locale === l}
+        >
+          {LOCALE_LABELS[l]}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+export default function Header() {
+  const { t } = useLanguage();
+  const [stuck, setStuck] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => setStuck(window.scrollY > 8);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  return (
+    <header className={`${styles.hdr} ${stuck ? styles.stuck : ''}`}>
+      <div className={`wrap ${styles.bar}`}>
+        <a href="#top">
+          <Image
+            src="/palei-logo.png"
+            alt={t('brand')}
+            width={120}
+            height={38}
+            className={styles.logo}
+            priority
+          />
+        </a>
+
+        <nav className={styles.nav} aria-label="Main navigation">
+          {NAV.map(({ key, href }) => (
+            <a key={key} className={styles.link} href={href}>
+              {t(key)}
+            </a>
+          ))}
+        </nav>
+
+        <div className={styles.right}>
+          <div className={styles.langDesktop}>
+            <LangSwitch />
+          </div>
+          <Button
+            variant="navy"
+            size="sm"
+            as="a"
+            href="#contact"
+            className={styles.bookDesktop}
+          >
+            {t('nav.bookNow')}
+          </Button>
+          <button
+            className={styles.burger}
+            aria-label={menuOpen ? t('nav.closeMenu') : t('nav.openMenu')}
+            onClick={() => setMenuOpen((o) => !o)}
+          >
+            <Icon name={menuOpen ? 'x' : 'menu'} size={20} />
+          </button>
+        </div>
+      </div>
+
+      <div className={`${styles.drawer} ${menuOpen ? styles.drawerOpen : ''}`}>
+        <div className={styles.drawerPanel}>
+          {NAV.map(({ key, href }) => (
+            <a key={key} href={href} onClick={() => setMenuOpen(false)}>
+              {t(key)}
+            </a>
+          ))}
+          <div className={styles.drawerBottom}>
+            <LangSwitch />
+            <Button
+              variant="primary"
+              size="sm"
+              as="a"
+              href="#contact"
+              onClick={() => setMenuOpen(false)}
+            >
+              {t('nav.bookNow')}
+            </Button>
+          </div>
+        </div>
+      </div>
+    </header>
+  );
+}

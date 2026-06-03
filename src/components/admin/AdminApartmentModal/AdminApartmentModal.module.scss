@@ -1,0 +1,289 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(22, 41, 59, 0.45);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 20px;
+  overflow: hidden;
+  animation: adminFade 0.2s ease;
+}
+
+@keyframes adminFade {
+  from {
+    opacity: 0;
+  }
+}
+
+.modal {
+  background: var(--surface);
+  border-radius: var(--r-lg);
+  width: 100%;
+  max-width: 720px;
+  max-height: calc(100vh - 48px);
+  box-shadow: var(--shadow-lg);
+  animation: adminPop 0.24s var(--ease);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+@keyframes adminPop {
+  from {
+    transform: translateY(12px) scale(0.98);
+    opacity: 0;
+  }
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 22px 26px;
+  border-bottom: 1px solid var(--line);
+  flex-shrink: 0;
+  background: var(--surface);
+
+  h3 {
+    font-size: 20px;
+    margin: 0;
+  }
+
+  p {
+    font-size: 13.5px;
+    color: var(--ink-soft);
+    margin: 2px 0 0;
+  }
+}
+
+.close {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  border: none;
+  background: var(--sand);
+  color: var(--ink);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: 0.15s;
+  flex: none;
+
+  &:hover {
+    background: var(--sand-2);
+  }
+}
+
+.body {
+  padding: 24px 26px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.grid3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.foot {
+  padding: 18px 26px;
+  border-top: 1px solid var(--line);
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  flex-shrink: 0;
+  background: var(--surface);
+}
+
+.photos {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+.photo {
+  aspect-ratio: 1;
+  border-radius: 10px;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--line);
+
+  :global(img) {
+    object-fit: cover;
+  }
+}
+
+.photoImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.photoTag {
+  position: absolute;
+  bottom: 6px;
+  left: 6px;
+  font-size: 10px;
+  font-family: ui-monospace, monospace;
+  color: var(--navy);
+  background: rgba(255, 255, 255, 0.85);
+  padding: 2px 6px;
+  border-radius: 6px;
+  z-index: 1;
+}
+
+.photoDel {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 24px;
+  height: 24px;
+  border-radius: 7px;
+  border: none;
+  background: rgba(22, 41, 59, 0.7);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  z-index: 1;
+
+  &:hover {
+    background: var(--accent);
+  }
+}
+
+.photoAdd {
+  aspect-ratio: 1;
+  border: 1.5px dashed var(--line-2);
+  border-radius: 10px;
+  background: var(--bg);
+  color: var(--ink-soft);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.15s;
+
+  &:hover {
+    border-color: var(--accent);
+    color: var(--accent-press);
+    background: var(--accent-tint);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: wait;
+  }
+}
+
+.fileInput {
+  display: none;
+}
+
+.uploadError {
+  font-size: 12.5px;
+  color: #b42318;
+  margin: 6px 0 0;
+}
+
+.seg {
+  display: flex;
+  gap: 8px;
+}
+
+.segBtn {
+  flex: 1;
+  padding: 11px;
+  border-radius: 10px;
+  border: 1px solid var(--line-2);
+  background: var(--surface);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: 0.15s;
+
+  &.on {
+    color: #fff;
+    border-color: transparent;
+  }
+
+  &.onAvailable {
+    background: #3fa564;
+  }
+
+  &.onBooked {
+    background: var(--accent);
+  }
+
+  &.onMaintenance {
+    background: #8a7a52;
+  }
+}
+
+@media (max-width: 860px) {
+  .grid,
+  .grid3 {
+    grid-template-columns: 1fr;
+  }
+
+  .photos {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .overlay {
+    padding: 0;
+    align-items: stretch;
+  }
+
+  .modal {
+    max-width: none;
+    max-height: none;
+    min-height: 100dvh;
+    border-radius: 0;
+  }
+
+  .head {
+    padding: 16px 18px;
+  }
+
+  .body {
+    padding: 16px 18px;
+  }
+
+  .foot {
+    flex-direction: column-reverse;
+    gap: 8px;
+    padding: 14px 18px;
+
+    :global(button) {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+
+  .photos {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

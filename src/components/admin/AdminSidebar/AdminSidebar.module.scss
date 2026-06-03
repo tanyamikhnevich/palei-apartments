@@ -1,0 +1,133 @@
+.side {
+  position: sticky;
+  top: 0;
+  align-self: start;
+  height: 100vh;
+  background: var(--navy);
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  padding: 22px 16px;
+}
+
+.logoLink {
+  background: #fff;
+  border-radius: 12px;
+  padding: 9px 12px;
+  margin: 4px 6px 26px;
+  display: block;
+
+  img {
+    height: 32px;
+    width: auto;
+    display: block;
+  }
+}
+
+.label {
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.4);
+  font-weight: 700;
+  padding: 0 14px;
+  margin: 22px 0 8px;
+}
+
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.74);
+  border: none;
+  background: none;
+  text-align: left;
+  width: 100%;
+  cursor: pointer;
+  transition: 0.15s;
+  text-decoration: none;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.07);
+    color: #fff;
+  }
+
+  &.active {
+    background: rgba(255, 255, 255, 0.12);
+    color: #fff;
+  }
+}
+
+.count {
+  margin-left: auto;
+  font-size: 12px;
+  font-weight: 700;
+  background: var(--accent);
+  color: #fff;
+  border-radius: 999px;
+  padding: 2px 8px;
+}
+
+.foot {
+  margin-top: auto;
+}
+
+.user {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 12px 10px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.06);
+  margin-top: 10px;
+}
+
+.avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--accent);
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  font-size: 14px;
+  flex: none;
+  color: #fff;
+}
+
+.userName {
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.userRole {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+@media (max-width: 860px) {
+  .side {
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 300;
+    width: 260px;
+    transform: translateX(-100%);
+    transition: transform 0.25s var(--ease);
+
+    &.open {
+      transform: translateX(0);
+    }
+  }
+}

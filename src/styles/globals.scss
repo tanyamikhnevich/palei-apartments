@@ -1,0 +1,264 @@
+/* ============================================================
+   Palei Apartments — design tokens & base styles
+   Warm Mediterranean: deep navy brand, terracotta accent,
+   sand / warm-white neutrals. Modern clean sans.
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+
+:root {
+  /* Accent */
+  --accent:       #c8643c;
+  --accent-press: #b1542f;
+  --accent-tint:  #f6e6dc;
+
+  /* Typography */
+  --font: 'Plus Jakarta Sans', system-ui, sans-serif;
+
+  /* Neutrals (warm) */
+  --bg:        #faf7f1;
+  --surface:   #ffffff;
+  --sand:      #f1e9da;
+  --sand-2:    #e9dec9;
+  --navy:      #1e3a52;
+  --navy-2:    #16293b;
+  --navy-soft: #2c4a64;
+
+  --ink:       #23211d;
+  --ink-soft:  #6d6655;
+  --ink-faint: #9b9382;
+  --line:      #e8e0d1;
+  --line-2:    #ddd2bd;
+
+  /* Shape */
+  --r-sm: 10px;
+  --r-md: 16px;
+  --r-lg: 24px;
+  --r-xl: 32px;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(30, 40, 55, 0.05), 0 2px 6px rgba(30, 40, 55, 0.04);
+  --shadow-md: 0 4px 14px rgba(30, 40, 55, 0.07), 0 12px 30px rgba(30, 40, 55, 0.06);
+  --shadow-lg: 0 10px 30px rgba(30, 40, 55, 0.10), 0 30px 60px rgba(30, 40, 55, 0.10);
+
+  --maxw: 1200px;
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  overflow-x: hidden;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--ink);
+  font-size: 17px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+::selection {
+  background: var(--accent-tint);
+}
+
+h1, h2, h3, h4 {
+  margin: 0;
+  font-weight: 700;
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+
+p {
+  margin: 0;
+}
+
+/* Layout helpers */
+.wrap {
+  max-width: var(--maxw);
+  margin: 0 auto;
+  padding: 0 28px;
+  width: 100%;
+}
+
+/* Section rhythm */
+.section {
+  padding: 96px 0;
+}
+
+.section--tight {
+  padding: 72px 0;
+}
+
+/* Eyebrow label */
+.eyebrow {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 14px;
+}
+
+.section-title {
+  font-size: clamp(28px, 3.6vw, 44px);
+}
+
+.section-sub {
+  color: var(--ink-soft);
+  font-size: 18px;
+  margin-top: 16px;
+  max-width: 60ch;
+}
+
+/* Form base */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+
+  > label,
+  > span {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink);
+    letter-spacing: -0.01em;
+  }
+}
+
+.input,
+.select,
+.textarea {
+  width: 100%;
+  font-family: inherit;
+  font-size: 15px;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-sm);
+  padding: 12px 14px;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  outline: none;
+
+  &::placeholder {
+    color: var(--ink-faint);
+  }
+
+  &:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-tint);
+  }
+}
+
+.inputInvalid,
+.select.inputInvalid,
+.textarea.inputInvalid {
+  border-color: #b42318;
+
+  &:focus {
+    border-color: #b42318;
+    box-shadow: 0 0 0 3px rgba(180, 35, 24, 0.15);
+  }
+}
+
+.fieldError {
+  display: block;
+  margin-top: 6px;
+  font-size: 12.5px;
+  color: #b42318;
+  line-height: 1.4;
+}
+
+.textarea {
+  resize: vertical;
+  min-height: 96px;
+  line-height: 1.55;
+}
+
+.select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%236d6655' stroke-width='1.6' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 38px;
+}
+
+/* Muted text */
+.muted {
+  color: var(--ink-soft);
+}
+
+@media (max-width: 760px) {
+  body {
+    font-size: 16px;
+  }
+
+  .section {
+    padding: 64px 0;
+  }
+
+  .section--tight {
+    padding: 52px 0;
+  }
+
+  .wrap {
+    padding: 0 20px;
+  }
+
+  .section-sub {
+    font-size: 16px;
+    margin-top: 12px;
+  }
+
+  .eyebrow {
+    font-size: 12px;
+    margin-bottom: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .wrap {
+    padding: 0 16px;
+  }
+
+  .section {
+    padding: 48px 0;
+  }
+
+  .section--tight {
+    padding: 40px 0;
+  }
+}
+
+/* RTL (Hebrew) */
+[dir='rtl'] {
+  .wrap {
+    text-align: start;
+  }
+}

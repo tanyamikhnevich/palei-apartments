@@ -1,0 +1,28 @@
+.ph {
+  position: relative;
+  overflow: hidden;
+  background: var(--sand);
+  background-image: repeating-linear-gradient(
+    -45deg,
+    transparent,
+    transparent 11px,
+    rgba(30, 58, 82, 0.045) 11px,
+    rgba(30, 58, 82, 0.045) 22px
+  );
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-start;
+}
+
+.tag {
+  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  color: var(--navy);
+  background: rgba(255, 255, 255, 0.78);
+  backdrop-filter: blur(2px);
+  padding: 4px 9px;
+  border-radius: 7px;
+  margin: 12px;
+  border: 1px solid rgba(30, 58, 82, 0.08);
+}

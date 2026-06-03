@@ -1,0 +1,126 @@
+.cal {
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  padding: 14px;
+  background: var(--bg);
+}
+
+.hint {
+  margin: 12px 0 0;
+  font-size: 13px;
+  color: var(--ink-soft);
+  line-height: 1.45;
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.navBtn {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 13px;
+  color: var(--navy);
+  cursor: pointer;
+
+  &:hover {
+    border-color: var(--line-2);
+  }
+}
+
+.month {
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  margin-bottom: 6px;
+
+  span {
+    text-align: center;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--ink-soft);
+    text-transform: uppercase;
+  }
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.empty {
+  aspect-ratio: 1;
+}
+
+.day {
+  aspect-ratio: 1;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink);
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    background: rgba(30, 58, 82, 0.08);
+  }
+
+  &.today {
+    box-shadow: inset 0 0 0 1px var(--navy);
+  }
+
+  &.inRange {
+    background: rgba(196, 106, 74, 0.12);
+    border-radius: 0;
+  }
+
+  &.start {
+    background: var(--accent);
+    color: #fff;
+    border-radius: 10px 0 0 10px;
+  }
+
+  &.end {
+    background: var(--accent);
+    color: #fff;
+    border-radius: 0 10px 10px 0;
+  }
+
+  &.start.end {
+    border-radius: 10px;
+  }
+
+  &.disabled {
+    color: var(--ink-soft);
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+}
+
+@media (max-width: 400px) {
+  .cal {
+    padding: 10px;
+  }
+
+  .day {
+    font-size: 12px;
+    border-radius: 8px;
+  }
+
+  .grid,
+  .weekdays {
+    gap: 2px;
+  }
+}

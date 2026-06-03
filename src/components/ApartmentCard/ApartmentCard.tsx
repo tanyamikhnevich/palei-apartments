@@ -2,13 +2,16 @@
 
 import { useState } from 'react';
 import type { Apartment } from '@/types/apartment';
-import ApartmentCover from '@/components/ApartmentCover/ApartmentCover';
+import FormattedDescription from '@/components/FormattedDescription/FormattedDescription';
+import PhotoGallery from '@/components/PhotoGallery/PhotoGallery';
 import Button from '@/components/ui/Button/Button';
 import Icon from '@/components/ui/Icon/Icon';
+import SpecStat from '@/components/ui/SpecStat/SpecStat';
 import BookingModal from '@/components/BookingModal/BookingModal';
 import { useLanguage } from '@/i18n/LanguageProvider';
 import { getApartmentCopy } from '@/i18n/apartmentLocale';
-import { formatApartmentTags } from '@/lib/apartmentMedia';
+import { formatApartmentTags, getApartmentPhotos } from '@/lib/apartmentMedia';
+import { getPrimaryTagLabel } from '@/lib/apartmentTags';
 import styles from './ApartmentCard.module.scss';
 
 interface ApartmentCardProps {
@@ -18,21 +21,21 @@ interface ApartmentCardProps {
 export default function ApartmentCard({ apt }: ApartmentCardProps) {
   const { locale, t } = useLanguage();
   const copy = getApartmentCopy(apt, locale);
+  const photos = getApartmentPhotos(apt);
   const [fav, setFav] = useState(false);
   const [bookingOpen, setBookingOpen] = useState(false);
   const tagLine = formatApartmentTags(apt, locale, t);
-
-  const bedLabel =
-    apt.bedrooms === 1 ? t('apartments.bed') : t('apartments.beds');
-  const bathLabel =
-    apt.bathrooms === 1 ? t('apartments.bath') : t('apartments.baths');
-  const guestLabel =
-    apt.guests === 1 ? t('apartments.guest') : t('apartments.guests');
+  const placeholderCaption = getPrimaryTagLabel(apt, locale, t);
 
   return (
     <>
       <article className={styles.card}>
-        <ApartmentCover apt={apt} alt={copy.title} className={styles.media} placeholderLabel={tagLine}>
+        <PhotoGallery
+          photos={photos}
+          alt={copy.title}
+          className={styles.media}
+          placeholderLabel={placeholderCaption}
+        >
           <button
             type="button"
             className={`${styles.fav} ${fav ? styles.favOn : ''}`}
@@ -51,11 +54,11 @@ export default function ApartmentCard({ apt }: ApartmentCardProps) {
               ₪{apt.price} <span>{t('apartments.perNight')}</span>
             </span>
           </div>
-        </ApartmentCover>
+        </PhotoGallery>
 
         <div className={styles.body}>
           <div className={styles.top}>
-            <div>
+            <div className={styles.titleBlock}>
               <div className={styles.name}>{copy.title}</div>
               <div className={styles.loc}>
                 <Icon name="pin" size={14} />
@@ -68,21 +71,25 @@ export default function ApartmentCard({ apt }: ApartmentCardProps) {
             </div>
           </div>
 
-          <p className={styles.desc}>{copy.description}</p>
+          <FormattedDescription text={copy.description} clamp className={styles.desc} />
 
           <div className={styles.specs}>
-            <span className={styles.spec}>
-              <Icon name="guest" size={16} />
-              {apt.guests} {guestLabel}
-            </span>
-            <span className={styles.spec}>
-              <Icon name="bed" size={16} />
-              {apt.bedrooms} {bedLabel}
-            </span>
-            <span className={styles.spec}>
-              <Icon name="bath" size={16} />
-              {apt.bathrooms} {bathLabel}
-            </span>
+            <SpecStat icon="guest" value={apt.guests} label={t('apartments.guests')} />
+            <SpecStat
+              icon="home"
+              value={apt.bedrooms}
+              label={apt.bedrooms === 1 ? t('apartments.bedroom') : t('apartments.bedrooms')}
+            />
+            <SpecStat
+              icon="bed"
+              value={apt.beds}
+              label={apt.beds === 1 ? t('apartments.bed') : t('apartments.beds')}
+            />
+            <SpecStat
+              icon="bath"
+              value={apt.bathrooms}
+              label={apt.bathrooms === 1 ? t('apartments.bath') : t('apartments.baths')}
+            />
           </div>
 
           <div className={styles.foot}>

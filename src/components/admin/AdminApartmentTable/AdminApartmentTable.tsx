@@ -45,7 +45,7 @@ export default function AdminApartmentTable({
               </td>
               <td className={styles.muted}>{copy.location}</td>
               <td className={styles.muted}>
-                {a.guests}g · {a.bedrooms}bd · {a.bathrooms}ba
+                {a.guests}g · {a.bedrooms}br · {a.beds}b · {a.bathrooms}ba
               </td>
               <td className={styles.price}>
                 <b>₪{a.price}</b>

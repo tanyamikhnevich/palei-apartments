@@ -20,8 +20,16 @@
   cursor: pointer;
   font-family: inherit;
 
-  &:active {
+  &:active:not(:disabled) {
     transform: translateY(1px) scale(0.99);
+  }
+
+  &:disabled,
+  &.inactive {
+    opacity: 0.45;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
   }
 }
 

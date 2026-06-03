@@ -63,8 +63,12 @@ export default function AdminApartmentCard({
             {apt.guests}
           </span>
           <span>
-            <Icon name="bed" size={14} />
+            <Icon name="home" size={14} />
             {apt.bedrooms}
+          </span>
+          <span>
+            <Icon name="bed" size={14} />
+            {apt.beds}
           </span>
           <span>
             <Icon name="bath" size={14} />

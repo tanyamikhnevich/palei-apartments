@@ -4,7 +4,7 @@ import { getDb, schema } from '@/db/index';
 import { bookingToInsert, rowToBooking } from '@/db/map';
 import type { Booking, BookingStatus } from '@/types/apartment';
 import { bookings as mockBookings } from '@/data/apartments';
-import { formatDateRange, rangesOverlap } from '@/lib/dates';
+import { formatDateRange, nightsBetween, rangesOverlap } from '@/lib/dates';
 import { dbUnavailableResponse, isDbConfigured, jsonError } from '@/lib/api/errors';
 import { validateBookingGuest, validationMessageEn } from '@/lib/validation/contact';
 
@@ -55,6 +55,18 @@ export async function POST(request: Request) {
     }
 
     const db = getDb();
+
+    const aptRows = await db
+      .select({ minNights: schema.apartments.minNights })
+      .from(schema.apartments)
+      .where(eq(schema.apartments.id, body.apartmentId))
+      .limit(1);
+
+    const minNights = aptRows[0]?.minNights ?? 1;
+    if (body.status !== 'Draft' && nightsBetween(body.checkIn, body.checkOut) < minNights) {
+      return jsonError(`Minimum stay is ${minNights} night(s)`, 400);
+    }
+
     const blocked = await db
       .select()
       .from(schema.bookings)

@@ -1,11 +1,13 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import Image from 'next/image';
 import type { Apartment } from '@/types/apartment';
+import FormattedDescription from '@/components/FormattedDescription/FormattedDescription';
+import PhotoGallery from '@/components/PhotoGallery/PhotoGallery';
 import Button from '@/components/ui/Button/Button';
+import btnStyles from '@/components/ui/Button/Button.module.scss';
 import Icon from '@/components/ui/Icon/Icon';
-import Placeholder from '@/components/ui/Placeholder/Placeholder';
+import SpecStat from '@/components/ui/SpecStat/SpecStat';
 import DateRangeCalendar from '@/components/DateRangeCalendar/DateRangeCalendar';
 import { useLanguage } from '@/i18n/LanguageProvider';
 import { getApartmentCopy } from '@/i18n/apartmentLocale';
@@ -22,7 +24,7 @@ import {
   validatePhoneOrEmail,
 } from '@/lib/validation/contact';
 import { resolveValidationMessage } from '@/lib/validation/resolveMessage';
-import { getApartmentPhotos, isPhotoUrl } from '@/lib/apartmentMedia';
+import { getApartmentPhotos } from '@/lib/apartmentMedia';
 import styles from './BookingModal.module.scss';
 
 interface BookingModalProps {
@@ -33,13 +35,15 @@ interface BookingModalProps {
 export default function BookingModal({ apt, onClose }: BookingModalProps) {
   const { locale, t } = useLanguage();
   const copy = getApartmentCopy(apt, locale);
+  const photos = useMemo(() => getApartmentPhotos(apt), [apt.photos]);
+  const minNights = apt.minNights ?? 1;
+
   const [bookingId] = useState(
     () => `web-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`
   );
   const [blocked, setBlocked] = useState<{ checkIn: string; checkOut: string }[]>([]);
   const [checkIn, setCheckIn] = useState<string | null>(null);
   const [checkOut, setCheckOut] = useState<string | null>(null);
-  const [activePhoto, setActivePhoto] = useState(0);
   const [guests, setGuests] = useState(Math.min(2, apt.guests));
   const [guestName, setGuestName] = useState('');
   const [guestContact, setGuestContact] = useState('');
@@ -48,24 +52,37 @@ export default function BookingModal({ apt, onClose }: BookingModalProps) {
   const [error, setError] = useState<string | null>(null);
   const [nameError, setNameError] = useState<string | null>(null);
   const [contactError, setContactError] = useState<string | null>(null);
-
-  const photos = useMemo(() => getApartmentPhotos(apt), [apt.photos]);
+  const [dateError, setDateError] = useState<string | null>(null);
+  const [showFormErrors, setShowFormErrors] = useState(false);
 
   useEffect(() => {
     fetchBookingAvailability(apt.id).then(setBlocked).catch(() => setBlocked([]));
   }, [apt.id]);
 
+  const nights =
+    checkIn && checkOut && checkOut > checkIn ? nightsBetween(checkIn, checkOut) : 0;
+  const rangeReady = Boolean(checkIn && checkOut && checkOut > checkIn);
+  const nightsValid = rangeReady && nights >= minNights;
+  const nameValid = validatePersonName(guestName).ok;
+  const contactValid = validatePhoneOrEmail(guestContact).ok;
+  const formComplete = nightsValid && nameValid && contactValid;
+
   const calendarHint = useMemo(() => {
+    if (dateError) return dateError;
     if (checkIn && checkOut && checkOut > checkIn) {
-      return t('booking.rangeSelected').replace('{range}', formatDateRange(checkIn, checkOut, locale));
+      return t('booking.rangeSelected').replace(
+        '{range}',
+        formatDateRange(checkIn, checkOut, locale)
+      );
     }
     if (checkIn && !checkOut) return t('booking.selectCheckOut');
     return t('booking.selectCheckIn');
-  }, [checkIn, checkOut, locale, t]);
+  }, [checkIn, checkOut, dateError, locale, t]);
 
   const persistDraft = useCallback(
     async (inDate: string, outDate: string) => {
       if (outDate <= inDate) return;
+      if (nightsBetween(inDate, outDate) < minNights) return;
       setSaving(true);
       setError(null);
       try {
@@ -88,22 +105,47 @@ export default function BookingModal({ apt, onClose }: BookingModalProps) {
         setSaving(false);
       }
     },
-    [apt.id, bookingId, copy.title, guestContact, guestName, guests, locale, t]
+    [apt.id, bookingId, copy.title, guestContact, guestName, guests, locale, minNights, t]
   );
+
+  const validateDates = (): boolean => {
+    if (!rangeReady) {
+      setDateError(t('booking.pickDates'));
+      return false;
+    }
+    if (nights < minNights) {
+      setDateError(
+        t('booking.minNightsError')
+          .replace('{min}', String(minNights))
+          .replace('{nights}', String(nights))
+      );
+      return false;
+    }
+    setDateError(null);
+    return true;
+  };
 
   const onRangeChange = (range: { checkIn: string; checkOut: string | null }) => {
     setCheckIn(range.checkIn);
     setCheckOut(range.checkOut);
     setError(null);
+
     if (range.checkOut && range.checkOut > range.checkIn) {
+      const n = nightsBetween(range.checkIn, range.checkOut);
+      if (n < minNights) {
+        setDateError(
+          t('booking.minNightsError')
+            .replace('{min}', String(minNights))
+            .replace('{nights}', String(n))
+        );
+        return;
+      }
+      setDateError(null);
       void persistDraft(range.checkIn, range.checkOut);
+    } else {
+      setDateError(null);
     }
   };
-
-  const nights =
-    checkIn && checkOut && checkOut > checkIn ? nightsBetween(checkIn, checkOut) : 0;
-  const total = nights * apt.price;
-  const rangeReady = Boolean(checkIn && checkOut && checkOut > checkIn);
 
   const validateGuestFields = (): { guest: string; contact: string } | null => {
     const nameResult = validatePersonName(guestName);
@@ -127,15 +169,18 @@ export default function BookingModal({ apt, onClose }: BookingModalProps) {
   };
 
   const handleSubmit = async () => {
-    if (!rangeReady || !checkIn || !checkOut) {
-      setError(t('booking.pickDates'));
+    setShowFormErrors(true);
+    setError(null);
+
+    const datesOk = validateDates();
+    const guestFields = validateGuestFields();
+
+    if (!datesOk || !guestFields) {
+      setError(t('booking.fillRequired'));
       return;
     }
-    const guestFields = validateGuestFields();
-    if (!guestFields) return;
 
     setSubmitting(true);
-    setError(null);
     try {
       await submitBookingRequest({
         id: bookingId,
@@ -143,9 +188,9 @@ export default function BookingModal({ apt, onClose }: BookingModalProps) {
         apt: copy.title,
         guest: guestFields.guest,
         guestContact: guestFields.contact,
-        checkIn,
-        checkOut,
-        dates: formatDateRange(checkIn, checkOut, locale),
+        checkIn: checkIn!,
+        checkOut: checkOut!,
+        dates: formatDateRange(checkIn!, checkOut!, locale),
         guests,
         status: 'New request',
         channel: 'Website',
@@ -158,10 +203,7 @@ export default function BookingModal({ apt, onClose }: BookingModalProps) {
     }
   };
 
-  const bedLabel = apt.bedrooms === 1 ? t('apartments.bed') : t('apartments.beds');
-  const bathLabel = apt.bathrooms === 1 ? t('apartments.bath') : t('apartments.baths');
-  const guestLabel = apt.guests === 1 ? t('apartments.guest') : t('apartments.guests');
-  const currentPhoto = photos[activePhoto] ?? photos[0];
+  const total = nights * apt.price;
 
   return (
     <div
@@ -191,56 +233,36 @@ export default function BookingModal({ apt, onClose }: BookingModalProps) {
 
         <div className={styles.layout}>
           <section className={styles.about}>
-            <div className={styles.gallery}>
-              <div className={styles.mainPhoto}>
-                {currentPhoto && isPhotoUrl(currentPhoto) ? (
-                  <Image
-                    src={currentPhoto}
-                    alt={copy.title}
-                    fill
-                    sizes="(max-width: 720px) 100vw, 360px"
-                    className={styles.photoImg}
-                  />
-                ) : (
-                  <Placeholder className={styles.photoPh} label={currentPhoto} />
-                )}
-              </div>
-              {photos.length > 1 && (
-                <div className={styles.thumbs}>
-                  {photos.map((p, i) => (
-                    <button
-                      key={`${p}-${i}`}
-                      type="button"
-                      className={`${styles.thumb} ${i === activePhoto ? styles.thumbOn : ''}`}
-                      onClick={() => setActivePhoto(i)}
-                      aria-label={`Photo ${i + 1}`}
-                    >
-                      {isPhotoUrl(p) ? (
-                        <Image src={p} alt="" fill sizes="72px" className={styles.photoImg} />
-                      ) : (
-                        <Placeholder className={styles.thumbPh} label="" />
-                      )}
-                    </button>
-                  ))}
-                </div>
-              )}
+            <PhotoGallery
+              photos={photos}
+              alt={copy.title}
+              className={styles.gallery}
+              sizes="(max-width: 720px) 100vw, 360px"
+              autoPlayMs={7000}
+              smooth
+            />
+
+            <div className={styles.descScroll}>
+              <FormattedDescription text={copy.description} />
             </div>
 
-            <p className={styles.desc}>{copy.description}</p>
-
             <div className={styles.specs}>
-              <span className={styles.spec}>
-                <Icon name="guest" size={16} />
-                {apt.guests} {guestLabel}
-              </span>
-              <span className={styles.spec}>
-                <Icon name="bed" size={16} />
-                {apt.bedrooms} {bedLabel}
-              </span>
-              <span className={styles.spec}>
-                <Icon name="bath" size={16} />
-                {apt.bathrooms} {bathLabel}
-              </span>
+              <SpecStat icon="guest" value={apt.guests} label={t('apartments.guests')} />
+              <SpecStat
+                icon="home"
+                value={apt.bedrooms}
+                label={apt.bedrooms === 1 ? t('apartments.bedroom') : t('apartments.bedrooms')}
+              />
+              <SpecStat
+                icon="bed"
+                value={apt.beds}
+                label={apt.beds === 1 ? t('apartments.bed') : t('apartments.beds')}
+              />
+              <SpecStat
+                icon="bath"
+                value={apt.bathrooms}
+                label={apt.bathrooms === 1 ? t('apartments.bath') : t('apartments.baths')}
+              />
               <span className={styles.spec}>
                 <Icon name="star" size={16} />
                 {apt.rating.toFixed(1)} · {apt.reviews} {t('booking.reviews')}
@@ -250,6 +272,11 @@ export default function BookingModal({ apt, onClose }: BookingModalProps) {
 
           <section className={styles.booking}>
             <div className="eyebrow">{t('booking.datesTitle')}</div>
+            {minNights > 1 && (
+              <p className={styles.minStay}>
+                {t('booking.minStayHint').replace('{min}', String(minNights))}
+              </p>
+            )}
             <DateRangeCalendar
               locale={locale}
               hint={calendarHint}
@@ -283,7 +310,7 @@ export default function BookingModal({ apt, onClose }: BookingModalProps) {
               <label className="field">
                 <span>{t('booking.yourName')}</span>
                 <input
-                  className={`input ${nameError ? 'inputInvalid' : ''}`}
+                  className={`input ${nameError || (showFormErrors && !nameValid) ? 'inputInvalid' : ''}`}
                   value={guestName}
                   maxLength={PERSON_NAME_MAX}
                   aria-invalid={nameError ? true : undefined}
@@ -305,7 +332,7 @@ export default function BookingModal({ apt, onClose }: BookingModalProps) {
             <label className="field">
               <span>{t('booking.contact')}</span>
               <input
-                className={`input ${contactError ? 'inputInvalid' : ''}`}
+                className={`input ${contactError || (showFormErrors && !contactValid) ? 'inputInvalid' : ''}`}
                 type="text"
                 inputMode="tel"
                 autoComplete="tel"
@@ -327,7 +354,7 @@ export default function BookingModal({ apt, onClose }: BookingModalProps) {
               {contactError && <span className="fieldError">{contactError}</span>}
             </label>
 
-            {rangeReady && (
+            {nightsValid && (
               <div className={styles.summary}>
                 {formatDateRange(checkIn!, checkOut!, locale)} · {nights}{' '}
                 {nights === 1 ? t('booking.night') : t('booking.nights')} ·{' '}
@@ -338,9 +365,6 @@ export default function BookingModal({ apt, onClose }: BookingModalProps) {
             {error && (
               <div className={styles.errorBox}>
                 <p className={styles.error}>{error}</p>
-                <Button variant="ghost" size="sm" onClick={() => void handleSubmit()} disabled={submitting}>
-                  {t('booking.tryAgain')}
-                </Button>
               </div>
             )}
 
@@ -351,8 +375,9 @@ export default function BookingModal({ apt, onClose }: BookingModalProps) {
               <Button
                 variant="primary"
                 icon="check"
+                className={!formComplete && !submitting ? btnStyles.inactive : ''}
                 onClick={() => void handleSubmit()}
-                disabled={submitting || !rangeReady}
+                disabled={submitting}
               >
                 {submitting ? t('booking.submitting') : t('booking.submit')}
               </Button>

@@ -20,6 +20,23 @@
   height: 76px;
 }
 
+.logoLink {
+  position: relative;
+  z-index: 60;
+  display: inline-flex;
+  flex-shrink: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  border-radius: 8px;
+  font: inherit;
+
+  &:hover {
+    opacity: 0.88;
+  }
+}
+
 .logo {
   height: 38px;
   width: auto;

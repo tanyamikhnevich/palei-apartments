@@ -1,3 +1,10 @@
+.hint {
+  font-size: 12.5px;
+  color: var(--ink-soft);
+  margin: 0 0 10px;
+  line-height: 1.45;
+}
+
 .chips {
   display: flex;
   flex-wrap: wrap;
@@ -25,5 +32,130 @@
     background: var(--navy);
     color: #fff;
     border-color: var(--navy);
+  }
+}
+
+.customRow {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+  align-items: center;
+
+  input {
+    flex: 1;
+    min-width: 0;
+  }
+}
+
+.addBtn {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--line-2);
+  background: var(--surface);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--navy);
+  cursor: pointer;
+
+  &:hover {
+    border-color: var(--navy);
+    background: var(--sand);
+  }
+}
+
+.error {
+  font-size: 12.5px;
+  color: #b42318;
+  margin: 8px 0 0;
+}
+
+.ordered {
+  list-style: none;
+  margin: 14px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.orderedItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--bg);
+  cursor: grab;
+
+  &:active {
+    cursor: grabbing;
+  }
+
+  &.orderedDragging {
+    opacity: 0.55;
+    border-color: var(--accent);
+  }
+}
+
+.grip {
+  color: var(--ink-faint);
+  font-size: 12px;
+  letter-spacing: -2px;
+  user-select: none;
+  flex: none;
+}
+
+.orderedLabel {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.primaryBadge {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--accent-press);
+  background: var(--accent-tint);
+  padding: 2px 6px;
+  border-radius: 6px;
+}
+
+.removeBtn {
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 8px;
+  background: var(--sand);
+  color: var(--ink);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+
+  &:hover {
+    background: var(--sand-2);
+    color: var(--accent-press);
+  }
+}
+
+@media (max-width: 600px) {
+  .customRow {
+    flex-direction: column;
+    align-items: stretch;
+
+    .addBtn {
+      justify-content: center;
+    }
   }
 }

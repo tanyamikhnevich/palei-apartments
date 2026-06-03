@@ -41,10 +41,14 @@ export interface Apartment {
   area: ApartmentArea;
   guests: number;
   bedrooms: number;
+  beds: number;
   bathrooms: number;
   price: number;
+  /** Minimum stay length in nights (default 1). */
+  minNights: number;
   status: ApartmentStatus;
-  tagIds: ApartmentTagId[];
+  /** Preset ids (e.g. seaView) or custom labels typed in admin. Order matters — first is primary. */
+  tagIds: string[];
   rating: number;
   reviews: number;
   photos?: string[];

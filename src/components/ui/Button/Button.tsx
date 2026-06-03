@@ -29,11 +29,14 @@ export default function Button(props: ButtonProps) {
 
   const iconSize = size === 'sm' ? 15 : 17;
 
+  const disabled = (rest as React.ButtonHTMLAttributes<HTMLButtonElement>).disabled;
+
   const cls = [
     styles.btn,
     styles[variant],
     size && size !== 'md' ? styles[size] : '',
     block ? styles.block : '',
+    disabled ? styles.inactive : '',
     className ?? '',
   ]
     .filter(Boolean)

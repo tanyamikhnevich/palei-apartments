@@ -10,8 +10,10 @@ import Placeholder from '@/components/ui/Placeholder/Placeholder';
 import AdminAvailabilityCalendar from '@/components/admin/AdminAvailabilityCalendar/AdminAvailabilityCalendar';
 import AdminTagPicker from '@/components/admin/AdminTagPicker/AdminTagPicker';
 import { isPhotoUrl } from '@/lib/apartmentMedia';
+import { photoLabelFromTags } from '@/lib/apartmentTags';
 import { AdminField, AdminInput, AdminSelect, AdminTextarea } from '@/components/admin/ui/AdminField';
-import { uploadApartmentPhoto } from '@/lib/api/client';
+import { uploadApartmentPhotos } from '@/lib/api/client';
+import { IMAGE_UPLOAD_ACCEPT, IMAGE_UPLOAD_MAX_FILES } from '@/lib/imageUpload';
 import styles from './AdminApartmentModal.module.scss';
 
 const STATUSES: ApartmentStatus[] = ['Available', 'Booked', 'Maintenance'];
@@ -21,7 +23,7 @@ function emptyEnCopy(): ApartmentLocaleCopy {
     title: '',
     location: '',
     description: '',
-    photoLabel: 'main photo',
+    photoLabel: '',
   };
 }
 
@@ -44,27 +46,56 @@ function PhotoManager({
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<string | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [dragOver, setDragOver] = useState(false);
+  const [dragIndex, setDragIndex] = useState<number | null>(null);
+  const [dropIndex, setDropIndex] = useState<number | null>(null);
 
   const del = (i: number) => onChange(photos.filter((_, idx) => idx !== i));
 
-  const onFiles = async (files: FileList | null) => {
-    if (!files?.length) return;
+  const reorder = (from: number, to: number) => {
+    if (from === to || from < 0 || to < 0 || from >= photos.length || to >= photos.length) return;
+    const next = [...photos];
+    const [item] = next.splice(from, 1);
+    next.splice(to, 0, item);
+    onChange(next);
+  };
+
+  const uploadFiles = async (fileList: FileList | File[] | null) => {
+    if (!fileList?.length) return;
+
+    const files = Array.from(fileList).slice(0, IMAGE_UPLOAD_MAX_FILES);
+    if (!files.length) return;
+
     setUploading(true);
     setUploadError(null);
-    const added: string[] = [];
+    setUploadProgress(
+      files.length === 1 ? '1 photo' : `${files.length} photos`
+    );
+
     try {
-      for (const file of Array.from(files)) {
-        const { url } = await uploadApartmentPhoto(file);
-        added.push(url);
-      }
-      onChange([...photos, ...added]);
+      const { urls } = await uploadApartmentPhotos(files);
+      onChange([...photos, ...urls]);
+      setUploadProgress(null);
     } catch (e) {
       setUploadError(e instanceof Error ? e.message : 'Upload failed');
+      setUploadProgress(null);
     } finally {
       setUploading(false);
       if (inputRef.current) inputRef.current.value = '';
     }
+  };
+
+  const onInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    void uploadFiles(e.target.files);
+  };
+
+  const onDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setDragOver(false);
+    if (uploading) return;
+    void uploadFiles(e.dataTransfer.files);
   };
 
   return (
@@ -72,40 +103,108 @@ function PhotoManager({
       <input
         ref={inputRef}
         type="file"
-        accept="image/jpeg,image/png,image/webp"
+        accept={IMAGE_UPLOAD_ACCEPT}
         multiple
         className={styles.fileInput}
-        onChange={(e) => void onFiles(e.target.files)}
+        onChange={onInputChange}
       />
-      <div className={styles.photos}>
-        {photos.map((p, i) => (
-          <div key={`${p}-${i}`} className={styles.photo}>
-            {isPhotoUrl(p) ? (
-              <Image src={p} alt="" fill sizes="120px" className={styles.photoImg} />
-            ) : (
-              <Placeholder className={styles.photoImg} label={p} />
-            )}
-            <span className={styles.photoTag}>{i === 0 ? 'cover' : `#${i + 1}`}</span>
-            <button
-              type="button"
-              className={styles.photoDel}
-              aria-label="Remove photo"
-              onClick={() => del(i)}
-            >
-              <Icon name="x" size={14} />
-            </button>
-          </div>
-        ))}
+
+      <div
+        className={`${styles.dropzone} ${dragOver ? styles.dropzoneOver : ''} ${uploading ? styles.dropzoneBusy : ''}`}
+        onDragEnter={(e) => {
+          e.preventDefault();
+          setDragOver(true);
+        }}
+        onDragOver={(e) => {
+          e.preventDefault();
+          setDragOver(true);
+        }}
+        onDragLeave={(e) => {
+          e.preventDefault();
+          if (e.currentTarget === e.target) setDragOver(false);
+        }}
+        onDrop={onDrop}
+      >
         <button
           type="button"
-          className={styles.photoAdd}
+          className={styles.dropzoneBtn}
           disabled={uploading}
           onClick={() => inputRef.current?.click()}
         >
-          <Icon name="image" size={20} />
-          {uploading ? 'Uploading…' : 'Upload'}
+          <Icon name="image" size={22} />
+          <span className={styles.dropzoneTitle}>
+            {uploading ? 'Uploading photos…' : 'Add photos'}
+          </span>
+          <span className={styles.dropzoneHint}>
+            Select or drop files here · JPEG, PNG, WebP, AVIF · up to 5 MB each
+          </span>
+          <span className={styles.dropzoneHint}>Drag photos below to change order (first = cover)</span>
+          {uploadProgress && <span className={styles.dropzoneProgress}>{uploadProgress}</span>}
         </button>
       </div>
+
+      {photos.length > 0 && (
+        <div className={styles.photos}>
+          {photos.map((p, i) => (
+            <div
+              key={p}
+              className={`${styles.photo} ${dragIndex === i ? styles.photoDragging : ''} ${dropIndex === i ? styles.photoDropTarget : ''}`}
+              draggable
+              onDragStart={(e) => {
+                setDragIndex(i);
+                e.dataTransfer.effectAllowed = 'move';
+                e.dataTransfer.setData('text/plain', String(i));
+              }}
+              onDragEnd={() => {
+                setDragIndex(null);
+                setDropIndex(null);
+              }}
+              onDragOver={(e) => {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+                setDropIndex(i);
+              }}
+              onDragLeave={() => setDropIndex((prev) => (prev === i ? null : prev))}
+              onDrop={(e) => {
+                e.preventDefault();
+                const from = dragIndex ?? parseInt(e.dataTransfer.getData('text/plain'), 10);
+                if (!Number.isNaN(from)) reorder(from, i);
+                setDragIndex(null);
+                setDropIndex(null);
+              }}
+            >
+              {isPhotoUrl(p) ? (
+                <Image src={p} alt="" fill sizes="120px" className={styles.photoImg} unoptimized draggable={false} />
+              ) : (
+                <Placeholder className={styles.photoImg} label={p} />
+              )}
+              <span className={styles.photoDrag} aria-hidden>
+                ⋮⋮
+              </span>
+              <span className={styles.photoTag}>{i === 0 ? 'cover' : `#${i + 1}`}</span>
+              <button
+                type="button"
+                className={styles.photoDel}
+                aria-label="Remove photo"
+                onClick={() => del(i)}
+              >
+                <Icon name="x" size={14} />
+              </button>
+            </div>
+          ))}
+          <button
+            type="button"
+            className={styles.photoAdd}
+            disabled={uploading}
+            onClick={() => inputRef.current?.click()}
+            aria-label="Add more photos"
+          >
+            <Icon name="plus" size={20} />
+            More
+          </button>
+        </div>
+      )}
+
       {uploadError && <p className={styles.uploadError}>{uploadError}</p>}
     </AdminField>
   );
@@ -123,6 +222,8 @@ export default function AdminApartmentModal({ initial, onClose, onSave }: AdminA
     if (initial) {
       return {
         ...initial,
+        beds: initial.beds ?? initial.bedrooms,
+        minNights: initial.minNights ?? 1,
         photos: initial.photos?.length ? initial.photos : undefined,
         availability: initial.availability ?? DEFAULT_AVAILABILITY,
       };
@@ -133,8 +234,10 @@ export default function AdminApartmentModal({ initial, onClose, onSave }: AdminA
       area: 'Bat Yam',
       guests: 2,
       bedrooms: 1,
+      beds: 1,
       bathrooms: 1,
       price: 500,
+      minNights: 1,
       status: 'Available',
       tagIds: [],
       rating: 5,
@@ -158,28 +261,26 @@ export default function AdminApartmentModal({ initial, onClose, onSave }: AdminA
     setForm((prev) => ({ ...prev, [key]: value }));
   };
 
-  const setNum = (key: 'guests' | 'bedrooms' | 'bathrooms' | 'price', raw: string) => {
-    setField(key, Math.max(key === 'guests' ? 1 : 0, parseInt(raw || '0', 10)) as Apartment[typeof key]);
+  const setNum = (
+    key: 'guests' | 'bedrooms' | 'beds' | 'bathrooms' | 'price' | 'minNights',
+    raw: string
+  ) => {
+    const min = key === 'guests' || key === 'beds' || key === 'minNights' ? 1 : 0;
+    setField(key, Math.max(min, parseInt(raw || '0', 10)) as Apartment[typeof key]);
   };
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!en.title.trim() || !en.location.trim()) return;
-    const enCopy = {
-      ...en,
-      photoLabel: en.photoLabel && !isPhotoUrl(en.photoLabel) ? en.photoLabel : 'main photo',
-    };
+    const photoLabel = photoLabelFromTags(form.tagIds);
+    const enCopy = { ...en, photoLabel };
     onSave({
       ...form,
       photos: form.photos?.length ? form.photos : undefined,
       locales: {
         en: enCopy,
-        ru: editing
-          ? { ...form.locales.ru, photoLabel: form.locales.ru.photoLabel && !isPhotoUrl(form.locales.ru.photoLabel) ? form.locales.ru.photoLabel : enCopy.photoLabel }
-          : { ...enCopy },
-        he: editing
-          ? { ...form.locales.he, photoLabel: form.locales.he.photoLabel && !isPhotoUrl(form.locales.he.photoLabel) ? form.locales.he.photoLabel : enCopy.photoLabel }
-          : { ...enCopy },
+        ru: editing ? { ...form.locales.ru, photoLabel } : { ...enCopy },
+        he: editing ? { ...form.locales.he, photoLabel } : { ...enCopy },
       },
     });
   };
@@ -223,7 +324,7 @@ export default function AdminApartmentModal({ initial, onClose, onSave }: AdminA
             />
           </div>
 
-          <div className={styles.grid}>
+          <div className={styles.grid3}>
             <AdminSelect
               label="Area"
               options={['Bat Yam', 'Tel Aviv']}
@@ -239,6 +340,15 @@ export default function AdminApartmentModal({ initial, onClose, onSave }: AdminA
                 onChange={(e) => setNum('price', e.target.value)}
               />
             </AdminField>
+            <AdminField label="Minimum nights">
+              <input
+                className="input"
+                type="number"
+                min={1}
+                value={form.minNights}
+                onChange={(e) => setNum('minNights', e.target.value)}
+              />
+            </AdminField>
           </div>
 
           <AdminTextarea
@@ -248,7 +358,7 @@ export default function AdminApartmentModal({ initial, onClose, onSave }: AdminA
             onChange={(e) => setEn({ description: e.target.value })}
           />
 
-          <div className={styles.grid3}>
+          <div className={styles.grid4}>
             <AdminField label="Guests">
               <input
                 className="input"
@@ -267,6 +377,15 @@ export default function AdminApartmentModal({ initial, onClose, onSave }: AdminA
                 onChange={(e) => setNum('bedrooms', e.target.value)}
               />
             </AdminField>
+            <AdminField label="Beds">
+              <input
+                className="input"
+                type="number"
+                min={1}
+                value={form.beds}
+                onChange={(e) => setNum('beds', e.target.value)}
+              />
+            </AdminField>
             <AdminField label="Bathrooms">
               <input
                 className="input"
@@ -281,13 +400,6 @@ export default function AdminApartmentModal({ initial, onClose, onSave }: AdminA
           <AdminTagPicker
             value={form.tagIds}
             onChange={(tagIds) => setField('tagIds', tagIds)}
-          />
-
-          <AdminInput
-            label="Placeholder caption (if no photo)"
-            placeholder="studio · balcony · sea"
-            value={en.photoLabel && !isPhotoUrl(en.photoLabel) ? en.photoLabel : ''}
-            onChange={(e) => setEn({ photoLabel: e.target.value })}
           />
 
           <AdminField label="Listing status">

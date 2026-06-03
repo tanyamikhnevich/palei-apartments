@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
+import { usePathname, useRouter } from 'next/navigation';
 import Button from '@/components/ui/Button/Button';
 import Icon from '@/components/ui/Icon/Icon';
 import { useLanguage } from '@/i18n/LanguageProvider';
@@ -37,8 +38,20 @@ function LangSwitch() {
 
 export default function Header() {
   const { t } = useLanguage();
+  const router = useRouter();
+  const pathname = usePathname();
   const [stuck, setStuck] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+
+  const goHome = useCallback(() => {
+    setMenuOpen(false);
+    if (pathname === '/') {
+      window.history.replaceState(null, '', '/');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+    router.push('/');
+  }, [pathname, router]);
 
   useEffect(() => {
     const handleScroll = () => setStuck(window.scrollY > 8);
@@ -50,16 +63,16 @@ export default function Header() {
   return (
     <header className={`${styles.hdr} ${stuck ? styles.stuck : ''}`}>
       <div className={`wrap ${styles.bar}`}>
-        <a href="#top">
+        <button type="button" className={styles.logoLink} onClick={goHome} aria-label={t('brand')}>
           <Image
             src="/palei-logo.png"
-            alt={t('brand')}
+            alt=""
             width={120}
             height={38}
             className={styles.logo}
             priority
           />
-        </a>
+        </button>
 
         <nav className={styles.nav} aria-label="Main navigation">
           {NAV.map(({ key, href }) => (

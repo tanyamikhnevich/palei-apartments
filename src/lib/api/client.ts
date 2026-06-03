@@ -98,10 +98,21 @@ export async function saveSettings(settings: BusinessSettings): Promise<Business
 }
 
 export async function uploadApartmentPhoto(file: File): Promise<{ url: string }> {
+  const { urls } = await uploadApartmentPhotos([file]);
+  return { url: urls[0] };
+}
+
+export async function uploadApartmentPhotos(files: File[]): Promise<{ urls: string[] }> {
+  if (!files.length) return { urls: [] };
+
   const formData = new FormData();
-  formData.append('file', file);
+  for (const file of files) {
+    formData.append('files', file);
+  }
+
   const res = await fetch('/api/upload', { method: 'POST', body: formData });
-  return parseJson(res);
+  const data = await parseJson<{ url?: string; urls: string[] }>(res);
+  return { urls: data.urls ?? (data.url ? [data.url] : []) };
 }
 
 export async function seedDatabase(): Promise<{ count: number; message: string }> {

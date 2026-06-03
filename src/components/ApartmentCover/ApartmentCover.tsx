@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import Placeholder from '@/components/ui/Placeholder/Placeholder';
 import { getCoverPhoto, isPhotoUrl } from '@/lib/apartmentMedia';
+import { isAvifImagePath } from '@/lib/imageUpload';
 import type { Apartment } from '@/types/apartment';
 import styles from './ApartmentCover.module.scss';
 
@@ -29,7 +30,15 @@ export default function ApartmentCover({
   if (src && isPhotoUrl(src)) {
     return (
       <div className={`${styles.cover} ${className}`.trim()}>
-        <Image src={src} alt={alt} fill sizes={sizes} className={styles.img} priority={false} />
+        <Image
+          src={src}
+          alt={alt}
+          fill
+          sizes={sizes}
+          className={styles.img}
+          priority={false}
+          unoptimized={isAvifImagePath(src)}
+        />
         {children}
       </div>
     );

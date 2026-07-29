@@ -1,5 +1,6 @@
 import type { Apartment, Booking, BookingStatus } from '@/types/apartment';
 import type { BusinessSettings } from '@/types/settings';
+import type { Review, ReviewStatus } from '@/types/review';
 import { apartments as fallbackApartments } from '@/data/apartments';
 
 export class ApiError extends Error {
@@ -174,4 +175,58 @@ export async function updateBookingStatus(id: string, status: BookingStatus): Pr
   });
   const data = await parseJson<{ booking: Booking }>(res);
   return data.booking;
+}
+
+export type ReviewSubmission = {
+  apartmentId: string;
+  guestName: string;
+  rating: number;
+  text?: string;
+  contact?: string;
+  honeypot?: string;
+};
+
+/** Approved reviews for one apartment (public — no contact details). */
+export async function fetchApartmentReviews(apartmentId: string): Promise<Review[]> {
+  try {
+    const res = await fetch(`/api/reviews?apartmentId=${encodeURIComponent(apartmentId)}`, {
+      cache: 'no-store',
+    });
+    const data = await parseJson<{ reviews: Review[] }>(res);
+    return data.reviews;
+  } catch (e) {
+    console.warn('fetchApartmentReviews fallback', e);
+    return [];
+  }
+}
+
+export async function submitReview(review: ReviewSubmission): Promise<void> {
+  const res = await fetch('/api/reviews', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(review),
+  });
+  await parseJson<{ ok: boolean }>(res);
+}
+
+/** Every review, newest first, with contact — admin moderation only. */
+export async function fetchReviews(): Promise<Review[]> {
+  const res = await fetch('/api/reviews?admin=1', { cache: 'no-store' });
+  const data = await parseJson<{ reviews: Review[] }>(res);
+  return data.reviews;
+}
+
+export async function updateReviewStatus(id: string, status: ReviewStatus): Promise<Review> {
+  const res = await fetch(`/api/reviews/${id}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ status }),
+  });
+  const data = await parseJson<{ review: Review }>(res);
+  return data.review;
+}
+
+export async function deleteReview(id: string): Promise<void> {
+  const res = await fetch(`/api/reviews/${id}`, { method: 'DELETE' });
+  await parseJson<{ ok: boolean }>(res);
 }

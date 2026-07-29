@@ -7,6 +7,7 @@ import { bookings as mockBookings } from '@/data/apartments';
 import { formatDateRange, nightsBetween, rangesOverlap } from '@/lib/dates';
 import { dbUnavailableResponse, isDbConfigured, jsonError } from '@/lib/api/errors';
 import { validateBookingGuest, validationMessageEn } from '@/lib/validation/contact';
+import { notifyNewBooking } from '@/lib/notify/telegram';
 
 const ADMIN_STATUSES: BookingStatus[] = ['New request', 'Confirmed', 'Declined'];
 
@@ -131,6 +132,18 @@ export async function POST(request: Request) {
       .from(schema.bookings)
       .where(eq(schema.bookings.id, row.id))
       .limit(1);
+
+    // Notify on a real request (not autosaved drafts). Never blocks the response.
+    if (row.status === 'New request') {
+      await notifyNewBooking({
+        apartmentTitle: row.apt,
+        guest: row.guest,
+        contact: row.guestContact,
+        dates: row.dates,
+        guests: row.guests,
+        channel: row.channel,
+      });
+    }
 
     return NextResponse.json({ booking: rowToBooking(saved[0]) }, { status: 201 });
   } catch (e) {

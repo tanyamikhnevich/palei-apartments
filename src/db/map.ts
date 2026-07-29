@@ -1,5 +1,6 @@
-import type { ApartmentRow, BookingRow, BusinessSettingsRow } from './schema';
+import type { ApartmentRow, BookingRow, BusinessSettingsRow, ReviewRow } from './schema';
 import type { Apartment, Booking } from '@/types/apartment';
+import type { Review } from '@/types/review';
 import { DEFAULT_AVAILABILITY } from '@/lib/availability';
 import { isPhotoUrl } from '@/lib/apartmentMedia';
 import type { ApartmentLocales } from './schema';
@@ -97,6 +98,31 @@ export function bookingToInsert(
     guests: booking.guests,
     status: booking.status,
     channel: booking.channel,
+  };
+}
+
+export function rowToReview(row: ReviewRow, options: { includeContact?: boolean } = {}): Review {
+  return {
+    id: row.id,
+    apartmentId: row.apartmentId,
+    guestName: row.guestName,
+    rating: row.rating,
+    text: row.text ?? undefined,
+    contact: options.includeContact ? row.contact ?? undefined : undefined,
+    status: row.status,
+    createdAt: (row.createdAt instanceof Date ? row.createdAt : new Date(row.createdAt)).toISOString(),
+  };
+}
+
+export function reviewToInsert(review: Review): Omit<ReviewRow, 'createdAt' | 'updatedAt'> {
+  return {
+    id: review.id,
+    apartmentId: review.apartmentId,
+    guestName: review.guestName,
+    rating: review.rating,
+    text: review.text?.trim() || null,
+    contact: review.contact?.trim() || null,
+    status: review.status,
   };
 }
 

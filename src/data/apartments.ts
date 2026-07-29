@@ -14,8 +14,8 @@ export const apartments: Apartment[] = [
     minNights: 1,
     status: 'Available',
     tagIds: ['seaView', 'balcony'],
-    rating: 4.9,
-    reviews: 64,
+    rating: 0,
+    reviews: 0,
     locales: {
       en: {
         title: 'Sea Breeze Studio',
@@ -50,8 +50,8 @@ export const apartments: Apartment[] = [
     minNights: 1,
     status: 'Available',
     tagIds: ['family', 'nearBeach'],
-    rating: 4.8,
-    reviews: 41,
+    rating: 0,
+    reviews: 0,
     locales: {
       en: {
         title: 'Marina Two-Bedroom',
@@ -86,8 +86,8 @@ export const apartments: Apartment[] = [
     minNights: 2,
     status: 'Booked',
     tagIds: ['seaView', 'terrace', 'premium'],
-    rating: 5.0,
-    reviews: 28,
+    rating: 0,
+    reviews: 0,
     locales: {
       en: {
         title: 'Promenade Penthouse',
@@ -121,8 +121,8 @@ export const apartments: Apartment[] = [
     minNights: 1,
     status: 'Available',
     tagIds: ['garden', 'central'],
-    rating: 4.7,
-    reviews: 52,
+    rating: 0,
+    reviews: 0,
     locales: {
       en: {
         title: 'Old North Garden Flat',
@@ -157,8 +157,8 @@ export const apartments: Apartment[] = [
     minNights: 1,
     status: 'Maintenance',
     tagIds: ['design', 'nightlife'],
-    rating: 4.9,
-    reviews: 37,
+    rating: 0,
+    reviews: 0,
     locales: {
       en: {
         title: 'Rothschild City Loft',
@@ -193,8 +193,8 @@ export const apartments: Apartment[] = [
     minNights: 1,
     status: 'Available',
     tagIds: ['family', 'equipped'],
-    rating: 4.8,
-    reviews: 19,
+    rating: 0,
+    reviews: 0,
     locales: {
       en: {
         title: 'Bat Yam Family Suite',

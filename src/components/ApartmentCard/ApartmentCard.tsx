@@ -65,10 +65,14 @@ export default function ApartmentCard({ apt }: ApartmentCardProps) {
                 {copy.location}
               </div>
             </div>
-            <div className={styles.rating}>
-              <Icon name="star" size={14} />
-              {apt.rating.toFixed(1)}
-            </div>
+            {apt.reviews > 0 ? (
+              <div className={styles.rating}>
+                <Icon name="star" size={14} />
+                {apt.rating.toFixed(1)}
+              </div>
+            ) : (
+              <div className={`${styles.rating} ${styles.ratingNew}`}>{t('reviews.newBadge')}</div>
+            )}
           </div>
 
           <FormattedDescription text={copy.description} clamp className={styles.desc} />

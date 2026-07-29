@@ -12,6 +12,14 @@ const TITLES: Record<AdminView, { title: string; sub: string }> = {
     title: 'Bookings & requests',
     sub: 'Confirm or decline guest enquiries',
   },
+  calendar: {
+    title: 'Calendar',
+    sub: 'Reservations across your apartments',
+  },
+  reviews: {
+    title: 'Reviews',
+    sub: 'Approve, reject or remove guest reviews',
+  },
   settings: {
     title: 'Settings',
     sub: 'Business profile and preferences',

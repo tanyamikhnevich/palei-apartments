@@ -9,6 +9,7 @@ import type {
 } from '@/types/apartment';
 import type { Locale } from '@/i18n/types';
 import type { CurrencyCode } from '@/types/settings';
+import type { ReviewStatus } from '@/types/review';
 
 export type ApartmentLocales = Record<Locale, ApartmentLocaleCopy>;
 
@@ -58,8 +59,23 @@ export const businessSettings = pgTable('business_settings', {
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 });
 
+export const reviews = pgTable('reviews', {
+  id: varchar('id', { length: 64 }).primaryKey(),
+  apartmentId: varchar('apartment_id', { length: 64 }).notNull(),
+  guestName: text('guest_name').notNull(),
+  rating: integer('rating').notNull(),
+  text: text('text'),
+  /** Private phone/email for moderation — never sent to the public site. */
+  contact: text('contact'),
+  status: varchar('status', { length: 32 }).notNull().$type<ReviewStatus>(),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+});
+
 export type ApartmentRow = typeof apartments.$inferSelect;
 export type ApartmentInsert = typeof apartments.$inferInsert;
 export type BookingRow = typeof bookings.$inferSelect;
 export type BookingInsert = typeof bookings.$inferInsert;
 export type BusinessSettingsRow = typeof businessSettings.$inferSelect;
+export type ReviewRow = typeof reviews.$inferSelect;
+export type ReviewInsert = typeof reviews.$inferInsert;

@@ -13,12 +13,15 @@ import AdminListBar, { type AdminListMode } from '@/components/admin/AdminListBa
 import AdminApartmentModal from '@/components/admin/AdminApartmentModal/AdminApartmentModal';
 import AdminSettings from '@/components/admin/AdminSettings/AdminSettings';
 import BookingsTable from '@/components/admin/BookingsTable/BookingsTable';
+import ReservationsCalendar from '@/components/admin/ReservationsCalendar/ReservationsCalendar';
+import ReviewsTable from '@/components/admin/ReviewsTable/ReviewsTable';
 import { getApartmentCopy } from '@/i18n/apartmentLocale';
 import {
   createApartment,
   deleteApartment,
   fetchApartments,
   fetchBookings,
+  fetchReviews,
   updateApartment,
 } from '@/lib/api/client';
 import { toggleApartmentListing } from '@/lib/apartmentVisibility';
@@ -34,6 +37,7 @@ export default function AdminDashboard() {
   const [fromDb, setFromDb] = useState(false);
   const [modalApt, setModalApt] = useState<Apartment | null | undefined>(undefined);
   const [requestCount, setRequestCount] = useState(0);
+  const [reviewCount, setReviewCount] = useState(0);
 
   useEffect(() => {
     fetchApartments()
@@ -48,6 +52,12 @@ export default function AdminDashboard() {
     fetchBookings(true)
       .then((b) => setRequestCount(b.filter((x) => x.status === 'New request').length))
       .catch(() => setRequestCount(0));
+  }, [view]);
+
+  useEffect(() => {
+    fetchReviews()
+      .then((r) => setReviewCount(r.filter((x) => x.status === 'pending').length))
+      .catch(() => setReviewCount(0));
   }, [view]);
 
   const filtered = useMemo(() => {
@@ -127,6 +137,7 @@ export default function AdminDashboard() {
           setNavOpen(false);
         }}
         requestCount={requestCount}
+        reviewCount={reviewCount}
         apartmentCount={list.length}
       />
 
@@ -179,6 +190,10 @@ export default function AdminDashboard() {
           )}
 
           {view === 'bookings' && <BookingsTable />}
+
+          {view === 'calendar' && <ReservationsCalendar apartments={list} />}
+
+          {view === 'reviews' && <ReviewsTable apartments={list} />}
 
           {view === 'settings' && <AdminSettings />}
         </div>

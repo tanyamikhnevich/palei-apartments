@@ -78,7 +78,8 @@
   gap: 12px;
   min-width: 0;
   min-height: 0;
-  overflow: hidden;
+  overflow-y: auto;
+  padding-right: 4px;
 }
 
 .gallery {
@@ -90,10 +91,7 @@
 }
 
 .descScroll {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-  padding-right: 4px;
+  flex: none;
   color: var(--ink-soft);
   font-size: 14.5px;
   line-height: 1.55;
@@ -208,10 +206,7 @@
   .about {
     max-height: none;
     overflow: visible;
-  }
-
-  .descScroll {
-    max-height: 200px;
+    padding-right: 0;
   }
 
   .fields {

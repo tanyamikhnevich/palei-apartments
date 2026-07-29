@@ -6,18 +6,18 @@ export const BUSINESS_NAME_MIN = 2;
 export const BUSINESS_NAME_MAX = 80;
 
 /** Max characters in the input (with spaces/dashes). */
-export const PHONE_INPUT_MAX_LENGTH = 18;
+export const PHONE_INPUT_MAX_LENGTH = 20;
 
-/** Israeli numbers: 10 digits local (05…) or 12 digits with country code (972…). */
-export const PHONE_DIGITS_MIN = 9;
-export const PHONE_DIGITS_MAX = 12;
+/** International E.164: 8–15 digits total (incl. country code). */
+export const PHONE_DIGITS_MIN = 8;
+export const PHONE_DIGITS_MAX = 15;
 
 const PERSON_NAME_RE = /^[\p{L}\p{M}'\s.\-]+$/u;
 const BUSINESS_NAME_RE = /^[\p{L}\p{M}0-9'\s.\-&]+$/u;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i;
 
-/** +972 5XXXXXXXX (mobile) or +972 [23489]XXXXXXX(X) (landline). */
-const ISRAEL_E164_RE = /^\+972(5\d{8}|[23489]\d{7,8})$/;
+/** General E.164: leading +, country code (1–9), 8–15 digits total. */
+const E164_RE = /^\+[1-9]\d{7,14}$/;
 
 export type ValidationCode =
   | 'nameRequired'
@@ -51,8 +51,9 @@ function digitsOnly(raw: string): string {
 }
 
 /**
- * Normalize to Israeli E.164 (+972…).
- * Accepts: 05X-XXXXXXX, 0X-XXXXXXX, 972…, +972…, 00 972…
+ * Normalize to E.164 (+<country><number>).
+ * Local Israeli numbers (05X…, 0X…) are assumed +972 for convenience;
+ * any other number must include its country code with a leading + (or 00).
  */
 export function normalizePhone(raw: string): string | null {
   let s = raw.trim();
@@ -61,40 +62,35 @@ export function normalizePhone(raw: string): string | null {
   s = s.replace(/[\s().-]/g, '');
   if (s.startsWith('00')) s = `+${s.slice(2)}`;
 
+  // International: already carries a country code.
   if (s.startsWith('+')) {
-    const digits = s.slice(1).replace(/\D/g, '');
-    if (!digits.startsWith('972')) return null;
-    const e164 = `+${digits}`;
-    return ISRAEL_E164_RE.test(e164) ? e164 : null;
+    const e164 = `+${s.slice(1).replace(/\D/g, '')}`;
+    return E164_RE.test(e164) ? e164 : null;
   }
 
   const digits = digitsOnly(s);
 
-  // Local mobile: 05X-XXXXXXX (exactly 10 digits)
+  // Local Israeli mobile: 05X-XXXXXXX (exactly 10 digits)
   if (/^05\d{8}$/.test(digits)) {
     return `+972${digits.slice(1)}`;
   }
 
-  // Intl without +: 9725XXXXXXXX (exactly 12 digits)
-  if (/^9725\d{8}$/.test(digits)) {
-    return `+${digits}`;
-  }
-
-  // Local landline: 0[23489] + 7–8 digits (9–10 digits total)
+  // Local Israeli landline: 0[23489] + 7–8 digits
   if (/^0[23489]\d{7,8}$/.test(digits)) {
     return `+972${digits.slice(1)}`;
   }
 
-  // Intl landline: 972[23489]… (11–12 digits)
-  if (/^972[23489]\d{7,8}$/.test(digits)) {
+  // Israeli intl digits without +: 972…
+  if (/^972\d{8,9}$/.test(digits)) {
     return `+${digits}`;
   }
 
+  // Any other bare number without a country code — ambiguous, reject.
   return null;
 }
 
-function isValidIsraeliE164(e164: string): boolean {
-  return ISRAEL_E164_RE.test(e164);
+function isValidE164(e164: string): boolean {
+  return E164_RE.test(e164);
 }
 
 export function validatePhone(raw: string): ValidationResult {
@@ -110,7 +106,7 @@ export function validatePhone(raw: string): ValidationResult {
   }
 
   const normalized = normalizePhone(trimmed);
-  if (!normalized || !isValidIsraeliE164(normalized)) {
+  if (!normalized || !isValidE164(normalized)) {
     return { ok: false, code: 'phoneInvalid' };
   }
 
@@ -176,13 +172,13 @@ export const VALIDATION_MESSAGES_EN: Record<ValidationCode, string> = {
   businessNameTooLong: 'Business name is too long (maximum 80 characters).',
   businessNameInvalidChars: 'Business name contains invalid characters.',
   phoneRequired: 'Please enter a phone number.',
-  phoneTooShort: 'Phone number is too short (Israeli mobile: 10 digits, e.g. 050-1234567).',
-  phoneTooLong: 'Phone number is too long (max 12 digits with country code).',
-  phoneInvalid: 'Use Israeli format: 05X-XXX-XXXX or +972 5X XXX XXXX.',
+  phoneTooShort: 'Phone number is too short.',
+  phoneTooLong: 'Phone number is too long (max 15 digits).',
+  phoneInvalid: 'Enter a valid number with country code, e.g. +972 50 123 4567 or +1 202 555 0100 (Israeli 05X… also works).',
   emailRequired: 'Please enter an email address.',
   emailInvalid: 'Enter a valid email address.',
   contactRequired: 'Please enter a phone number or email.',
-  contactInvalid: 'Enter a valid Israeli phone or email address.',
+  contactInvalid: 'Enter a valid phone number or email address.',
 };
 
 export function validationMessageEn(code: ValidationCode): string {

@@ -9,6 +9,7 @@ import btnStyles from '@/components/ui/Button/Button.module.scss';
 import Icon from '@/components/ui/Icon/Icon';
 import SpecStat from '@/components/ui/SpecStat/SpecStat';
 import DateRangeCalendar from '@/components/DateRangeCalendar/DateRangeCalendar';
+import ReviewsSection from '@/components/ReviewsSection/ReviewsSection';
 import { useLanguage } from '@/i18n/LanguageProvider';
 import { getApartmentCopy } from '@/i18n/apartmentLocale';
 import { formatDateRange, nightsBetween } from '@/lib/dates';
@@ -19,6 +20,7 @@ import {
 } from '@/lib/api/client';
 import {
   PERSON_NAME_MAX,
+  PHONE_INPUT_MAX_LENGTH,
   sanitizePhoneInput,
   validatePersonName,
   validatePhoneOrEmail,
@@ -58,6 +60,15 @@ export default function BookingModal({ apt, onClose }: BookingModalProps) {
   useEffect(() => {
     fetchBookingAvailability(apt.id).then(setBlocked).catch(() => setBlocked([]));
   }, [apt.id]);
+
+  // Lock background page scroll while the modal is open.
+  useEffect(() => {
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = previous;
+    };
+  }, []);
 
   const nights =
     checkIn && checkOut && checkOut > checkIn ? nightsBetween(checkIn, checkOut) : 0;
@@ -205,6 +216,22 @@ export default function BookingModal({ apt, onClose }: BookingModalProps) {
 
   const total = nights * apt.price;
 
+  /**
+   * Contact error message for the current locale.
+   * While typing (`live`), we skip the "required / too short" nags and only
+   * flag hard problems (too long, wrong format) so the field validates as you go.
+   */
+  const contactMessage = (raw: string, live: boolean): string | null => {
+    const trimmed = raw.trim();
+    if (!trimmed) return live ? null : resolveValidationMessage(locale, 'contactRequired');
+    const r = validatePhoneOrEmail(trimmed);
+    if (r.ok) return null;
+    if (live && (r.code === 'phoneTooShort' || r.code === 'contactRequired' || r.code === 'emailRequired')) {
+      return null;
+    }
+    return resolveValidationMessage(locale, r.code);
+  };
+
   return (
     <div
       className={styles.overlay}
@@ -263,11 +290,17 @@ export default function BookingModal({ apt, onClose }: BookingModalProps) {
                 value={apt.bathrooms}
                 label={apt.bathrooms === 1 ? t('apartments.bath') : t('apartments.baths')}
               />
-              <span className={styles.spec}>
-                <Icon name="star" size={16} />
-                {apt.rating.toFixed(1)} · {apt.reviews} {t('booking.reviews')}
-              </span>
+              {apt.reviews > 0 ? (
+                <span className={styles.spec}>
+                  <Icon name="star" size={16} />
+                  {apt.rating.toFixed(1)} · {apt.reviews} {t('booking.reviews')}
+                </span>
+              ) : (
+                <span className={styles.spec}>{t('reviews.newBadge')}</span>
+              )}
             </div>
+
+            <ReviewsSection apartmentId={apt.id} />
           </section>
 
           <section className={styles.booking}>
@@ -338,17 +371,15 @@ export default function BookingModal({ apt, onClose }: BookingModalProps) {
                 autoComplete="tel"
                 value={guestContact}
                 aria-invalid={contactError ? true : undefined}
-                maxLength={254}
+                maxLength={guestContact.includes('@') ? 254 : PHONE_INPUT_MAX_LENGTH}
                 onChange={(e) => {
-                  const v = e.target.value;
-                  setGuestContact(v.includes('@') ? v : sanitizePhoneInput(v));
-                  setContactError(null);
+                  const raw = e.target.value;
+                  const next = raw.includes('@') ? raw : sanitizePhoneInput(raw);
+                  setGuestContact(next);
+                  setContactError(contactMessage(next, true));
                   setError(null);
                 }}
-                onBlur={() => {
-                  const r = validatePhoneOrEmail(guestContact);
-                  setContactError(r.ok ? null : resolveValidationMessage(locale, r.code));
-                }}
+                onBlur={() => setContactError(contactMessage(guestContact, false))}
                 placeholder={t('booking.contactPlaceholder')}
               />
               {contactError && <span className="fieldError">{contactError}</span>}

@@ -3,7 +3,7 @@ import Icon from '@/components/ui/Icon/Icon';
 import type { IconName } from '@/components/ui/Icon/Icon';
 import styles from './AdminSidebar.module.scss';
 
-export type AdminView = 'apartments' | 'bookings' | 'settings';
+export type AdminView = 'apartments' | 'bookings' | 'calendar' | 'reviews' | 'settings';
 
 interface NavItem {
   id: AdminView;
@@ -17,6 +17,7 @@ interface AdminSidebarProps {
   open: boolean;
   onViewChange: (v: AdminView) => void;
   requestCount: number;
+  reviewCount?: number;
   apartmentCount?: number;
 }
 
@@ -25,11 +26,14 @@ export default function AdminSidebar({
   open,
   onViewChange,
   requestCount,
+  reviewCount = 0,
   apartmentCount = 0,
 }: AdminSidebarProps) {
   const items: NavItem[] = [
     { id: 'apartments', icon: 'grid', label: 'Apartments', count: apartmentCount },
     { id: 'bookings', icon: 'inbox', label: 'Bookings', count: requestCount },
+    { id: 'calendar', icon: 'calendar', label: 'Calendar' },
+    { id: 'reviews', icon: 'star', label: 'Reviews', count: reviewCount },
     { id: 'settings', icon: 'gear', label: 'Settings' },
   ];
 

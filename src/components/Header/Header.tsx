@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import Button from '@/components/ui/Button/Button';
 import Icon from '@/components/ui/Icon/Icon';
@@ -11,9 +12,9 @@ import styles from './Header.module.scss';
 
 const NAV = [
   { key: 'nav.apartments', href: '/apartments' },
-  { key: 'nav.about', href: '#about' },
-  { key: 'nav.location', href: '#location' },
-  { key: 'nav.contact', href: '#contact' },
+  { key: 'nav.about', href: '/about' },
+  { key: 'nav.location', href: '/location' },
+  { key: 'nav.contact', href: '/contact' },
 ] as const;
 
 function LangSwitch() {
@@ -75,11 +76,19 @@ export default function Header() {
         </button>
 
         <nav className={styles.nav} aria-label="Main navigation">
-          {NAV.map(({ key, href }) => (
-            <a key={key} className={styles.link} href={href}>
-              {t(key)}
-            </a>
-          ))}
+          {NAV.map(({ key, href }) => {
+            const active = pathname === href || pathname.startsWith(`${href}/`);
+            return (
+              <Link
+                key={key}
+                className={`${styles.link} ${active ? styles.linkOn : ''}`}
+                href={href}
+                aria-current={active ? 'page' : undefined}
+              >
+                {t(key)}
+              </Link>
+            );
+          })}
         </nav>
 
         <div className={styles.right}>
@@ -90,7 +99,7 @@ export default function Header() {
             variant="navy"
             size="sm"
             as="a"
-            href="#contact"
+            href="/contact"
             className={styles.bookDesktop}
           >
             {t('nav.bookNow')}
@@ -108,9 +117,9 @@ export default function Header() {
       <div className={`${styles.drawer} ${menuOpen ? styles.drawerOpen : ''}`}>
         <div className={styles.drawerPanel}>
           {NAV.map(({ key, href }) => (
-            <a key={key} href={href} onClick={() => setMenuOpen(false)}>
+            <Link key={key} href={href} onClick={() => setMenuOpen(false)}>
               {t(key)}
-            </a>
+            </Link>
           ))}
           <div className={styles.drawerBottom}>
             <LangSwitch />
@@ -118,7 +127,7 @@ export default function Header() {
               variant="primary"
               size="sm"
               as="a"
-              href="#contact"
+              href="/contact"
               onClick={() => setMenuOpen(false)}
             >
               {t('nav.bookNow')}

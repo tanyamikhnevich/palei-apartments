@@ -1,18 +1,12 @@
-import type { Apartment, ApartmentArea } from '@/types/apartment';
-import type { FilterId } from '@/i18n/types';
-import { filterApartments } from '@/data/apartments';
+import type { Apartment } from '@/types/apartment';
+import { apartmentHasTag } from '@/lib/apartmentTags';
 import { rangeHasBlockedNight } from '@/lib/dates';
 
-export type SearchWhere = 'batYam' | 'telAviv' | 'anywhere';
-
 export type ApartmentSearchParams = {
-  where: SearchWhere;
   checkIn: string | null;
   checkOut: string | null;
   guests: number;
 };
-
-const WHERE_KEYS: SearchWhere[] = ['batYam', 'telAviv', 'anywhere'];
 
 export function parseApartmentSearchParams(
   params: URLSearchParams | Readonly<Record<string, string | string[] | undefined>>
@@ -24,18 +18,12 @@ export function parseApartmentSearchParams(
     return v ?? null;
   };
 
-  const whereRaw = get('where');
-  const where = WHERE_KEYS.includes(whereRaw as SearchWhere)
-    ? (whereRaw as SearchWhere)
-    : 'anywhere';
-
   const checkIn = get('checkIn');
   const checkOut = get('checkOut');
   const guestsRaw = parseInt(get('guests') ?? '2', 10);
   const guests = Number.isFinite(guestsRaw) ? Math.min(6, Math.max(1, guestsRaw)) : 2;
 
   return {
-    where,
     checkIn: checkIn && /^\d{4}-\d{2}-\d{2}$/.test(checkIn) ? checkIn : null,
     checkOut: checkOut && /^\d{4}-\d{2}-\d{2}$/.test(checkOut) ? checkOut : null,
     guests,
@@ -44,18 +32,11 @@ export function parseApartmentSearchParams(
 
 export function buildApartmentSearchQuery(search: ApartmentSearchParams): string {
   const qs = new URLSearchParams();
-  if (search.where !== 'anywhere') qs.set('where', search.where);
   if (search.checkIn) qs.set('checkIn', search.checkIn);
   if (search.checkOut) qs.set('checkOut', search.checkOut);
   if (search.guests !== 2) qs.set('guests', String(search.guests));
   const s = qs.toString();
   return s ? `?${s}` : '';
-}
-
-function areaForWhere(where: SearchWhere): ApartmentArea | null {
-  if (where === 'batYam') return 'Bat Yam';
-  if (where === 'telAviv') return 'Tel Aviv';
-  return null;
 }
 
 export function isApartmentAvailableForStay(
@@ -71,12 +52,10 @@ export function filterApartmentsBySearch(
   list: Apartment[],
   search: ApartmentSearchParams,
   blockedByApartment: Record<string, { checkIn: string; checkOut: string }[]>,
-  chipFilter: FilterId
+  /** Selected tag chip, or null for "all". */
+  tagFilter: string | null
 ): Apartment[] {
-  let result = filterApartments(list, chipFilter);
-
-  const area = areaForWhere(search.where);
-  if (area) result = result.filter((a) => a.area === area);
+  let result = tagFilter ? list.filter((a) => apartmentHasTag(a, tagFilter)) : list;
 
   result = result.filter((a) => a.guests >= search.guests);
 
@@ -87,10 +66,4 @@ export function filterApartmentsBySearch(
   }
 
   return result;
-}
-
-export function searchParamsToChipFilter(where: SearchWhere): FilterId {
-  if (where === 'batYam') return 'batYam';
-  if (where === 'telAviv') return 'telAviv';
-  return 'all';
 }

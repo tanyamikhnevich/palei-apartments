@@ -6,7 +6,3 @@ export const LOCALE_LABELS: Record<Locale, string> = {
   ru: 'RU',
   he: 'HE',
 };
-
-export type FilterId = 'all' | 'batYam' | 'telAviv' | 'seaView' | 'family';
-
-export const FILTER_IDS: FilterId[] = ['all', 'batYam', 'telAviv', 'seaView', 'family'];

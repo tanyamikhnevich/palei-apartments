@@ -1,8 +1,8 @@
 export const en = {
   meta: {
-    title: 'Palei Apartments — Bat Yam & Tel Aviv',
+    title: 'Palei Apartments — Bat Yam',
     description:
-      'Boutique short-term rentals near the Mediterranean — comfortable apartments in Bat Yam and Tel Aviv.',
+      'Boutique short-term rentals near the Mediterranean — comfortable apartments in Bat Yam.',
   },
   brand: 'Palei Apartments',
   nav: {
@@ -19,16 +19,14 @@ export const en = {
     completeDates: 'Please select check-in and check-out dates.',
   },
   hero: {
-    pill: 'Bat Yam · Tel Aviv · by the Mediterranean',
+    pill: 'Bat Yam · by the Mediterranean',
     title: 'Comfortable apartments near the sea in Bat Yam',
     sub: 'Boutique short-term rentals for tourists and families — sunny, fully equipped, and a short walk from the beach.',
-    where: 'Where',
     checkIn: 'Check in',
     guests: 'Guests',
     search: 'Search',
     viewApartments: 'View apartments',
     contactUs: 'Contact us',
-    areas: { batYam: 'Bat Yam', telAviv: 'Tel Aviv', anywhere: 'Anywhere' },
     checkInPlaceholder: 'Add dates',
     guestOptions: {
       one: '1 guest',
@@ -46,11 +44,14 @@ export const en = {
   apartments: {
     eyebrow: 'Our apartments',
     title: 'Stay a few steps from the Mediterranean',
-    sub: 'Hand-picked, professionally cleaned apartments in Bat Yam and Tel Aviv — booked directly with us, no hidden fees.',
+    sub: 'Hand-picked, professionally cleaned apartments in Bat Yam — booked directly with us, no hidden fees.',
     seeAll: 'See all',
     allTitle: 'All apartments',
-    allSub: 'Browse our full collection in Bat Yam and Tel Aviv.',
+    allSub: 'Browse our full collection in Bat Yam.',
     backHome: 'Back to home',
+    backToAll: 'Back to all apartments',
+    notFound: 'Apartment not found',
+    notFoundDesc: 'This apartment is no longer listed. Browse the rest of our collection.',
     viewAll: 'View all apartments',
     empty: 'No apartments match this filter.',
     emptySearch: 'No apartments available for these dates and guests. Try different dates or fewer guests.',
@@ -64,15 +65,9 @@ export const en = {
     bath: 'bath',
     baths: 'baths',
     viewDetails: 'View details',
+    filterAll: 'All',
     save: 'Save apartment',
     unsave: 'Remove from saved',
-    filters: {
-      all: 'All',
-      batYam: 'Bat Yam',
-      telAviv: 'Tel Aviv',
-      seaView: 'Sea view',
-      family: 'Family friendly',
-    },
     tags: {
       seaView: 'Sea view',
       balcony: 'Balcony',
@@ -172,7 +167,7 @@ export const en = {
   about: {
     badge: 'About Palei Apartments',
     title: 'Hosted by people who actually live here',
-    desc: "We're a small family business renting our own carefully prepared apartments in Bat Yam and Tel Aviv. Transparent prices, verified listings, and a real person to help you choose the right place and plan your stay.",
+    desc: "We're a small family business renting our own carefully prepared apartments in Bat Yam. Transparent prices, verified listings, and a real person to help you choose the right place and plan your stay.",
     stats: {
       apartments: 'Apartments',
       guests: 'Happy guests',
@@ -199,14 +194,14 @@ export const en = {
       },
       families: {
         title: 'Great for families & tourists',
-        desc: 'Spacious layouts, flexible check-in and tips for getting around Bat Yam and Tel Aviv.',
+        desc: 'Spacious layouts, flexible check-in and tips for getting around Bat Yam.',
       },
     },
   },
   location: {
     eyebrow: 'Location',
     title: 'Bat Yam — sunny, calm, and close to everything',
-    sub: 'A relaxed seaside town just south of Tel Aviv, with the best of the city minutes away.',
+    sub: 'A relaxed seaside town on the Mediterranean, with the beach, cafés and markets minutes away.',
     mapLabel: 'map · Bat Yam seafront',
     openMaps: 'Open in maps',
     points: {
@@ -214,9 +209,9 @@ export const en = {
         title: '2 minutes to the beach',
         desc: "Bat Yam's wide sandy beaches and seaside promenade are right around the corner.",
       },
-      telAviv: {
-        title: '20 minutes to Tel Aviv',
-        desc: 'Quick access to central Tel Aviv by train, light rail and bus — and the airport in 25 min.',
+      transport: {
+        title: 'Easy to get around',
+        desc: 'Train, light rail and bus stops close by — Ben Gurion airport in about 25 minutes.',
       },
       cafes: {
         title: 'Cafés & markets nearby',
@@ -264,7 +259,7 @@ export const en = {
   },
   footer: {
     tagline:
-      'Boutique short-term apartment rentals by the sea in Bat Yam and Tel Aviv. Hosted personally, priced transparently.',
+      'Boutique short-term apartment rentals by the sea in Bat Yam. Hosted personally, priced transparently.',
     explore: 'Explore',
     contact: 'Contact',
     language: 'Language',

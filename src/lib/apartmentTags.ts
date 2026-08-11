@@ -62,6 +62,37 @@ export function getPrimaryTagLabel(
   return formatTagLabel(first, t);
 }
 
+/** True when the apartment carries this tag (custom labels compare case-insensitively). */
+export function apartmentHasTag(apt: Apartment, tagId: string): boolean {
+  const wanted = tagId.toLowerCase();
+  return apt.tagIds.some((id) => id.toLowerCase() === wanted);
+}
+
+/**
+ * Tags actually used by the given apartments — the source for the filter chips,
+ * so the list follows whatever admin saved in the database (presets and custom
+ * labels alike). Most-used first; duplicates that differ only in case collapse
+ * into the first spelling seen.
+ */
+export function collectApartmentTags(list: Apartment[]): string[] {
+  const seen = new Map<string, { id: string; count: number }>();
+
+  for (const apt of list) {
+    for (const raw of apt.tagIds) {
+      const id = raw.trim();
+      if (!id) continue;
+      const key = id.toLowerCase();
+      const entry = seen.get(key);
+      if (entry) entry.count += 1;
+      else seen.set(key, { id, count: 1 });
+    }
+  }
+
+  return [...seen.values()]
+    .sort((a, b) => b.count - a.count || a.id.localeCompare(b.id))
+    .map((entry) => entry.id);
+}
+
 export function normalizeCustomTagInput(raw: string): string | null {
   const label = raw.trim().replace(/\s+/g, ' ');
   if (!label || label.length > 48) return null;

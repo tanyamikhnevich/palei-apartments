@@ -93,12 +93,6 @@
   gap: 16px;
 }
 
-.grid3 {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-}
-
 .grid4 {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -330,7 +324,6 @@
 
 @media (max-width: 860px) {
   .grid,
-  .grid3,
   .grid4 {
     grid-template-columns: 1fr 1fr;
   }

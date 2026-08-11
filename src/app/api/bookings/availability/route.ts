@@ -3,6 +3,9 @@ import { and, eq, inArray } from 'drizzle-orm';
 import { getDb, schema } from '@/db/index';
 import { DEFAULT_AVAILABILITY, mergeBlockedRanges } from '@/lib/availability';
 import { isDbConfigured, jsonError } from '@/lib/api/errors';
+import { loadExternalBlocks, syncStaleFeeds } from '@/lib/server/calendarSync';
+
+export const dynamic = 'force-dynamic';
 
 function isoFromDate(value: string | Date): string {
   if (typeof value === 'string') return value.slice(0, 10);
@@ -54,6 +57,7 @@ export async function GET(request: Request) {
         .select({ id: schema.apartments.id, availability: schema.apartments.availability })
         .from(schema.apartments);
 
+      const externalBlocks = await loadExternalBlocks(db);
       const byApartment: Record<string, { checkIn: string; checkOut: string }[]> = {};
 
       for (const apt of aptRows) {
@@ -66,7 +70,11 @@ export async function GET(request: Request) {
         const availability = apt.availability ?? DEFAULT_AVAILABILITY;
         const manualBlocked =
           availability.mode === 'calendar' ? availability.blocked : [];
-        byApartment[apt.id] = mergeBlockedRanges(bookingBlocked, manualBlocked);
+        byApartment[apt.id] = mergeBlockedRanges(
+          bookingBlocked,
+          manualBlocked,
+          externalBlocks[apt.id] ?? []
+        );
       }
 
       return NextResponse.json({ byApartment, source: 'database' as const });
@@ -87,6 +95,12 @@ export async function GET(request: Request) {
   }
 
   try {
+    // The booking calendar must not offer a night another platform already sold,
+    // so refresh imported feeds that have gone stale before answering.
+    await syncStaleFeeds(apartmentId).catch((e) => {
+      console.warn('availability: stale feed refresh failed', e);
+    });
+
     const db = getDb();
 
     const bookingRows = await db
@@ -117,7 +131,12 @@ export async function GET(request: Request) {
     const manualBlocked =
       availability.mode === 'calendar' ? availability.blocked : [];
 
-    const blocked = mergeBlockedRanges(bookingBlocked, manualBlocked);
+    const externalBlocks = await loadExternalBlocks(db, [apartmentId]);
+    const blocked = mergeBlockedRanges(
+      bookingBlocked,
+      manualBlocked,
+      externalBlocks[apartmentId] ?? []
+    );
 
     return NextResponse.json({ blocked, source: 'database' as const });
   } catch (e) {

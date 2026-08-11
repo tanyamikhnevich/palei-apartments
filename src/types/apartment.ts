@@ -6,7 +6,7 @@ export type BookingStatus = 'Draft' | 'New request' | 'Confirmed' | 'Declined';
 
 export type BookingChannel = 'WhatsApp' | 'Website' | 'Booking';
 
-export type ApartmentArea = 'Bat Yam' | 'Tel Aviv';
+export type ApartmentArea = 'Bat Yam';
 
 export type ApartmentTagId =
   | 'seaView'
@@ -54,6 +54,8 @@ export interface Apartment {
   photos?: string[];
   locales: Record<Locale, ApartmentLocaleCopy>;
   availability?: ApartmentAvailability;
+  /** Secret segment of this apartment's public iCal export URL. */
+  icalToken?: string;
 }
 
 export interface Booking {

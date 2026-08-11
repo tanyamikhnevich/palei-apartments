@@ -22,6 +22,13 @@
       "when": 1780479000000,
       "tag": "0002_add_reviews",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1786000000000,
+      "tag": "0003_add_calendar_sync",
+      "breakpoints": true
     }
   ]
 }

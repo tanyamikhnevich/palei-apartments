@@ -8,7 +8,7 @@ import styles from './LocationSection.module.scss';
 
 const POINT_KEYS: { icon: IconName; key: string }[] = [
   { icon: 'wave', key: 'beach' },
-  { icon: 'pin', key: 'telAviv' },
+  { icon: 'pin', key: 'transport' },
   { icon: 'sparkle', key: 'cafes' },
 ];
 

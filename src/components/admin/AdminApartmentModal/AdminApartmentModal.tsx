@@ -8,10 +8,11 @@ import Button from '@/components/ui/Button/Button';
 import Icon from '@/components/ui/Icon/Icon';
 import Placeholder from '@/components/ui/Placeholder/Placeholder';
 import AdminAvailabilityCalendar from '@/components/admin/AdminAvailabilityCalendar/AdminAvailabilityCalendar';
+import AdminCalendarSync from '@/components/admin/AdminCalendarSync/AdminCalendarSync';
 import AdminTagPicker from '@/components/admin/AdminTagPicker/AdminTagPicker';
 import { isPhotoUrl } from '@/lib/apartmentMedia';
 import { photoLabelFromTags } from '@/lib/apartmentTags';
-import { AdminField, AdminInput, AdminSelect, AdminTextarea } from '@/components/admin/ui/AdminField';
+import { AdminField, AdminInput, AdminTextarea } from '@/components/admin/ui/AdminField';
 import { uploadApartmentPhotos } from '@/lib/api/client';
 import { IMAGE_UPLOAD_ACCEPT, IMAGE_UPLOAD_MAX_FILES } from '@/lib/imageUpload';
 import styles from './AdminApartmentModal.module.scss';
@@ -324,13 +325,7 @@ export default function AdminApartmentModal({ initial, onClose, onSave }: AdminA
             />
           </div>
 
-          <div className={styles.grid3}>
-            <AdminSelect
-              label="Area"
-              options={['Bat Yam', 'Tel Aviv']}
-              value={form.area}
-              onChange={(e) => setField('area', e.target.value as Apartment['area'])}
-            />
+          <div className={styles.grid}>
             <AdminField label="Price per night (₪)">
               <input
                 className="input"
@@ -423,6 +418,10 @@ export default function AdminApartmentModal({ initial, onClose, onSave }: AdminA
               onChange={(availability) => setField('availability', availability)}
             />
           </AdminField>
+
+          {editing && (
+            <AdminCalendarSync apartmentId={form.id} icalToken={form.icalToken} />
+          )}
 
           <PhotoManager
             photos={form.photos ?? []}

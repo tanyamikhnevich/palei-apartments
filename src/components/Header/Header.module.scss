@@ -64,6 +64,12 @@
   }
 }
 
+.linkOn {
+  background: var(--sand);
+  color: var(--navy);
+  font-weight: 600;
+}
+
 .right {
   display: flex;
   align-items: center;

@@ -1,5 +1,12 @@
-import type { ApartmentRow, BookingRow, BusinessSettingsRow, ReviewRow } from './schema';
+import type {
+  ApartmentRow,
+  BookingRow,
+  BusinessSettingsRow,
+  CalendarFeedRow,
+  ReviewRow,
+} from './schema';
 import type { Apartment, Booking } from '@/types/apartment';
+import type { CalendarFeed } from '@/types/calendar';
 import type { Review } from '@/types/review';
 import { DEFAULT_AVAILABILITY } from '@/lib/availability';
 import { isPhotoUrl } from '@/lib/apartmentMedia';
@@ -37,8 +44,16 @@ export function rowToApartment(row: ApartmentRow): Apartment {
     reviews: row.reviews,
     photos: row.photos ?? undefined,
     availability: row.availability ?? DEFAULT_AVAILABILITY,
+    icalToken: row.icalToken ?? undefined,
     locales: sanitizeLocales(row.locales),
   };
+}
+
+/** 32 hex chars — unguessable enough for a calendar URL, short enough to paste. */
+export function createIcalToken(): string {
+  const bytes = new Uint8Array(16);
+  crypto.getRandomValues(bytes);
+  return [...bytes].map((b) => b.toString(16).padStart(2, '0')).join('');
 }
 
 export function apartmentToInsert(apt: Apartment): Omit<ApartmentRow, 'createdAt' | 'updatedAt'> {
@@ -57,7 +72,22 @@ export function apartmentToInsert(apt: Apartment): Omit<ApartmentRow, 'createdAt
     reviews: apt.reviews,
     photos: apt.photos ?? null,
     availability: apt.availability ?? DEFAULT_AVAILABILITY,
+    icalToken: apt.icalToken ?? createIcalToken(),
     locales: sanitizeLocales(apt.locales),
+  };
+}
+
+export function rowToCalendarFeed(row: CalendarFeedRow): CalendarFeed {
+  return {
+    id: row.id,
+    apartmentId: row.apartmentId,
+    source: row.source,
+    label: row.label,
+    url: row.url,
+    lastSyncAt: row.lastSyncAt ? row.lastSyncAt.toISOString() : null,
+    lastStatus: row.lastStatus ?? null,
+    lastError: row.lastError ?? null,
+    eventCount: row.eventCount,
   };
 }
 

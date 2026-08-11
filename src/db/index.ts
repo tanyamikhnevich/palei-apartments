@@ -11,7 +11,10 @@ function getDatabaseUrl(): string {
 }
 
 export function getDb() {
-  const sql = neon(getDatabaseUrl());
+  // Neon's HTTP driver talks over `fetch`, which Next.js patches with its Data
+  // Cache — without this a query can be answered from a stale cached response
+  // (booked dates reappearing as free, freshly saved rows missing).
+  const sql = neon(getDatabaseUrl(), { fetchOptions: { cache: 'no-store' } });
   return drizzle(sql, { schema });
 }
 

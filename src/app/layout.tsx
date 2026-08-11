@@ -4,9 +4,9 @@ import { LanguageProvider } from '@/i18n/LanguageProvider';
 import LocaleDocument from '@/i18n/LocaleDocument';
 
 export const metadata: Metadata = {
-  title: 'Palei Apartments — Bat Yam & Tel Aviv',
+  title: 'Palei Apartments — Bat Yam',
   description:
-    'Boutique short-term rentals near the Mediterranean — comfortable apartments in Bat Yam and Tel Aviv.',
+    'Boutique short-term rentals near the Mediterranean — comfortable apartments in Bat Yam.',
 };
 
 export const viewport = {

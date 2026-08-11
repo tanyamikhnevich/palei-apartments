@@ -1,6 +1,4 @@
 import type { Apartment, Booking } from '@/types/apartment';
-import type { FilterId } from '@/i18n/types';
-import { FILTER_IDS } from '@/i18n/types';
 
 export const apartments: Apartment[] = [
   {
@@ -111,78 +109,6 @@ export const apartments: Apartment[] = [
     },
   },
   {
-    id: 'a4',
-    area: 'Tel Aviv',
-    guests: 3,
-    bedrooms: 1,
-    beds: 2,
-    bathrooms: 1,
-    price: 890,
-    minNights: 1,
-    status: 'Available',
-    tagIds: ['garden', 'central'],
-    rating: 0,
-    reviews: 0,
-    locales: {
-      en: {
-        title: 'Old North Garden Flat',
-        location: 'Old North, Tel Aviv',
-        description:
-          "Quiet garden apartment near Dizengoff, a short ride from the city's best restaurants and galleries.",
-        photoLabel: 'garden flat · Tel Aviv',
-      },
-      ru: {
-        title: 'Old North Garden Flat',
-        location: 'Старый Север, Тель-Авив',
-        description:
-          'Тихая квартира с садом у Дизенгоф — недалеко от лучших ресторанов и галерей города.',
-        photoLabel: 'квартира с садом · Тель-Авив',
-      },
-      he: {
-        title: 'Old North Garden Flat',
-        location: 'הצפון הישן, תל אביב',
-        description: 'דירת גן שקטה ליד דיזנגוף — נסיעה קצרה למסעדות וגלריות הטובות בעיר.',
-        photoLabel: 'דירת גן · תל אביב',
-      },
-    },
-  },
-  {
-    id: 'a5',
-    area: 'Tel Aviv',
-    guests: 2,
-    bedrooms: 1,
-    beds: 1,
-    bathrooms: 1,
-    price: 970,
-    minNights: 1,
-    status: 'Maintenance',
-    tagIds: ['design', 'nightlife'],
-    rating: 0,
-    reviews: 0,
-    locales: {
-      en: {
-        title: 'Rothschild City Loft',
-        location: 'Rothschild Blvd, Tel Aviv',
-        description:
-          'Design loft on the boulevard, surrounded by Bauhaus architecture, coffee and nightlife.',
-        photoLabel: 'loft · Bauhaus · boulevard',
-      },
-      ru: {
-        title: 'Rothschild City Loft',
-        location: 'бульвар Ротшильд, Тель-Авив',
-        description:
-          'Дизайнерский лофт на бульваре — баухаус, кофе и ночная жизнь вокруг.',
-        photoLabel: 'лофт · баухаус · бульвар',
-      },
-      he: {
-        title: 'Rothschild City Loft',
-        location: 'שדרות רוטשילד, תל אביב',
-        description: 'לופט עיצובי על השדרה — באוהאוס, קפה וחיי לילה מסביב.',
-        photoLabel: 'לופט · באוהאוס · שדרה',
-      },
-    },
-  },
-  {
     id: 'a6',
     area: 'Bat Yam',
     guests: 6,
@@ -219,18 +145,6 @@ export const apartments: Apartment[] = [
     },
   },
 ];
-
-export function filterApartments(list: Apartment[], filter: FilterId): Apartment[] {
-  if (filter === 'all') return list;
-  if (filter === 'batYam') return list.filter((a) => a.area === 'Bat Yam');
-  if (filter === 'telAviv') return list.filter((a) => a.area === 'Tel Aviv');
-  if (filter === 'seaView') return list.filter((a) => a.tagIds.includes('seaView'));
-  if (filter === 'family') return list.filter((a) => a.tagIds.includes('family'));
-  return list;
-}
-
-export { FILTER_IDS };
-export type { FilterId };
 
 import { buildSeedBookings } from '@/db/seedBookings';
 

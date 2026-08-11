@@ -1,6 +1,7 @@
 import type { Apartment, Booking, BookingStatus } from '@/types/apartment';
 import type { BusinessSettings } from '@/types/settings';
 import type { Review, ReviewStatus } from '@/types/review';
+import type { CalendarFeed, CalendarFeedInput, CalendarSyncOutcome } from '@/types/calendar';
 import { apartments as fallbackApartments } from '@/data/apartments';
 
 export class ApiError extends Error {
@@ -175,6 +176,59 @@ export async function updateBookingStatus(id: string, status: BookingStatus): Pr
   });
   const data = await parseJson<{ booking: Booking }>(res);
   return data.booking;
+}
+
+export async function fetchCalendarFeeds(apartmentId: string): Promise<CalendarFeed[]> {
+  const res = await fetch(`/api/calendar/feeds?apartmentId=${encodeURIComponent(apartmentId)}`, {
+    cache: 'no-store',
+  });
+  const data = await parseJson<{ feeds: CalendarFeed[] }>(res);
+  return data.feeds;
+}
+
+export async function createCalendarFeed(input: CalendarFeedInput): Promise<CalendarFeed> {
+  const res = await fetch('/api/calendar/feeds', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(input),
+  });
+  const data = await parseJson<{ feed: CalendarFeed }>(res);
+  return data.feed;
+}
+
+export async function updateCalendarFeed(
+  id: string,
+  patch: { url?: string; label?: string }
+): Promise<CalendarFeed> {
+  const res = await fetch(`/api/calendar/feeds/${id}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(patch),
+  });
+  const data = await parseJson<{ feed: CalendarFeed }>(res);
+  return data.feed;
+}
+
+export async function deleteCalendarFeed(id: string): Promise<void> {
+  const res = await fetch(`/api/calendar/feeds/${id}`, { method: 'DELETE' });
+  await parseJson<{ ok: boolean }>(res);
+}
+
+export type CalendarSyncResponse = {
+  synced: number;
+  failed: number;
+  results: CalendarSyncOutcome[];
+};
+
+export async function syncCalendars(
+  target: { apartmentId?: string; feedId?: string } = {}
+): Promise<CalendarSyncResponse> {
+  const res = await fetch('/api/calendar/sync', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(target),
+  });
+  return parseJson<CalendarSyncResponse>(res);
 }
 
 export type ReviewSubmission = {

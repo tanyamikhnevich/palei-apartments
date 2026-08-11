@@ -33,13 +33,13 @@ export default function Hero() {
             <ApartmentSearch variant="hero" />
 
             <div className={styles.cta}>
-              <Button variant="light" as="a" href="#apartments" iconRight="arrow">
+              <Button variant="light" as="a" href="/apartments" iconRight="arrow">
                 {t('hero.viewApartments')}
               </Button>
               <Button
                 variant="ghost"
                 as="a"
-                href="#contact"
+                href="/contact"
                 style={{
                   background: 'rgba(255,255,255,.12)',
                   color: '#fff',

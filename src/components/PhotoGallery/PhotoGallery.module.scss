@@ -11,20 +11,49 @@
   background: var(--sand);
 }
 
+/* Slides are stacked; the active one fades in over the one it replaces. */
 .img {
   object-fit: cover;
+  opacity: 0;
+  transition: opacity 0.35s var(--ease);
 }
 
-.imgFade {
-  animation: galleryFade 0.9s ease-out;
+.imgOn {
+  opacity: 1;
+  z-index: 1;
 }
 
-@keyframes galleryFade {
-  from {
-    opacity: 0.2;
+/* Shown until the first photo has decoded, so the frame is never just empty. */
+.loading {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: var(--sand);
+  overflow: hidden;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.7), transparent);
+    animation: galleryShimmer 1.5s var(--ease) infinite;
   }
-  to {
-    opacity: 1;
+}
+
+@keyframes galleryShimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .img {
+    transition: none;
+  }
+
+  .loading::after {
+    animation: none;
   }
 }
 

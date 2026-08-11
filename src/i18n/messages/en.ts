@@ -66,8 +66,6 @@ export const en = {
     baths: 'baths',
     viewDetails: 'View details',
     filterAll: 'All',
-    save: 'Save apartment',
-    unsave: 'Remove from saved',
     tags: {
       seaView: 'Sea view',
       balcony: 'Balcony',
@@ -170,7 +168,8 @@ export const en = {
     desc: "We're a small family business renting our own carefully prepared apartments in Bat Yam. Transparent prices, verified listings, and a real person to help you choose the right place and plan your stay.",
     stats: {
       apartments: 'Apartments',
-      guests: 'Happy guests',
+      sleeps: 'Sleeps up to',
+      from: 'From, per night',
       rating: 'Avg. rating',
       languages: 'Languages',
     },
@@ -181,20 +180,20 @@ export const en = {
     sub: 'We host a small collection of apartments ourselves, so every stay is personal.',
     items: {
       beach: {
-        title: 'Walking distance to the sea',
-        desc: "Every apartment is a short stroll from the beach, promenade and the Bat Yam marina.",
+        title: 'On the seafront',
+        desc: 'Most of the apartments sit on the seaside boulevard, the rest are a few minutes’ walk from the promenade.',
       },
       clean: {
-        title: 'Clean & fully equipped',
-        desc: 'Professionally cleaned, with a stocked kitchen, fast Wi-Fi, fresh linens and everything you need.',
+        title: 'Ready to live in',
+        desc: 'A full kitchen, washing machine, air conditioning, fast Wi-Fi with Netflix, fresh linen and towels in every flat.',
       },
       support: {
         title: 'Personal support',
         desc: 'Talk to a real host on WhatsApp before, during and after your stay — in English, Russian or Hebrew.',
       },
       families: {
-        title: 'Great for families & tourists',
-        desc: 'Spacious layouts, flexible check-in and tips for getting around Bat Yam.',
+        title: 'From studios to a penthouse',
+        desc: 'Studios for two, family apartments, and a mini-penthouse with a private pool that sleeps ten.',
       },
     },
   },
@@ -202,7 +201,6 @@ export const en = {
     eyebrow: 'Location',
     title: 'Bat Yam — sunny, calm, and close to everything',
     sub: 'A relaxed seaside town on the Mediterranean, with the beach, cafés and markets minutes away.',
-    mapLabel: 'map · Bat Yam seafront',
     openMaps: 'Open in maps',
     points: {
       beach: {

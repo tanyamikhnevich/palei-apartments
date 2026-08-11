@@ -262,7 +262,6 @@ export default function ApartmentDetail({ apt }: ApartmentDetailProps) {
         className={styles.gallery}
         sizes="(max-width: 900px) 100vw, 900px"
         autoPlayMs={7000}
-        smooth
       />
 
       <div className={styles.layout}>

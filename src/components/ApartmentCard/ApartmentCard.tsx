@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import Link from 'next/link';
 import type { Apartment } from '@/types/apartment';
 import FormattedDescription from '@/components/FormattedDescription/FormattedDescription';
 import PhotoGallery from '@/components/PhotoGallery/PhotoGallery';
@@ -21,7 +21,6 @@ export default function ApartmentCard({ apt }: ApartmentCardProps) {
   const { locale, t } = useLanguage();
   const copy = getApartmentCopy(apt, locale);
   const photos = getApartmentPhotos(apt);
-  const [fav, setFav] = useState(false);
   const tagLine = formatApartmentTags(apt, locale, t);
   const placeholderCaption = getPrimaryTagLabel(apt, locale, t);
 
@@ -33,18 +32,6 @@ export default function ApartmentCard({ apt }: ApartmentCardProps) {
         className={styles.media}
         placeholderLabel={placeholderCaption}
       >
-        <button
-          type="button"
-          className={`${styles.fav} ${fav ? styles.favOn : ''}`}
-          aria-label={fav ? t('apartments.unsave') : t('apartments.save')}
-          onClick={() => setFav((f) => !f)}
-        >
-          <Icon
-            name="heart"
-            size={18}
-            style={{ fill: fav ? 'currentColor' : 'none' }}
-          />
-        </button>
         <div className={styles.mediaBar}>
           {tagLine ? <span className={styles.featureTag}>{tagLine}</span> : <span />}
           <span className={styles.priceTag}>
@@ -103,11 +90,24 @@ export default function ApartmentCard({ apt }: ApartmentCardProps) {
             iconRight="arrow"
             as="a"
             href={`/apartments/${apt.id}`}
+            className={styles.detailsBtn}
           >
             {t('apartments.viewDetails')}
           </Button>
         </div>
       </div>
+
+      {/*
+        Makes the whole card clickable without wrapping the gallery controls in
+        an anchor. Hidden from assistive tech and from the tab order — the
+        "view details" button above is the real link.
+      */}
+      <Link
+        href={`/apartments/${apt.id}`}
+        className={styles.cardLink}
+        aria-hidden="true"
+        tabIndex={-1}
+      />
     </article>
   );
 }

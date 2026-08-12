@@ -14,11 +14,12 @@
 }
 
 .logoWrap {
+  /* Navy artwork needs a light plate to read against the dark footer. */
   img {
-    height: 36px;
+    height: 38px;
     width: auto;
     background: #fff;
-    padding: 9px 14px;
+    padding: 8px 14px;
     border-radius: 12px;
     margin-bottom: 18px;
   }

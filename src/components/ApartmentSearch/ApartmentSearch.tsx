@@ -8,7 +8,6 @@ import { useLanguage } from '@/i18n/LanguageProvider';
 import {
   buildApartmentSearchQuery,
   type ApartmentSearchParams,
-  type SearchWhere,
 } from '@/lib/apartmentSearch';
 import { formatDateRange } from '@/lib/dates';
 import styles from './ApartmentSearch.module.scss';
@@ -23,7 +22,6 @@ export default function ApartmentSearch({ variant = 'hero', initial }: Apartment
   const { locale, t } = useLanguage();
   const router = useRouter();
 
-  const [where, setWhere] = useState<SearchWhere>(initial?.where ?? 'batYam');
   const [checkIn, setCheckIn] = useState<string | null>(initial?.checkIn ?? null);
   const [checkOut, setCheckOut] = useState<string | null>(initial?.checkOut ?? null);
   const [guests, setGuests] = useState(initial?.guests ?? 2);
@@ -34,7 +32,6 @@ export default function ApartmentSearch({ variant = 'hero', initial }: Apartment
 
   useEffect(() => {
     if (!initial) return;
-    setWhere(initial.where);
     setCheckIn(initial.checkIn);
     setCheckOut(initial.checkOut);
     setGuests(initial.guests);
@@ -83,7 +80,7 @@ export default function ApartmentSearch({ variant = 'hero', initial }: Apartment
       return;
     }
 
-    const query = buildApartmentSearchQuery({ where, checkIn, checkOut, guests });
+    const query = buildApartmentSearchQuery({ checkIn, checkOut, guests });
     router.push(`/apartments${query}`);
   };
 
@@ -92,19 +89,6 @@ export default function ApartmentSearch({ variant = 'hero', initial }: Apartment
   return (
     <div className={rootClass}>
       <div className={styles.bar}>
-        <div className={styles.cell}>
-          <label htmlFor={`search-where-${variant}`}>{t('hero.where')}</label>
-          <select
-            id={`search-where-${variant}`}
-            value={where}
-            onChange={(e) => setWhere(e.target.value as SearchWhere)}
-          >
-            <option value="batYam">{t('hero.areas.batYam')}</option>
-            <option value="telAviv">{t('hero.areas.telAviv')}</option>
-            <option value="anywhere">{t('hero.areas.anywhere')}</option>
-          </select>
-        </div>
-
         <div className={styles.cell} ref={dateCellRef}>
           <label htmlFor={`search-dates-${variant}`}>{t('hero.checkIn')}</label>
           <button

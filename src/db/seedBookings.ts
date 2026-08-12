@@ -43,9 +43,9 @@ export function buildSeedBookings(apartmentList: Apartment[]): Booking[] {
     },
     {
       id: 'b4',
-      apartmentId: 'a5',
+      apartmentId: 'a6',
       guest: 'Sophie Bernard',
-      apt: apt('a5'),
+      apt: apt('a6'),
       checkIn: addDaysISO(today, 17),
       checkOut: addDaysISO(today, 20),
       guests: 2,
@@ -54,9 +54,9 @@ export function buildSeedBookings(apartmentList: Apartment[]): Booking[] {
     },
     {
       id: 'b5',
-      apartmentId: 'a4',
+      apartmentId: 'a2',
       guest: 'Yulia Smirnova',
-      apt: apt('a4'),
+      apt: apt('a2'),
       checkIn: addDaysISO(today, 23),
       checkOut: addDaysISO(today, 30),
       guests: 4,

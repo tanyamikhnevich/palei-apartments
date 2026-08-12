@@ -1,0 +1,48 @@
+.skeleton {
+  display: block;
+  position: relative;
+  overflow: hidden;
+  flex: none;
+  background: var(--sand);
+  border-radius: var(--r-sm);
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.72),
+      transparent
+    );
+    animation: shimmer 1.5s var(--ease) infinite;
+  }
+}
+
+.circle {
+  border-radius: 50%;
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes pulse {
+  50% {
+    opacity: 0.55;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    animation: pulse 1.8s ease-in-out infinite;
+
+    &::after {
+      display: none;
+    }
+  }
+}

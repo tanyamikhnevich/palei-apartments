@@ -1,16 +1,17 @@
 'use client';
 
 import Image from 'next/image';
+import Link from 'next/link';
 import Icon from '@/components/ui/Icon/Icon';
 import { useLanguage } from '@/i18n/LanguageProvider';
 import type { Locale } from '@/i18n/types';
 import styles from './Footer.module.scss';
 
 const NAV = [
-  { key: 'nav.apartments', href: '#apartments' },
-  { key: 'nav.about', href: '#about' },
-  { key: 'nav.location', href: '#location' },
-  { key: 'nav.contact', href: '#contact' },
+  { key: 'nav.apartments', href: '/apartments' },
+  { key: 'nav.about', href: '/about' },
+  { key: 'nav.location', href: '/location' },
+  { key: 'nav.contact', href: '/contact' },
 ] as const;
 
 const LANG_LINKS: { locale: Locale; key: string }[] = [
@@ -27,7 +28,7 @@ export default function Footer() {
       <div className="wrap">
         <div className={styles.top}>
           <div className={styles.logoWrap}>
-            <Image src="/palei-logo.png" alt={t('brand')} width={120} height={36} />
+            <Image src="/palei-logo.png" alt={t('brand')} width={135} height={40} />
             <p>{t('footer.tagline')}</p>
             <div className={styles.social}>
               <a href="#" aria-label={t('footer.instagram')}>
@@ -47,7 +48,7 @@ export default function Footer() {
             <ul>
               {NAV.map(({ key, href }) => (
                 <li key={key}>
-                  <a href={href}>{t(key)}</a>
+                  <Link href={href}>{t(key)}</Link>
                 </li>
               ))}
             </ul>

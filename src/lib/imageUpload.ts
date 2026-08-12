@@ -1,12 +1,14 @@
 export const IMAGE_UPLOAD_MAX_BYTES = 5 * 1024 * 1024;
 export const IMAGE_UPLOAD_MAX_FILES = 24;
 
-/** MIME types accepted for apartment photos */
+/** MIME types accepted for apartment photos — all are re-encoded to WebP on upload. */
 export const IMAGE_UPLOAD_MIME_TYPES = [
   'image/jpeg',
   'image/png',
   'image/webp',
   'image/avif',
+  'image/heic',
+  'image/heif',
 ] as const;
 
 export type ImageUploadMime = (typeof IMAGE_UPLOAD_MIME_TYPES)[number];
@@ -19,6 +21,8 @@ const EXT_TO_MIME: Record<string, ImageUploadMime> = {
   png: 'image/png',
   webp: 'image/webp',
   avif: 'image/avif',
+  heic: 'image/heic',
+  heif: 'image/heif',
 };
 
 const MIME_TO_EXT: Record<ImageUploadMime, string> = {
@@ -26,11 +30,14 @@ const MIME_TO_EXT: Record<ImageUploadMime, string> = {
   'image/png': 'png',
   'image/webp': 'webp',
   'image/avif': 'avif',
+  'image/heic': 'heic',
+  'image/heif': 'heif',
 };
 
 /** Value for `<input accept>` — MIME types + extensions (Safari / AVIF). */
 export const IMAGE_UPLOAD_ACCEPT =
-  'image/jpeg,image/png,image/webp,image/avif,.jpg,.jpeg,.png,.webp,.avif';
+  'image/jpeg,image/png,image/webp,image/avif,image/heic,image/heif,' +
+  '.jpg,.jpeg,.png,.webp,.avif,.heic,.heif';
 
 export function resolveImageMime(file: Pick<File, 'type' | 'name'>): ImageUploadMime | null {
   if (file.type && MIME_SET.has(file.type)) {
@@ -52,7 +59,7 @@ export function isAvifImagePath(src: string): boolean {
 export function validateImageFile(file: Pick<File, 'type' | 'name' | 'size'>): string | null {
   const mime = resolveImageMime(file);
   if (!mime) {
-    return 'Only JPEG, PNG, WebP and AVIF images are allowed';
+    return 'Only JPEG, PNG, WebP, AVIF and HEIC images are allowed';
   }
   if (file.size > IMAGE_UPLOAD_MAX_BYTES) {
     return `"${file.name}" must be 5 MB or smaller`;

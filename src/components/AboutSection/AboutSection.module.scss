@@ -1,5 +1,6 @@
 .section {
-  padding: 72px 0;
+  /* No top padding: the apartments grid above already ends with 96px. */
+  padding: 0 0 72px;
 }
 
 .band {
@@ -69,11 +70,20 @@
     font-size: 14px;
     margin-top: 2px;
   }
+
+  /* The shared skeleton is tuned for light surfaces; soften it on the navy band. */
+  .statSkeleton {
+    background: rgba(255, 255, 255, 0.16);
+
+    & + .statSkeleton {
+      margin-top: 8px;
+    }
+  }
 }
 
 @media (max-width: 760px) {
   .section {
-    padding: 52px 0;
+    padding: 0 0 52px;
   }
 
   .band {

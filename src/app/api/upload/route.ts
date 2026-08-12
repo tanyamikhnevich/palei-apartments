@@ -1,13 +1,7 @@
-import { mkdir, writeFile } from 'fs/promises';
-import path from 'path';
 import { NextResponse } from 'next/server';
 import { jsonError } from '@/lib/api/errors';
-import {
-  extensionForImageMime,
-  IMAGE_UPLOAD_MAX_FILES,
-  resolveImageMime,
-  validateImageFile,
-} from '@/lib/imageUpload';
+import { IMAGE_UPLOAD_MAX_FILES, validateImageFile } from '@/lib/imageUpload';
+import { storeApartmentPhoto } from '@/lib/server/photoStorage';
 
 function collectFiles(formData: FormData): File[] {
   const fromFiles = formData.getAll('files').filter((f): f is File => f instanceof File);
@@ -20,16 +14,7 @@ async function saveImage(file: File): Promise<string> {
   const err = validateImageFile(file);
   if (err) throw new Error(err);
 
-  const mime = resolveImageMime(file)!;
-  const ext = extensionForImageMime(mime);
-  const name = `${Date.now()}-${Math.random().toString(36).slice(2, 9)}.${ext}`;
-  const dir = path.join(process.cwd(), 'public', 'uploads', 'apartments');
-  await mkdir(dir, { recursive: true });
-
-  const buffer = Buffer.from(await file.arrayBuffer());
-  await writeFile(path.join(dir, name), buffer);
-
-  return `/uploads/apartments/${name}`;
+  return storeApartmentPhoto(file);
 }
 
 export async function POST(request: Request) {

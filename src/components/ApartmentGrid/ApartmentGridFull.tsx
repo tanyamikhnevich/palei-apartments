@@ -1,19 +1,28 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import dynamic from 'next/dynamic';
 import { useSearchParams } from 'next/navigation';
-import { FILTER_IDS, type FilterId } from '@/data/apartments';
 import type { Apartment } from '@/types/apartment';
 import ApartmentCard from '@/components/ApartmentCard/ApartmentCard';
+import ApartmentCardSkeleton from '@/components/ApartmentCard/ApartmentCardSkeleton';
 import Button from '@/components/ui/Button/Button';
+import Icon from '@/components/ui/Icon/Icon';
+import Skeleton from '@/components/ui/Skeleton/Skeleton';
 import { useLanguage } from '@/i18n/LanguageProvider';
-import {
-  filterApartmentsBySearch,
-  parseApartmentSearchParams,
-  searchParamsToChipFilter,
-} from '@/lib/apartmentSearch';
+import { filterApartmentsBySearch, parseApartmentSearchParams } from '@/lib/apartmentSearch';
+import { collectApartmentTags, formatTagLabel } from '@/lib/apartmentTags';
 import { fetchAllBookingAvailability, fetchApartments } from '@/lib/api/client';
 import styles from './ApartmentGrid.module.scss';
+
+// Leaflet touches `window` on import, so the map is client-only and is not
+// downloaded at all until a visitor asks to see it.
+const ApartmentMap = dynamic(() => import('@/components/ApartmentMap/ApartmentMap'), {
+  ssr: false,
+  loading: () => <Skeleton height={440} radius="var(--r-lg)" style={{ marginTop: 24 }} />,
+});
+
+const SKELETON_COUNT = 6;
 
 export default function ApartmentGridFull() {
   const { t } = useLanguage();
@@ -23,21 +32,15 @@ export default function ApartmentGridFull() {
     [searchParams]
   );
   const hasSearchQuery = Boolean(
-    searchParams.get('where') ||
-      searchParams.get('checkIn') ||
-      searchParams.get('checkOut') ||
-      searchParams.get('guests')
+    searchParams.get('checkIn') || searchParams.get('checkOut') || searchParams.get('guests')
   );
-  const [filter, setFilter] = useState<FilterId>(() => searchParamsToChipFilter(search.where));
+  const [tagFilter, setTagFilter] = useState<string | null>(null);
+  const [mapOpen, setMapOpen] = useState(false);
   const [apartments, setApartments] = useState<Apartment[]>([]);
   const [blockedByApartment, setBlockedByApartment] = useState<
     Record<string, { checkIn: string; checkOut: string }[]>
   >({});
   const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    setFilter(searchParamsToChipFilter(search.where));
-  }, [search.where]);
 
   useEffect(() => {
     Promise.all([fetchApartments({ publicOnly: true }), fetchAllBookingAvailability()])
@@ -48,7 +51,12 @@ export default function ApartmentGridFull() {
       .finally(() => setLoading(false));
   }, []);
 
-  const filtered = filterApartmentsBySearch(apartments, search, blockedByApartment, filter);
+  const tags = useMemo(() => collectApartmentTags(apartments), [apartments]);
+
+  // A tag can disappear while it is selected (admin edit, reload) — fall back to "all".
+  const activeTag = tagFilter && tags.includes(tagFilter) ? tagFilter : null;
+
+  const filtered = filterApartmentsBySearch(apartments, search, blockedByApartment, activeTag);
   const emptyMessage = hasSearchQuery ? t('apartments.emptySearch') : t('apartments.empty');
 
   return (
@@ -65,22 +73,58 @@ export default function ApartmentGridFull() {
           </Button>
         </div>
 
-        <div className={styles.filters}>
-          {FILTER_IDS.map((id) => (
+        {loading && (
+          <div className={styles.filters} aria-hidden="true">
+            {[72, 108, 92, 86].map((w, i) => (
+              <Skeleton key={i} width={w} height={38} radius={999} />
+            ))}
+          </div>
+        )}
+
+        {tags.length > 0 && (
+          <div className={styles.filters}>
             <button
-              key={id}
               type="button"
-              className={`${styles.chip} ${filter === id ? styles.chipOn : ''}`}
-              onClick={() => setFilter(id)}
+              className={`${styles.chip} ${activeTag === null ? styles.chipOn : ''}`}
+              onClick={() => setTagFilter(null)}
+              aria-pressed={activeTag === null}
             >
-              {t(`apartments.filters.${id}`)}
+              {t('apartments.filterAll')}
             </button>
-          ))}
-        </div>
+            {tags.map((tag) => (
+              <button
+                key={tag}
+                type="button"
+                className={`${styles.chip} ${activeTag === tag ? styles.chipOn : ''}`}
+                onClick={() => setTagFilter(tag)}
+                aria-pressed={activeTag === tag}
+              >
+                {formatTagLabel(tag, t)}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {!loading && filtered.length > 0 && (
+          <div className={styles.mapBar}>
+            <button
+              type="button"
+              className={`${styles.mapToggle} ${mapOpen ? styles.mapToggleOn : ''}`}
+              onClick={() => setMapOpen((open) => !open)}
+              aria-expanded={mapOpen}
+            >
+              <Icon name="pin" size={16} />
+              {mapOpen ? t('apartments.hideMap') : t('apartments.showMap')}
+            </button>
+          </div>
+        )}
+
+        {/* Pins follow the search and tag filters, not the whole listing. */}
+        {mapOpen && !loading && filtered.length > 0 && <ApartmentMap apartments={filtered} />}
 
         <div className={styles.grid}>
           {loading ? (
-            <p className={styles.empty}>{t('apartments.empty')}</p>
+            Array.from({ length: SKELETON_COUNT }, (_, i) => <ApartmentCardSkeleton key={i} />)
           ) : filtered.length === 0 ? (
             <p className={styles.empty}>{emptyMessage}</p>
           ) : (

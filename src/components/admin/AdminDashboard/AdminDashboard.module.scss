@@ -1,14 +1,22 @@
 .shell {
   display: grid;
   grid-template-columns: 260px 1fr;
-  min-height: 100vh;
   background: var(--bg);
+  /*
+    The shell owns the viewport and never scrolls itself: the menu stays put
+    and the right-hand column carries the scrollbar. `position: sticky` cannot
+    do this here because `overflow-x: hidden` on <body> breaks it.
+  */
+  height: 100dvh;
+  overflow: hidden;
 }
 
 .main {
   min-width: 0;
   display: flex;
   flex-direction: column;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .content {
@@ -44,8 +52,16 @@
 }
 
 @media (max-width: 860px) {
+  /* On phones the page scrolls normally and the menu is a drawer. */
   .shell {
     grid-template-columns: 1fr;
+    height: auto;
+    min-height: 100dvh;
+    overflow: visible;
+  }
+
+  .main {
+    overflow: visible;
   }
 
   .content {

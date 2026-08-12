@@ -1,0 +1,103 @@
+.wrap {
+  margin-top: 24px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  background: var(--sand);
+}
+
+.map {
+  height: 440px;
+  width: 100%;
+
+  /* Leaflet paints its own light-grey chrome; match the warm palette. */
+  :global(.leaflet-container) {
+    font-family: var(--font);
+    background: var(--sand);
+  }
+
+  :global(.leaflet-popup-content-wrapper) {
+    border-radius: var(--r-md);
+    box-shadow: var(--shadow-md);
+  }
+
+  :global(.leaflet-popup-content) {
+    margin: 14px 16px;
+    line-height: 1.5;
+  }
+
+  :global(.leaflet-bar a) {
+    color: var(--navy);
+  }
+}
+
+.pin {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  font-family: var(--font);
+  font-size: 14px;
+  font-weight: 700;
+  border: 2px solid #fff;
+  box-shadow: 0 3px 10px rgba(30, 40, 55, 0.35);
+}
+
+.popupTitle {
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--ink);
+  margin-bottom: 8px;
+}
+
+.popupList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 210px;
+  overflow-y: auto;
+}
+
+.popupItem {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 13.5px;
+}
+
+.popupLink {
+  color: var(--accent-press);
+  font-weight: 600;
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+
+  &:hover {
+    border-bottom-color: currentColor;
+  }
+}
+
+.popupPrice {
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+
+.note {
+  padding: 10px 16px;
+  border-top: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink-soft);
+  font-size: 13px;
+}
+
+@media (max-width: 760px) {
+  .map {
+    height: 340px;
+  }
+}

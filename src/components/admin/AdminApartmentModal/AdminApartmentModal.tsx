@@ -8,10 +8,13 @@ import Button from '@/components/ui/Button/Button';
 import Icon from '@/components/ui/Icon/Icon';
 import Placeholder from '@/components/ui/Placeholder/Placeholder';
 import AdminAvailabilityCalendar from '@/components/admin/AdminAvailabilityCalendar/AdminAvailabilityCalendar';
+// import AdminCalendarSync from '@/components/admin/AdminCalendarSync/AdminCalendarSync';
 import AdminTagPicker from '@/components/admin/AdminTagPicker/AdminTagPicker';
 import { isPhotoUrl } from '@/lib/apartmentMedia';
 import { photoLabelFromTags } from '@/lib/apartmentTags';
-import { AdminField, AdminInput, AdminSelect, AdminTextarea } from '@/components/admin/ui/AdminField';
+import { AdminField, AdminInput, AdminTextarea } from '@/components/admin/ui/AdminField';
+import AdminPriceTiers from '@/components/admin/AdminPricing/AdminPriceTiers';
+import AdminServices from '@/components/admin/AdminPricing/AdminServices';
 import { uploadApartmentPhotos } from '@/lib/api/client';
 import { IMAGE_UPLOAD_ACCEPT, IMAGE_UPLOAD_MAX_FILES } from '@/lib/imageUpload';
 import styles from './AdminApartmentModal.module.scss';
@@ -225,6 +228,8 @@ export default function AdminApartmentModal({ initial, onClose, onSave }: AdminA
         beds: initial.beds ?? initial.bedrooms,
         minNights: initial.minNights ?? 1,
         photos: initial.photos?.length ? initial.photos : undefined,
+        priceTiers: initial.priceTiers ?? [],
+        services: initial.services ?? [],
         availability: initial.availability ?? DEFAULT_AVAILABILITY,
       };
     }
@@ -243,6 +248,8 @@ export default function AdminApartmentModal({ initial, onClose, onSave }: AdminA
       rating: 5,
       reviews: 0,
       photos: [],
+      priceTiers: [],
+      services: [],
       availability: DEFAULT_AVAILABILITY,
       locales: { en, ru: { ...en }, he: { ...en } },
     };
@@ -261,6 +268,14 @@ export default function AdminApartmentModal({ initial, onClose, onSave }: AdminA
     setForm((prev) => ({ ...prev, [key]: value }));
   };
 
+  /** Empty clears the pin; anything unparseable is ignored rather than saved as 0. */
+  const setCoord = (key: 'lat' | 'lng', raw: string) => {
+    const trimmed = raw.trim();
+    if (!trimmed) return setField(key, undefined);
+    const value = Number(trimmed);
+    if (Number.isFinite(value)) setField(key, value);
+  };
+
   const setNum = (
     key: 'guests' | 'bedrooms' | 'beds' | 'bathrooms' | 'price' | 'minNights',
     raw: string
@@ -277,6 +292,10 @@ export default function AdminApartmentModal({ initial, onClose, onSave }: AdminA
     onSave({
       ...form,
       photos: form.photos?.length ? form.photos : undefined,
+      priceTiers: form.priceTiers?.length ? form.priceTiers : undefined,
+      services: form.services?.filter((s) => s.name.trim()).length
+        ? form.services.filter((s) => s.name.trim())
+        : undefined,
       locales: {
         en: enCopy,
         ru: editing ? { ...form.locales.ru, photoLabel } : { ...enCopy },
@@ -324,13 +343,7 @@ export default function AdminApartmentModal({ initial, onClose, onSave }: AdminA
             />
           </div>
 
-          <div className={styles.grid3}>
-            <AdminSelect
-              label="Area"
-              options={['Bat Yam', 'Tel Aviv']}
-              value={form.area}
-              onChange={(e) => setField('area', e.target.value as Apartment['area'])}
-            />
+          <div className={styles.grid}>
             <AdminField label="Price per night (₪)">
               <input
                 className="input"
@@ -350,6 +363,44 @@ export default function AdminApartmentModal({ initial, onClose, onSave }: AdminA
               />
             </AdminField>
           </div>
+
+          <AdminPriceTiers
+            basePrice={form.price}
+            tiers={form.priceTiers ?? []}
+            onChange={(priceTiers) => setField('priceTiers', priceTiers)}
+          />
+
+          <AdminServices
+            services={form.services ?? []}
+            onChange={(services) => setField('services', services)}
+          />
+
+          <div className={styles.grid}>
+            <AdminField label="Latitude">
+              <input
+                className="input"
+                type="number"
+                step="any"
+                placeholder="32.0227269"
+                value={form.lat ?? ''}
+                onChange={(e) => setCoord('lat', e.target.value)}
+              />
+            </AdminField>
+            <AdminField label="Longitude">
+              <input
+                className="input"
+                type="number"
+                step="any"
+                placeholder="34.7439456"
+                value={form.lng ?? ''}
+                onChange={(e) => setCoord('lng', e.target.value)}
+              />
+            </AdminField>
+          </div>
+          <p className={styles.coordHint}>
+            Puts the apartment on the listing map. In Google Maps, right-click the building
+            and copy the pair of numbers — latitude first.
+          </p>
 
           <AdminTextarea
             label="Description"
@@ -423,6 +474,13 @@ export default function AdminApartmentModal({ initial, onClose, onSave }: AdminA
               onChange={(availability) => setField('availability', availability)}
             />
           </AdminField>
+
+          {/* Calendar sync (Airbnb/Booking iCal) is parked until we decide how
+              it should work. The component and its API routes are untouched —
+              drop the comment markers to bring the block back. */}
+          {/* {editing && (
+            <AdminCalendarSync apartmentId={form.id} icalToken={form.icalToken} />
+          )} */}
 
           <PhotoManager
             photos={form.photos ?? []}

@@ -2,19 +2,19 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { filterApartments, type FilterId } from '@/data/apartments';
 import type { Apartment } from '@/types/apartment';
 import ApartmentCard from '@/components/ApartmentCard/ApartmentCard';
+import ApartmentCardSkeleton from '@/components/ApartmentCard/ApartmentCardSkeleton';
 import Button from '@/components/ui/Button/Button';
 import { useLanguage } from '@/i18n/LanguageProvider';
 import { fetchApartments } from '@/lib/api/client';
 import styles from './ApartmentGrid.module.scss';
 
 const HOME_PREVIEW_LIMIT = 6;
+const SKELETON_COUNT = 3;
 
 export default function ApartmentGridPreview() {
   const { t } = useLanguage();
-  const [filter] = useState<FilterId>('all');
   const [apartments, setApartments] = useState<Apartment[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -24,8 +24,7 @@ export default function ApartmentGridPreview() {
       .finally(() => setLoading(false));
   }, []);
 
-  const filtered = filterApartments(apartments, filter);
-  const displayed = filtered.slice(0, HOME_PREVIEW_LIMIT);
+  const displayed = apartments.slice(0, HOME_PREVIEW_LIMIT);
 
   return (
     <section className={styles.section} id="apartments">
@@ -37,13 +36,13 @@ export default function ApartmentGridPreview() {
             <p className="section-sub">{t('apartments.sub')}</p>
           </div>
           <Button variant="ghost" iconRight="arrow" as="a" href="/apartments">
-            {t('apartments.seeAll')} {apartments.length}
+            {t('apartments.seeAll')} {loading ? '' : apartments.length}
           </Button>
         </div>
 
         <div className={styles.grid}>
           {loading ? (
-            <p className={styles.empty}>{t('apartments.empty')}</p>
+            Array.from({ length: SKELETON_COUNT }, (_, i) => <ApartmentCardSkeleton key={i} />)
           ) : displayed.length === 0 ? (
             <p className={styles.empty}>{t('apartments.empty')}</p>
           ) : (

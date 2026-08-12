@@ -2,64 +2,16 @@
   padding: 96px 0;
 }
 
-.grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 56px;
-  align-items: center;
+.head {
+  max-width: 60ch;
 }
 
-.map {
-  aspect-ratio: 5 / 4;
-  border-radius: var(--r-lg);
-  border: 1px solid var(--line);
-  position: relative;
-  overflow: hidden;
-  background: var(--sand);
-  background-image: repeating-linear-gradient(
-    -45deg,
-    transparent,
-    transparent 11px,
-    rgba(30, 58, 82, 0.045) 11px,
-    rgba(30, 58, 82, 0.045) 22px
-  );
-  display: flex;
-  align-items: flex-end;
-}
-
-.mapLabel {
-  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
-  font-size: 11px;
-  letter-spacing: 0.02em;
-  color: var(--navy);
-  background: rgba(255, 255, 255, 0.78);
-  backdrop-filter: blur(2px);
-  padding: 4px 9px;
-  border-radius: 7px;
-  margin: 12px;
-  border: 1px solid rgba(30, 58, 82, 0.08);
-}
-
-.mapPin {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-}
-
-.pin {
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  background: var(--accent);
-  box-shadow: 0 0 0 8px var(--accent-tint), 0 6px 16px rgba(0, 0, 0, 0.2);
-}
-
+/* Without the map the three points read better side by side than stacked. */
 .points {
-  display: flex;
-  flex-direction: column;
-  gap: 22px;
-  margin-top: 28px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 32px;
+  margin-top: 40px;
 }
 
 .point {
@@ -90,23 +42,25 @@
 }
 
 .cta {
-  margin-top: 30px;
+  margin-top: 36px;
 }
 
 @media (max-width: 1000px) {
-  .grid {
-    grid-template-columns: 1fr;
-    gap: 36px;
-  }
-
-  .map {
-    order: -1;
+  .points {
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
   }
 }
 
 @media (max-width: 760px) {
   .section {
     padding: 64px 0;
+  }
+
+  .points {
+    grid-template-columns: 1fr;
+    gap: 22px;
+    margin-top: 28px;
   }
 
   .cta :global(a),
@@ -119,9 +73,5 @@
 @media (max-width: 480px) {
   .section {
     padding: 48px 0;
-  }
-
-  .map {
-    aspect-ratio: 16 / 11;
   }
 }

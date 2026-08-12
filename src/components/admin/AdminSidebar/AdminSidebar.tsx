@@ -1,4 +1,7 @@
+'use client';
+
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import Icon from '@/components/ui/Icon/Icon';
 import type { IconName } from '@/components/ui/Icon/Icon';
 import styles from './AdminSidebar.module.scss';
@@ -29,6 +32,14 @@ export default function AdminSidebar({
   reviewCount = 0,
   apartmentCount = 0,
 }: AdminSidebarProps) {
+  const router = useRouter();
+
+  const signOut = async () => {
+    await fetch('/api/admin/session', { method: 'DELETE' });
+    router.replace('/admin/login');
+    router.refresh();
+  };
+
   const items: NavItem[] = [
     { id: 'apartments', icon: 'grid', label: 'Apartments', count: apartmentCount },
     { id: 'bookings', icon: 'inbox', label: 'Bookings', count: requestCount },
@@ -40,7 +51,7 @@ export default function AdminSidebar({
   return (
     <aside className={`${styles.side} ${open ? styles.open : ''}`}>
       <a href="/" className={styles.logoLink} title="View public site">
-        <Image src="/palei-logo.png" alt="Palei Apartments" width={100} height={32} />
+        <Image src="/palei-logo.png" alt="Palei Apartments" width={135} height={40} />
       </a>
 
       <div className={styles.label}>Manage</div>
@@ -65,6 +76,11 @@ export default function AdminSidebar({
           <Icon name="home" size={19} />
           View website
         </a>
+
+        <button type="button" className={styles.item} onClick={signOut}>
+          <Icon name="x" size={19} />
+          Sign out
+        </button>
 
         <div className={styles.user}>
           <div className={styles.avatar}>PA</div>

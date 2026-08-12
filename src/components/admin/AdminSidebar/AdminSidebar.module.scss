@@ -1,24 +1,26 @@
 .side {
-  position: sticky;
-  top: 0;
-  align-self: start;
-  height: 100vh;
+  height: 100%;
   background: var(--navy);
   color: #fff;
   display: flex;
   flex-direction: column;
   padding: 22px 16px;
+  /* A long menu on a short laptop screen scrolls inside the column. */
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .logoLink {
+  /* Hugs the wordmark instead of stretching the plate across the column. */
+  display: inline-block;
+  width: fit-content;
   background: #fff;
   border-radius: 12px;
-  padding: 9px 12px;
+  padding: 10px 14px;
   margin: 4px 6px 26px;
-  display: block;
 
   img {
-    height: 32px;
+    height: 34px;
     width: auto;
     display: block;
   }
@@ -123,6 +125,7 @@
     top: 0;
     z-index: 300;
     width: 260px;
+    height: 100dvh;
     transform: translateX(-100%);
     transition: transform 0.25s var(--ease);
 

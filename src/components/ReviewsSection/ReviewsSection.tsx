@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import Button from '@/components/ui/Button/Button';
 import Icon from '@/components/ui/Icon/Icon';
+import Skeleton from '@/components/ui/Skeleton/Skeleton';
 import StarRating from '@/components/ui/StarRating/StarRating';
 import { useLanguage } from '@/i18n/LanguageProvider';
 import { fetchApartmentReviews, submitReview } from '@/lib/api/client';
@@ -128,7 +129,19 @@ export default function ReviewsSection({ apartmentId }: ReviewsSectionProps) {
       </div>
 
       {loading ? (
-        <p className={styles.muted}>…</p>
+        <ul className={styles.list} aria-hidden="true">
+          {[0, 1, 2].map((i) => (
+            <li key={i} className={styles.item}>
+              <div className={styles.itemHead}>
+                <Skeleton width={120} height={14} />
+                <Skeleton width={76} height={12} />
+              </div>
+              <Skeleton width={88} height={14} />
+              <Skeleton height={12} />
+              <Skeleton width="68%" height={12} />
+            </li>
+          ))}
+        </ul>
       ) : reviews.length === 0 ? (
         <p className={styles.empty}>{t('reviews.noneYet')}</p>
       ) : (

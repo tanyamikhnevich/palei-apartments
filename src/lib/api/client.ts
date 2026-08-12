@@ -117,11 +117,6 @@ export async function uploadApartmentPhotos(files: File[]): Promise<{ urls: stri
   return { urls: data.urls ?? (data.url ? [data.url] : []) };
 }
 
-export async function seedDatabase(): Promise<{ count: number; message: string }> {
-  const res = await fetch('/api/seed', { method: 'POST' });
-  return parseJson(res);
-}
-
 export async function fetchBookingAvailability(
   apartmentId: string
 ): Promise<{ checkIn: string; checkOut: string }[]> {

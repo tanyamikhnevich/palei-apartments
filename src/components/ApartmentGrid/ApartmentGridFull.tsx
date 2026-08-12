@@ -1,17 +1,26 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import dynamic from 'next/dynamic';
 import { useSearchParams } from 'next/navigation';
 import type { Apartment } from '@/types/apartment';
 import ApartmentCard from '@/components/ApartmentCard/ApartmentCard';
 import ApartmentCardSkeleton from '@/components/ApartmentCard/ApartmentCardSkeleton';
 import Button from '@/components/ui/Button/Button';
+import Icon from '@/components/ui/Icon/Icon';
 import Skeleton from '@/components/ui/Skeleton/Skeleton';
 import { useLanguage } from '@/i18n/LanguageProvider';
 import { filterApartmentsBySearch, parseApartmentSearchParams } from '@/lib/apartmentSearch';
 import { collectApartmentTags, formatTagLabel } from '@/lib/apartmentTags';
 import { fetchAllBookingAvailability, fetchApartments } from '@/lib/api/client';
 import styles from './ApartmentGrid.module.scss';
+
+// Leaflet touches `window` on import, so the map is client-only and is not
+// downloaded at all until a visitor asks to see it.
+const ApartmentMap = dynamic(() => import('@/components/ApartmentMap/ApartmentMap'), {
+  ssr: false,
+  loading: () => <Skeleton height={440} radius="var(--r-lg)" style={{ marginTop: 24 }} />,
+});
 
 const SKELETON_COUNT = 6;
 
@@ -26,6 +35,7 @@ export default function ApartmentGridFull() {
     searchParams.get('checkIn') || searchParams.get('checkOut') || searchParams.get('guests')
   );
   const [tagFilter, setTagFilter] = useState<string | null>(null);
+  const [mapOpen, setMapOpen] = useState(false);
   const [apartments, setApartments] = useState<Apartment[]>([]);
   const [blockedByApartment, setBlockedByApartment] = useState<
     Record<string, { checkIn: string; checkOut: string }[]>
@@ -94,6 +104,23 @@ export default function ApartmentGridFull() {
             ))}
           </div>
         )}
+
+        {!loading && filtered.length > 0 && (
+          <div className={styles.mapBar}>
+            <button
+              type="button"
+              className={`${styles.mapToggle} ${mapOpen ? styles.mapToggleOn : ''}`}
+              onClick={() => setMapOpen((open) => !open)}
+              aria-expanded={mapOpen}
+            >
+              <Icon name="pin" size={16} />
+              {mapOpen ? t('apartments.hideMap') : t('apartments.showMap')}
+            </button>
+          </div>
+        )}
+
+        {/* Pins follow the search and tag filters, not the whole listing. */}
+        {mapOpen && !loading && filtered.length > 0 && <ApartmentMap apartments={filtered} />}
 
         <div className={styles.grid}>
           {loading ? (

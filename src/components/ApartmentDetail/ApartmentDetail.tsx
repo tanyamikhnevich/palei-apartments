@@ -28,6 +28,14 @@ import {
 } from '@/lib/validation/contact';
 import { resolveValidationMessage } from '@/lib/validation/resolveMessage';
 import { formatApartmentTags, getApartmentPhotos } from '@/lib/apartmentMedia';
+import {
+  hasPriceTiers,
+  optionalServices,
+  priceFrom,
+  priceTiers,
+  quoteStay,
+  SERVICE_UNIT_KEYS,
+} from '@/lib/pricing';
 import styles from './ApartmentDetail.module.scss';
 
 interface ApartmentDetailProps {
@@ -48,6 +56,7 @@ export default function ApartmentDetail({ apt }: ApartmentDetailProps) {
   const [checkIn, setCheckIn] = useState<string | null>(null);
   const [checkOut, setCheckOut] = useState<string | null>(null);
   const [guests, setGuests] = useState(Math.min(2, apt.guests));
+  const [selectedServices, setSelectedServices] = useState<string[]>([]);
   const [guestName, setGuestName] = useState('');
   const [guestContact, setGuestContact] = useState('');
   const [saving, setSaving] = useState(false);
@@ -207,7 +216,8 @@ export default function ApartmentDetail({ apt }: ApartmentDetailProps) {
     }
   };
 
-  const total = nights * apt.price;
+  const quote = quoteStay(apt, nights, guests, selectedServices);
+  const total = quote.total;
 
   /**
    * Contact error message for the current locale.
@@ -252,7 +262,8 @@ export default function ApartmentDetail({ apt }: ApartmentDetailProps) {
           </div>
         </div>
         <div className={styles.priceBox}>
-          <b>₪{apt.price}</b> <span>{t('apartments.perNight')}</span>
+          {hasPriceTiers(apt) && <span>{t('apartments.from')} </span>}
+          <b>₪{priceFrom(apt)}</b> <span>{t('apartments.perNight')}</span>
         </div>
       </header>
 
@@ -328,6 +339,54 @@ export default function ApartmentDetail({ apt }: ApartmentDetailProps) {
                 />
                 {saving && <p className={styles.muted}>{t('booking.savingDates')}</p>}
 
+                {hasPriceTiers(apt) && (
+                  <div className={styles.rates}>
+                    <div className={styles.ratesTitle}>{t('booking.rates')}</div>
+                    {priceTiers(apt).map((tier) => (
+                      <div
+                        key={tier.minNights}
+                        className={`${styles.rateRow} ${
+                          tier.price === quote.rate && nights > 0 ? styles.rateOn : ''
+                        }`}
+                      >
+                        <span>
+                          {tier.minNights === 1
+                            ? t('booking.rateFrom').replace('{nights}', '1')
+                            : t('booking.rateFrom').replace('{nights}', String(tier.minNights))}
+                        </span>
+                        <span>
+                          ₪{tier.price} {t('apartments.perNight')}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {optionalServices(apt).length > 0 && (
+                  <div className={styles.extras}>
+                    <div className={styles.ratesTitle}>{t('booking.extras')}</div>
+                    {optionalServices(apt).map((service) => (
+                      <label key={service.id} className={styles.extraRow}>
+                        <input
+                          type="checkbox"
+                          checked={selectedServices.includes(service.id)}
+                          onChange={(e) =>
+                            setSelectedServices((prev) =>
+                              e.target.checked
+                                ? [...prev, service.id]
+                                : prev.filter((id) => id !== service.id)
+                            )
+                          }
+                        />
+                        <span className={styles.extraName}>{service.name}</span>
+                        <span className={styles.extraPrice}>
+                          ₪{service.price} {t(SERVICE_UNIT_KEYS[service.unit])}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                )}
+
                 <div className={styles.fields}>
                   <label className="field">
                     <span>{t('booking.guests')}</span>
@@ -390,9 +449,30 @@ export default function ApartmentDetail({ apt }: ApartmentDetailProps) {
 
                 {nightsValid && (
                   <div className={styles.summary}>
-                    {formatDateRange(checkIn!, checkOut!, locale)} · {nights}{' '}
-                    {nights === 1 ? t('booking.night') : t('booking.nights')} ·{' '}
-                    <strong>₪{total}</strong> {t('booking.total')}
+                    <div className={styles.summaryDates}>
+                      {formatDateRange(checkIn!, checkOut!, locale)}
+                    </div>
+                    <div className={styles.summaryRow}>
+                      <span>
+                        {t('booking.nightsLine')
+                          .replace('{nights}', String(nights))
+                          .replace('{rate}', String(quote.rate))}
+                      </span>
+                      <span>₪{quote.nightsTotal}</span>
+                    </div>
+                    {quote.charges.map(({ service, amount }) => (
+                      <div className={styles.summaryRow} key={service.id}>
+                        <span>
+                          {service.name}
+                          {service.required && ` · ${t('booking.extraRequired')}`}
+                        </span>
+                        <span>₪{amount}</span>
+                      </div>
+                    ))}
+                    <div className={styles.summaryTotal}>
+                      <span>{t('booking.total')}</span>
+                      <strong>₪{total}</strong>
+                    </div>
                   </div>
                 )}
 

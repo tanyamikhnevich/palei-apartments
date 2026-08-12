@@ -6,6 +6,7 @@ import Skeleton from '@/components/ui/Skeleton/Skeleton';
 import { useLanguage } from '@/i18n/LanguageProvider';
 import { LOCALES } from '@/i18n/types';
 import { fetchApartments } from '@/lib/api/client';
+import { priceFrom } from '@/lib/pricing';
 import styles from './AboutSection.module.scss';
 
 type Stat = { value: string; key: string };
@@ -22,7 +23,7 @@ function buildStats(apartments: Apartment[]): Stat[] {
       key: 'about.stats.sleeps',
     },
     {
-      value: `₪${Math.min(...apartments.map((a) => a.price))}`,
+      value: `₪${Math.min(...apartments.map((a) => priceFrom(a)))}`,
       key: 'about.stats.from',
     },
   ];

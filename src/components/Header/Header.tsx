@@ -68,8 +68,8 @@ export default function Header() {
           <Image
             src="/palei-logo.png"
             alt=""
-            width={120}
-            height={38}
+            width={135}
+            height={40}
             className={styles.logo}
             priority
           />

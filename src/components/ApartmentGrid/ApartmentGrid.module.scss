@@ -40,6 +40,46 @@
   }
 }
 
+.mapBar {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+.mapToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--line-2);
+  background: var(--surface);
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 9px 16px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: 0.15s;
+
+  svg {
+    color: var(--accent);
+  }
+
+  &:hover {
+    border-color: var(--navy);
+  }
+
+  &.mapToggleOn {
+    background: var(--navy);
+    border-color: var(--navy);
+    color: #fff;
+
+    svg {
+      color: #fff;
+    }
+  }
+}
+
 .grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);

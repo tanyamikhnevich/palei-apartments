@@ -11,6 +11,7 @@ import { useLanguage } from '@/i18n/LanguageProvider';
 import { getApartmentCopy } from '@/i18n/apartmentLocale';
 import { formatApartmentTags, getApartmentPhotos } from '@/lib/apartmentMedia';
 import { getPrimaryTagLabel } from '@/lib/apartmentTags';
+import { hasPriceTiers, priceFrom } from '@/lib/pricing';
 import styles from './ApartmentCard.module.scss';
 
 interface ApartmentCardProps {
@@ -22,6 +23,9 @@ export default function ApartmentCard({ apt }: ApartmentCardProps) {
   const copy = getApartmentCopy(apt, locale);
   const photos = getApartmentPhotos(apt);
   const tagLine = formatApartmentTags(apt, locale, t);
+  // With long-stay rates the headline number is the cheapest one on offer.
+  const fromPrice = priceFrom(apt);
+  const showFrom = hasPriceTiers(apt);
   const placeholderCaption = getPrimaryTagLabel(apt, locale, t);
 
   return (
@@ -35,7 +39,8 @@ export default function ApartmentCard({ apt }: ApartmentCardProps) {
         <div className={styles.mediaBar}>
           {tagLine ? <span className={styles.featureTag}>{tagLine}</span> : <span />}
           <span className={styles.priceTag}>
-            ₪{apt.price} <span>{t('apartments.perNight')}</span>
+            {showFrom && <span>{t('apartments.from')} </span>}₪{fromPrice}{' '}
+            <span>{t('apartments.perNight')}</span>
           </span>
         </div>
       </PhotoGallery>
@@ -82,7 +87,8 @@ export default function ApartmentCard({ apt }: ApartmentCardProps) {
 
         <div className={styles.foot}>
           <div className={styles.price}>
-            <b>₪{apt.price}</b> <span>{t('apartments.perNight')}</span>
+            {showFrom && <span>{t('apartments.from')} </span>}
+            <b>₪{fromPrice}</b> <span>{t('apartments.perNight')}</span>
           </div>
           <Button
             variant="ghost"

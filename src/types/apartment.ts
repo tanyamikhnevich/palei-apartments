@@ -23,6 +23,28 @@ export type ApartmentTagId =
 
 export type ApartmentAvailabilityMode = 'always' | 'calendar';
 
+/**
+ * A cheaper nightly rate that unlocks at `minNights` and then applies to every
+ * night of the stay — 10 nights against a 7-night tier are all billed at the
+ * tier's rate, the way Airbnb and Booking present weekly and monthly prices.
+ */
+export interface PriceTier {
+  minNights: number;
+  price: number;
+}
+
+/** How an extra is multiplied out: once, per night, or per guest. */
+export type ServiceUnit = 'stay' | 'night' | 'guest';
+
+export interface ApartmentService {
+  id: string;
+  name: string;
+  price: number;
+  unit: ServiceUnit;
+  /** Always in the total; otherwise the guest ticks it themselves. */
+  required: boolean;
+}
+
 export interface ApartmentAvailability {
   mode: ApartmentAvailabilityMode;
   /** Blocked night ranges (check-out exclusive), used when mode is calendar */
@@ -52,6 +74,13 @@ export interface Apartment {
   rating: number;
   reviews: number;
   photos?: string[];
+  /** Nightly rate for longer stays; the base `price` covers everything below. */
+  priceTiers?: PriceTier[];
+  /** Cleaning, transfer and the like — priced per apartment. */
+  services?: ApartmentService[];
+  /** Exact position of the building, used by the listing map. */
+  lat?: number;
+  lng?: number;
   locales: Record<Locale, ApartmentLocaleCopy>;
   availability?: ApartmentAvailability;
   /** Secret segment of this apartment's public iCal export URL. */

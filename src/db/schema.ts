@@ -1,9 +1,21 @@
-import { date, integer, jsonb, pgTable, real, text, timestamp, varchar } from 'drizzle-orm/pg-core';
+import {
+  date,
+  doublePrecision,
+  integer,
+  jsonb,
+  pgTable,
+  real,
+  text,
+  timestamp,
+  varchar,
+} from 'drizzle-orm/pg-core';
 import type {
   ApartmentAvailability,
   ApartmentLocaleCopy,
+  ApartmentService,
   ApartmentStatus,
   ApartmentTagId,
+  PriceTier,
   BookingChannel,
   BookingStatus,
 } from '@/types/apartment';
@@ -28,6 +40,10 @@ export const apartments = pgTable('apartments', {
   rating: real('rating').notNull(),
   reviews: integer('reviews').notNull(),
   photos: jsonb('photos').$type<string[]>(),
+  priceTiers: jsonb('price_tiers').$type<PriceTier[]>(),
+  services: jsonb('services').$type<ApartmentService[]>(),
+  lat: doublePrecision('lat'),
+  lng: doublePrecision('lng'),
   availability: jsonb('availability').$type<ApartmentAvailability>(),
   /** Secret path segment of the public iCal export other platforms subscribe to. */
   icalToken: varchar('ical_token', { length: 64 }),

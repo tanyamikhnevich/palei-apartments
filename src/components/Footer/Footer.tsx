@@ -28,7 +28,7 @@ export default function Footer() {
       <div className="wrap">
         <div className={styles.top}>
           <div className={styles.logoWrap}>
-            <Image src="/palei-logo.png" alt={t('brand')} width={120} height={36} />
+            <Image src="/palei-logo.png" alt={t('brand')} width={135} height={40} />
             <p>{t('footer.tagline')}</p>
             <div className={styles.social}>
               <a href="#" aria-label={t('footer.instagram')}>

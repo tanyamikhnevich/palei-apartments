@@ -9,7 +9,7 @@ import {
   LANGUAGE_OPTIONS,
   type BusinessSettings,
 } from '@/types/settings';
-import { fetchSettings, saveSettings, seedDatabase } from '@/lib/api/client';
+import { fetchSettings, saveSettings } from '@/lib/api/client';
 import {
   BUSINESS_NAME_MAX,
   PHONE_INPUT_MAX_LENGTH,
@@ -64,7 +64,6 @@ export default function AdminSettings() {
   const [settings, setSettings] = useState<BusinessSettings>(DEFAULT_BUSINESS_SETTINGS);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [seeding, setSeeding] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
   const [dbConnected, setDbConnected] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Partial<Record<FieldKey, string>>>({});
@@ -130,21 +129,6 @@ export default function AdminSettings() {
     }
   };
 
-  const handleSeed = async () => {
-    if (!confirm('Replace all apartments in Neon with mock data from the project?')) return;
-    setSeeding(true);
-    setStatus(null);
-    try {
-      const result = await seedDatabase();
-      setDbConnected(true);
-      setStatus(result.message);
-    } catch (e) {
-      setStatus(e instanceof Error ? e.message : 'Seed failed');
-    } finally {
-      setSeeding(false);
-    }
-  };
-
   if (loading) {
     return <p className={styles.status}>Loading settings…</p>;
   }
@@ -154,7 +138,7 @@ export default function AdminSettings() {
       {!dbConnected && (
         <p className={styles.warn}>
           Database not connected — showing defaults. Add <code>DATABASE_URL</code> to{' '}
-          <code>.env.local</code>, run <code>npm run db:push</code>, then seed mock data below.
+          <code>.env.local</code> and run <code>npm run db:push</code>.
         </p>
       )}
 
@@ -226,17 +210,6 @@ export default function AdminSettings() {
             onChange={(e) => update('currency', e.target.value as BusinessSettings['currency'])}
           />
         </div>
-      </div>
-
-      <div className={styles.panel}>
-        <h3>Database (Neon)</h3>
-        <p className={styles.desc}>
-          Push schema with <code>npm run db:push</code>, then load mock apartments and default
-          settings into your cloud database.
-        </p>
-        <Button variant="ghost" onClick={handleSeed} disabled={seeding}>
-          {seeding ? 'Seeding…' : 'Load mock apartments into Neon'}
-        </Button>
       </div>
 
       <div className={styles.foot}>

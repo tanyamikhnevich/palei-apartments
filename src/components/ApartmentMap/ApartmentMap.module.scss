@@ -1,4 +1,8 @@
+/* Same containment as the mini map: Leaflet's panes must not outrank the UI. */
 .wrap {
+  position: relative;
+  z-index: 0;
+  isolation: isolate;
   margin-top: 24px;
   border: 1px solid var(--line);
   border-radius: var(--r-lg);

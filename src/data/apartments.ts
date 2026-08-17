@@ -35,6 +35,13 @@ export const apartments: Apartment[] = [
         description: 'סטודיו מואר במרחק בלוק מהטיילת, עם מרפסת לים של הבוקר.',
         photoLabel: 'סטודיו · מרפסת · ים',
       },
+      fr: {
+        title: 'Sea Breeze Studio',
+        location: 'Bd Ben Gourion, Bat Yam',
+        description:
+          'Studio lumineux à un pâté de maisons de la promenade, avec un balcon privé face à la mer du matin.',
+        photoLabel: 'studio · balcon · mer',
+      },
     },
   },
   {
@@ -71,6 +78,13 @@ export const apartments: Apartment[] = [
         description: 'דירת משפחה מוארת ליד המרינה, החוף, בתי קפה ושוק סוף השבוע.',
         photoLabel: 'סלון · 2 חדרי שינה',
       },
+      fr: {
+        title: 'Marina Two-Bedroom',
+        location: 'Quartier de la Marina, Bat Yam',
+        description:
+          'Appartement familial lumineux à deux pas de la marina, de la plage de sable, des cafés et du marché du week-end.',
+        photoLabel: 'salon · 2 chambres',
+      },
     },
   },
   {
@@ -105,6 +119,13 @@ export const apartments: Apartment[] = [
         location: 'טיילת תיילת, בת ים',
         description: 'נטהאוז בקומה עליונה עם טרסה ונוף פנורמי לים התיכון בשקיעה.',
         photoLabel: 'נטהאוז · טרסה · שקיעה',
+      },
+      fr: {
+        title: 'Promenade Penthouse',
+        location: 'Promenade Tayelet, Bat Yam',
+        description:
+          'Penthouse au dernier étage avec terrasse panoramique et vue sur la Méditerranée au coucher du soleil.',
+        photoLabel: 'penthouse · terrasse · coucher de soleil',
       },
     },
   },
@@ -141,6 +162,13 @@ export const apartments: Apartment[] = [
         location: 'רחוב בלפור, בת ים',
         description: 'סוויטה מרווחת למשפחות גדולות — מטבח מצויד, כביסה ושתי מרפסות.',
         photoLabel: 'סוויטה משפחתית · מטבח',
+      },
+      fr: {
+        title: 'Bat Yam Family Suite',
+        location: 'Rue Balfour, Bat Yam',
+        description:
+          'Suite spacieuse pour les grandes familles, avec cuisine entièrement équipée, buanderie et deux balcons.',
+        photoLabel: 'suite familiale · cuisine',
       },
     },
   },

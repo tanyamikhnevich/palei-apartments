@@ -18,6 +18,7 @@ const LANG_LINKS: { locale: Locale; key: string }[] = [
   { locale: 'en', key: 'footer.langEn' },
   { locale: 'ru', key: 'footer.langRu' },
   { locale: 'he', key: 'footer.langHe' },
+  { locale: 'fr', key: 'footer.langFr' },
 ];
 
 export default function Footer() {

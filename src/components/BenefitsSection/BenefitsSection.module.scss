@@ -15,6 +15,16 @@
   border-radius: var(--r-lg);
   background: var(--surface);
   border: 1px solid var(--line);
+  transition: transform 0.3s var(--ease), box-shadow 0.3s var(--ease);
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
+  }
+
+  &:hover .icon {
+    background: var(--accent-grad);
+  }
 }
 
 .icon {
@@ -26,6 +36,7 @@
   display: grid;
   place-items: center;
   margin-bottom: 18px;
+  transition: background 0.3s var(--ease);
 }
 
 .title {

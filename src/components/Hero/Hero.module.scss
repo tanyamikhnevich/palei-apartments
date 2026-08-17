@@ -5,20 +5,60 @@
 
 .media {
   position: relative;
-  min-height: 620px;
+  min-height: 660px;
   display: flex;
   align-items: flex-end;
-  background-image:
-    linear-gradient(180deg, rgba(22, 41, 59, 0.05) 0%, rgba(22, 41, 59, 0.18) 45%, rgba(22, 41, 59, 0.72) 100%),
-    url('/hero.png');
+}
+
+/*
+  Holds the photo layers and takes the clipping, so the zoom stays inside the
+  hero while overlays above it (the date picker) can still overflow freely.
+*/
+.slides {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  z-index: 0;
+}
+
+/*
+  Each slide is its own layer so they cross-fade instead of snapping, with a
+  slow zoom on the active one — enough motion to feel alive, not enough to
+  fight the text sitting on top.
+*/
+.slide {
+  position: absolute;
+  inset: 0;
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
+  opacity: 0;
+  transform: scale(1.05);
+  transition: opacity 0.9s var(--ease), transform 5s linear;
+}
+
+.slideOn {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.scrim {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(14, 26, 38, 0.42) 0%, rgba(14, 26, 38, 0.22) 38%, rgba(14, 26, 38, 0.78) 100%),
+    linear-gradient(90deg, rgba(14, 26, 38, 0.45) 0%, rgba(14, 26, 38, 0) 62%);
+}
+
+/* Above the photo layer, and the source of the date picker's stacking context. */
+.content {
+  position: relative;
+  z-index: 1;
 }
 
 .inner {
   position: relative;
-  padding-bottom: 56px;
+  padding: 132px 0 72px;
   max-width: 720px;
 }
 
@@ -26,26 +66,30 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: rgba(255, 255, 255, 0.92);
-  color: var(--navy);
+  background: rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.34);
+  backdrop-filter: blur(8px);
+  color: #fff;
   font-size: 13.5px;
   font-weight: 600;
-  padding: 7px 14px;
+  padding: 7px 15px;
   border-radius: 999px;
   margin-bottom: 22px;
 }
 
 .h1 {
   color: #fff;
-  font-size: clamp(36px, 5.4vw, 62px);
-  letter-spacing: -0.03em;
+  font-size: clamp(38px, 5.6vw, 66px);
+  letter-spacing: -0.035em;
+  text-shadow: 0 2px 30px rgba(10, 20, 30, 0.35);
 }
 
 .sub {
-  color: rgba(255, 255, 255, 0.92);
+  color: rgba(255, 255, 255, 0.94);
   font-size: clamp(17px, 2vw, 21px);
   margin-top: 20px;
-  max-width: 33ch;
+  max-width: 36ch;
+  text-shadow: 0 1px 16px rgba(10, 20, 30, 0.35);
 }
 
 .cta {
@@ -55,12 +99,41 @@
   margin-top: 32px;
 }
 
+/* Slide dots */
+.dots {
+  position: absolute;
+  bottom: 26px;
+  inset-inline-end: 32px;
+  display: flex;
+  gap: 9px;
+  z-index: 2;
+}
+
+.dot {
+  width: 9px;
+  height: 9px;
+  padding: 0;
+  border: none;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.45);
+  transition: width 0.3s var(--ease), background 0.3s var(--ease);
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.75);
+  }
+}
+
+.dotOn {
+  width: 26px;
+  background: #fff;
+}
+
 /* Trust strip */
 .trust {
   display: flex;
   flex-wrap: wrap;
   gap: 28px 40px;
-  padding: 26px 0;
+  padding: 28px 0;
 }
 
 .trustItem {
@@ -85,11 +158,11 @@
 
 @media (max-width: 760px) {
   .media {
-    min-height: 520px;
+    min-height: 560px;
   }
 
   .inner {
-    padding-bottom: 40px;
+    padding: 96px 0 56px;
   }
 
   .cta {
@@ -102,6 +175,11 @@
     }
   }
 
+  .dots {
+    inset-inline-end: 20px;
+    bottom: 18px;
+  }
+
   .trust {
     gap: 16px 24px;
     padding: 20px 0;
@@ -110,7 +188,11 @@
 
 @media (max-width: 480px) {
   .media {
-    min-height: 460px;
+    min-height: 520px;
+  }
+
+  .inner {
+    padding: 80px 0 48px;
   }
 
   .pill {
@@ -121,10 +203,22 @@
 
   .sub {
     max-width: none;
+    font-size: 16px;
   }
 
   .trustItem {
     font-size: 14px;
     flex: 1 1 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .slide {
+    transition: opacity 0.3s linear;
+    transform: none;
+  }
+
+  .slideOn {
+    transform: none;
   }
 }

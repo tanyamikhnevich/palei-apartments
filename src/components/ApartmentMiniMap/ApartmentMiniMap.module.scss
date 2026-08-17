@@ -1,0 +1,105 @@
+/*
+  Leaflet gives its own panes z-index 400–800. Without a stacking context of
+  its own the map would climb over the sticky header and the floating booking
+  button; `isolation` keeps those numbers inside this box.
+*/
+.wrap {
+  position: relative;
+  z-index: 0;
+  isolation: isolate;
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  background: var(--sand);
+  box-shadow: var(--shadow-sm);
+}
+
+.map {
+  height: 240px;
+  width: 100%;
+
+  :global(.leaflet-container) {
+    font-family: var(--font);
+    background: var(--sand);
+    /* Non-interactive by design — no grab cursor to promise otherwise. */
+    cursor: default;
+  }
+
+  /* OpenStreetMap's tiles require credit; keep it legible but quiet. */
+  :global(.leaflet-control-attribution) {
+    font-size: 10px;
+    background: rgba(255, 255, 255, 0.8);
+
+    a {
+      color: var(--ink-soft);
+    }
+  }
+}
+
+.pin {
+  display: block;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 3px solid #fff;
+  box-shadow: 0 3px 10px rgba(30, 40, 55, 0.35);
+}
+
+.bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+  padding: 13px 16px;
+  background: var(--surface);
+  border-top: 1px solid var(--line);
+}
+
+.address {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--ink);
+  min-width: 0;
+
+  svg {
+    color: var(--accent);
+    flex: none;
+  }
+}
+
+.link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--accent-press);
+  white-space: nowrap;
+
+  &:hover {
+    color: var(--accent);
+  }
+
+  :global([dir='rtl']) & svg {
+    transform: rotate(180deg);
+  }
+}
+
+@media (max-width: 760px) {
+  .map {
+    height: 200px;
+  }
+
+  .bar {
+    padding: 12px 14px;
+  }
+
+  .address {
+    font-size: 14px;
+  }
+}

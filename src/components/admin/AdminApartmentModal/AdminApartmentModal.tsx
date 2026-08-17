@@ -251,7 +251,7 @@ export default function AdminApartmentModal({ initial, onClose, onSave }: AdminA
       priceTiers: [],
       services: [],
       availability: DEFAULT_AVAILABILITY,
-      locales: { en, ru: { ...en }, he: { ...en } },
+      locales: { en, ru: { ...en }, he: { ...en }, fr: { ...en } },
     };
   });
 
@@ -300,6 +300,8 @@ export default function AdminApartmentModal({ initial, onClose, onSave }: AdminA
         en: enCopy,
         ru: editing ? { ...form.locales.ru, photoLabel } : { ...enCopy },
         he: editing ? { ...form.locales.he, photoLabel } : { ...enCopy },
+        // Listings saved before French existed have no `fr` copy — fall back to English.
+        fr: editing ? { ...(form.locales.fr ?? enCopy), photoLabel } : { ...enCopy },
       },
     });
   };

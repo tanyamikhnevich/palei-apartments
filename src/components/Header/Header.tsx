@@ -92,9 +92,8 @@ export default function Header() {
         </nav>
 
         <div className={styles.right}>
-          <div className={styles.langDesktop}>
-            <LangSwitch />
-          </div>
+          {/* Kept in the bar on mobile too — buried in the drawer nobody finds it. */}
+          <LangSwitch />
           <Button
             variant="navy"
             size="sm"
@@ -122,7 +121,6 @@ export default function Header() {
             </Link>
           ))}
           <div className={styles.drawerBottom}>
-            <LangSwitch />
             <Button
               variant="primary"
               size="sm"

@@ -1,0 +1,174 @@
+.section {
+  padding: 96px 0 84px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.headerSide {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.arrows {
+  display: flex;
+  gap: 8px;
+}
+
+.arrow {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  border: 1px solid var(--line-2);
+  background: var(--surface);
+  color: var(--navy);
+  transition: background 0.18s var(--ease), border-color 0.18s var(--ease),
+    color 0.18s var(--ease), transform 0.18s var(--ease), opacity 0.18s;
+
+  &:hover:not(:disabled) {
+    background: var(--navy);
+    border-color: var(--navy);
+    color: #fff;
+    transform: translateY(-1px);
+  }
+
+  &:disabled {
+    opacity: 0.35;
+    cursor: default;
+  }
+}
+
+.arrowBack {
+  transform: rotate(180deg);
+}
+
+/* Track */
+.viewport {
+  margin-top: 40px;
+}
+
+.track {
+  display: flex;
+  gap: 28px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: max(28px, calc((100vw - var(--maxw)) / 2 + 28px));
+  padding-inline: max(28px, calc((100vw - var(--maxw)) / 2 + 28px));
+  padding-block: 6px 10px;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/*
+  Slightly narrower than a third of the row, so the next card always peeks in
+  from the edge — the clearest possible "this scrolls".
+*/
+.slide {
+  flex: 0 0 calc((min(100vw, var(--maxw)) - 112px) / 3 - 24px);
+  scroll-snap-align: start;
+  display: flex;
+
+  > * {
+    width: 100%;
+  }
+}
+
+.empty {
+  padding: 60px 20px;
+  color: var(--ink-soft);
+}
+
+/* Dots */
+.dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 26px;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  padding: 0;
+  border: none;
+  border-radius: 999px;
+  background: var(--line-2);
+  transition: width 0.3s var(--ease), background 0.3s var(--ease);
+
+  &:hover {
+    background: var(--ink-faint);
+  }
+}
+
+.dotOn {
+  width: 24px;
+  background: var(--accent);
+}
+
+@media (max-width: 1000px) {
+  .slide {
+    flex-basis: calc((100vw - 68px) / 2 - 18px);
+  }
+
+  .track {
+    padding-inline: 20px;
+    scroll-padding-inline: 20px;
+  }
+}
+
+@media (max-width: 760px) {
+  .section {
+    padding: 64px 0 56px;
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .headerSide {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .viewport {
+    margin-top: 28px;
+  }
+
+  .track {
+    gap: 16px;
+  }
+
+  .slide {
+    flex-basis: min(86vw, 420px);
+  }
+}
+
+@media (max-width: 480px) {
+  .section {
+    padding: 48px 0 44px;
+  }
+
+  .track {
+    padding-inline: 16px;
+    scroll-padding-inline: 16px;
+  }
+
+  .arrow {
+    width: 40px;
+    height: 40px;
+  }
+}

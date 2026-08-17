@@ -38,28 +38,33 @@ const SADEH = {
   en: 'Yitshak Sadeh St 3, Bat Yam',
   ru: 'ул. Ицхак Саде 3, Бат-Ям',
   he: 'יצחק שדה 3, בת ים',
+  fr: 'Rue Yitshak Sadeh 3, Bat Yam',
 };
 const KUKIS = {
   en: 'HaRav Kukis St 16, Bat Yam',
   ru: 'ул. ха-Рав Кукис 16, Бат-Ям',
   he: 'הרב קוקיס 16, בת ים',
+  fr: 'Rue HaRav Kukis 16, Bat Yam',
 };
 const BEN_GURION = {
   en: 'Derech Ben Gurion 81, Bat Yam',
   ru: 'Дерех Бен-Гурион 81, Бат-Ям',
   he: 'דרך בן גוריון 81, בת ים',
+  fr: 'Derech Ben Gourion 81, Bat Yam',
 };
 const ATSMAUT = {
   en: "Ha'Atsmaut Blvd 23, Bat Yam",
   ru: 'бул. ха-Ацмаут 23, Бат-Ям',
   he: 'שדרות העצמאות 23, בת ים',
+  fr: "Bd Ha'Atsmaut 23, Bat Yam",
 };
 const AGNON = {
   en: 'Shmuel Yosef Agnon St 3, Bat Yam',
   ru: 'ул. Шмуэль Йосеф Агнон 3, Бат-Ям',
   he: 'ש"י עגנון 3, בת ים',
+  fr: 'Rue Shmuel Yosef Agnon 3, Bat Yam',
 };
-const BAT_YAM = { en: 'Bat Yam', ru: 'Бат-Ям', he: 'בת ים' };
+const BAT_YAM = { en: 'Bat Yam', ru: 'Бат-Ям', he: 'בת ים', fr: 'Bat Yam' };
 
 export const APARTMENT_SOURCES: ApartmentSource[] = [
   {
@@ -93,6 +98,13 @@ export const APARTMENT_SOURCES: ApartmentSource[] = [
         description:
           'דירת שלושה חדרים שקטה למשפחה או לשני זוגות: חדר שינה עם מיטה זוגית, חדר שני עם מיטות יחיד וסלון עם ספה נפתחת.\n\nהמטבח מאובזר במלואו, חדר המקלחת חדש, ובכל הדירה מיזוג אוויר, Wi-Fi חופשי ו-Netflix. תל אביב במרחק 8 ק"מ לאורך החוף.',
         photoLabel: '2 חדרי שינה · סלון · משפחות',
+      },
+      fr: {
+        title: 'Sadeh Three-Room Deluxe',
+        location: SADEH.fr,
+        description:
+          'Un appartement de trois pièces au calme pour une famille ou deux couples : une chambre avec lit double, une seconde chambre avec lits simples et un salon avec canapé convertible.\n\nLa cuisine est entièrement équipée, jusqu’à la bouilloire et au café, la salle d’eau est neuve, et l’appartement dispose de la climatisation, du Wi-Fi gratuit et de Netflix. Tel Aviv est à 8 km le long de la côte.',
+        photoLabel: '2 chambres · salon · familial',
       },
     },
   },
@@ -128,6 +140,13 @@ export const APARTMENT_SOURCES: ApartmentSource[] = [
           'דירת שני חדרים משופצת בגוונים לבנים וצהובים, עם ספה פינתית רחבה בסלון ופינת אוכל ליד החלון.\n\nבמטבח מקרר, כיריים, מיקרוגל, תנור ומכונת כביסה; חדר הרחצה חדש עם מקלחון. מיזוג אוויר, Wi-Fi חופשי וסמארט טי-וי.',
         photoLabel: 'משופצת · מוארת · מאובזרת',
       },
+      fr: {
+        title: 'Kukis Sunny Suite',
+        location: KUKIS.fr,
+        description:
+          'Un deux-pièces fraîchement rénové, en blanc lumineux et jaune, avec un large canapé d’angle au salon et un coin repas près de la fenêtre.\n\nLa cuisine dispose d’un réfrigérateur, de plaques, d’un micro-ondes, d’un four et d’un lave-linge ; la salle de bain est neuve avec douche à l’italienne. Climatisation, Wi-Fi gratuit et Smart TV inclus.',
+        photoLabel: 'rénové · lumineux · entièrement équipé',
+      },
     },
   },
   {
@@ -161,6 +180,13 @@ export const APARTMENT_SOURCES: ApartmentSource[] = [
         description:
           'דירת שני חדרים חמימה בגוונים שמנת וזהב, עם מרפסת פרטית. בחדר השינה מיטה זוגית, בסלון ספה נפתחת — מקום נוח לשלושה.\n\nמטבחון עם כיריים אינדוקציה ומיקרוגל, חדר מקלחת חדש, מצעים ומגבות, מיזוג אוויר ו-Wi-Fi חופשי.',
         photoLabel: 'מרפסת · חדר שינה · גוונים חמים',
+      },
+      fr: {
+        title: 'Sadeh Golden Balcony Suite',
+        location: SADEH.fr,
+        description:
+          'Un deux-pièces chaleureux dans des tons crème et or, avec son propre balcon. La chambre dispose d’un lit double et le salon d’un canapé-lit : l’appartement accueille confortablement trois personnes.\n\nKitchenette avec plaques à induction, micro-ondes et tout le nécessaire pour le petit-déjeuner ; salle d’eau neuve, linge et serviettes frais, climatisation et Wi-Fi gratuit.',
+        photoLabel: 'balcon · chambre double · tons chauds',
       },
     },
   },
@@ -196,6 +222,13 @@ export const APARTMENT_SOURCES: ApartmentSource[] = [
           'דירת שני חדרים קומפקטית על שדרות הים — הטיילת והחוף ממול. רצפת פרקט, ספה פינתית נפתחת בסלון וחדר שינה נפרד.\n\nמטבחון עם מקרר, כיריים, מיקרוגל וקומקום, חדר מקלחת, מיזוג אוויר, Wi-Fi חופשי וטלוויזיה. תל אביב במרחק 8 ק"מ.',
         photoLabel: 'שדרות הים · 2 חדרים',
       },
+      fr: {
+        title: 'Boulevard Suite 109',
+        location: BEN_GURION.fr,
+        description:
+          'Un deux-pièces compact sur le boulevard du front de mer — la promenade et la plage sont juste en face. Parquet, canapé-lit d’angle gris au salon et chambre séparée.\n\nKitchenette avec réfrigérateur, plaques, micro-ondes et bouilloire, salle d’eau avec produits d’accueil, climatisation, Wi-Fi gratuit et téléviseur à écran plat. Tel Aviv est à 8 km.',
+        photoLabel: 'boulevard du front de mer · 2 pièces',
+      },
     },
   },
   {
@@ -227,6 +260,13 @@ export const APARTMENT_SOURCES: ApartmentSource[] = [
         description:
           'דירת שני חדרים על שדרות הים, דקה מהטיילת. חדר שינה נפרד עם מיטה זוגית וסלון עם ספה נפתחת.\n\nמטבח מאובזר, מכונת כביסה, חדר מקלחת, מיזוג אוויר, Wi-Fi חופשי ו-Netflix. תל אביב במרחק 8 ק"מ.',
         photoLabel: 'שדרות הים · 2 חדרים',
+      },
+      fr: {
+        title: 'Boulevard Suite 330',
+        location: BEN_GURION.fr,
+        description:
+          'Un deux-pièces sur le boulevard du front de mer, à une minute de la promenade. Une chambre séparée avec lit double et un salon avec canapé convertible.\n\nCuisine entièrement équipée, lave-linge, salle d’eau, climatisation, Wi-Fi gratuit et Netflix. Tel Aviv est à 8 km le long de la côte.',
+        photoLabel: 'boulevard du front de mer · 2 pièces',
       },
     },
   },
@@ -262,6 +302,13 @@ export const APARTMENT_SOURCES: ApartmentSource[] = [
           'דירת שני חדרים עם אופי: ספות קטיפה בכחול עמוק, תקרה עם תאורה נסתרת וחדר שינה נפרד מאחורי דלת הזזה.\n\nבמטבח מקרר גבוה, כיריים, מיקרוגל ומכונת כביסה. מיזוג אוויר, Wi-Fi חופשי, סמארט טי-וי — והטיילת ממול.',
         photoLabel: 'עיצוב מיוחד · 2 חדרים',
       },
+      fr: {
+        title: 'Boulevard Nightfall 216',
+        location: BEN_GURION.fr,
+        description:
+          'Un deux-pièces qui a du caractère : canapés en velours bleu nuit, plafond à caissons avec éclairage indirect et chambre séparée derrière une porte coulissante.\n\nLa cuisine dispose d’un grand réfrigérateur, de plaques, d’un micro-ondes et d’un lave-linge. Climatisation, Wi-Fi gratuit, Smart TV — et la promenade du bord de mer de l’autre côté du boulevard.',
+        photoLabel: 'intérieur design · 2 pièces',
+      },
     },
   },
   {
@@ -295,6 +342,13 @@ export const APARTMENT_SOURCES: ApartmentSource[] = [
         description:
           'דירת שני חדרים מוארת ונקייה מעומס: קירות לבנים, שולחן אוכל עגול, ספה נפתחת בסלון וחדר שינה עם ארון גדול.\n\nמטבחון עם מקרר, כיריים ומיקרוגל, חדר מקלחת בגוון גרפיט, מיזוג אוויר ו-Wi-Fi חופשי. החוף במרחק שתי דקות הליכה.',
         photoLabel: 'מוארת · נקייה · 2 חדרים',
+      },
+      fr: {
+        title: 'Boulevard Bright 219',
+        location: BEN_GURION.fr,
+        description:
+          'Un deux-pièces clair et épuré : murs blancs, table à manger ronde, canapé convertible au salon et chambre avec lit double et grande armoire.\n\nKitchenette avec réfrigérateur, plaques et micro-ondes, salle d’eau carrelée gris graphite, climatisation et Wi-Fi gratuit. La plage est à deux minutes à pied.',
+        photoLabel: 'lumineux · épuré · 2 pièces',
       },
     },
   },
@@ -330,6 +384,13 @@ export const APARTMENT_SOURCES: ApartmentSource[] = [
           'דירת שני חדרים בשחור-לבן, מעוצבת עד לעריכת השולחן: רצפת שיש, ספה פינתית אפורה וחדר שינה עם ראש מיטה כהה.\n\nמטבח לבן עם מקרר, כיריים, מיקרוגל ומכונת כביסה; חדר מקלחת. מיזוג אוויר, Wi-Fi חופשי, סמארט טי-וי, הטיילת ממול.',
         photoLabel: 'שחור-לבן · מעוצבת · 2 חדרים',
       },
+      fr: {
+        title: 'Boulevard Monochrome 765',
+        location: BEN_GURION.fr,
+        description:
+          'Un deux-pièces en noir et blanc, soigné jusqu’à la table dressée : sols en marbre, canapé d’angle gris, table à manger dressée et chambre avec tête de lit sombre.\n\nCuisine blanche avec réfrigérateur, plaques, micro-ondes et lave-linge ; salle d’eau avec produits d’accueil. Climatisation, Wi-Fi gratuit, Smart TV, promenade de l’autre côté de la rue.',
+        photoLabel: 'noir et blanc · design · 2 pièces',
+      },
     },
   },
   {
@@ -361,6 +422,13 @@ export const APARTMENT_SOURCES: ApartmentSource[] = [
         description:
           'הים ממש בחלון: דירת שני חדרים עם מבט ישיר למים, והשקיעות הן סיבה בפני עצמה לחזור.\n\nחדר שינה זוגי, סלון עם ספה נפתחת ופינת אוכל, מטבחון עם מקרר, כיריים, מיקרוגל ומכונת כביסה. מיזוג אוויר, Wi-Fi חופשי, טלוויזיה. החוף ממול.',
         photoLabel: 'נוף לים · שקיעות · 2 חדרים',
+      },
+      fr: {
+        title: 'Sunset Sea View 101',
+        location: BEN_GURION.fr,
+        description:
+          'La mer est là, dans la fenêtre : ce deux-pièces donne directement sur l’eau, et les couchers de soleil sont la raison pour laquelle nos hôtes reviennent.\n\nUne chambre avec lit double, un salon avec canapé convertible et coin repas, une kitchenette avec réfrigérateur, plaques, micro-ondes et lave-linge. Climatisation, Wi-Fi gratuit, téléviseur. La plage est de l’autre côté du boulevard.',
+        photoLabel: 'vue mer · couchers de soleil · 2 pièces',
       },
     },
   },
@@ -394,6 +462,13 @@ export const APARTMENT_SOURCES: ApartmentSource[] = [
         description:
           'דירה בקומה גבוהה עם נוף פנורמי לטיילת, לשדרה ולים הפתוח — חלונות גדולים משני כיוונים.\n\nסלון מואר עם ספה וכורסה, חדר שינה זוגי, מטבח מלא, מיזוג אוויר, Wi-Fi חופשי וסמארט טי-וי גדול. החוף במרחק שלוש דקות.',
         photoLabel: 'נוף פנורמי לים · קומה גבוהה',
+      },
+      fr: {
+        title: 'Panorama Sea View 542',
+        location: BEN_GURION.fr,
+        description:
+          'Un appartement en étage élevé avec vue panoramique sur la promenade, le boulevard bordé de palmiers et la mer ouverte — baies vitrées sur deux côtés.\n\nSalon lumineux avec canapé et fauteuil de lecture, une chambre avec lit double, une cuisine complète, la climatisation, le Wi-Fi gratuit et un grand Smart TV. La plage est à trois minutes à pied.',
+        photoLabel: 'vue mer panoramique · étage élevé',
       },
     },
   },
@@ -429,6 +504,13 @@ export const APARTMENT_SOURCES: ApartmentSource[] = [
           'שניים וחצי חדרים על השדרה המרכזית: חדר שינה זוגי, סלון עם ספה כחולה ושולחן אוכל, וחדרון נוסף עם מיטת יום.\n\nמטבח עם מקרר, כיריים ומיקרוגל, חדר מקלחת חדש, מיזוג אוויר ו-Wi-Fi חופשי. חנויות, בתי קפה והאוטובוס לתל אביב ליד הבית.',
         photoLabel: '2.5 חדרים · חדר נוסף · מרכזי',
       },
+      fr: {
+        title: 'Independence Blue Suite',
+        location: ATSMAUT.fr,
+        description:
+          'Deux pièces et demie sur le boulevard principal de la ville : une chambre avec lit double, un salon avec canapé bleu profond et table à manger, et une petite pièce supplémentaire avec lit de repos.\n\nCuisine avec réfrigérateur, plaques, micro-ondes et tout le nécessaire pour cuisiner, salle d’eau neuve, climatisation et Wi-Fi gratuit. Commerces, cafés et le bus pour Tel Aviv sont au pied de l’immeuble.',
+        photoLabel: '2,5 pièces · pièce en plus · central',
+      },
     },
   },
   {
@@ -462,6 +544,13 @@ export const APARTMENT_SOURCES: ApartmentSource[] = [
         description:
           'סטודיו לזוג עם קיר בגוון מג׳נטה, מיטה זוגית, ארון ושולחן קטן ערוך לארוחה.\n\nמטבחון עם כיריים, מקרר ומיקרוגל, חדר מקלחת פרטי, מגבות, מיזוג אוויר ו-Wi-Fi חופשי — על השדרה, עשר דקות מהים.',
         photoLabel: 'סטודיו לזוג · מרכזי',
+      },
+      fr: {
+        title: 'Independence Magenta Studio',
+        location: ATSMAUT.fr,
+        description:
+          'Un studio pour deux avec un mur magenta, un lit double, une armoire et une petite table bistro dressée pour le dîner.\n\nKitchenette avec plaques, réfrigérateur et micro-ondes, salle d’eau privée, serviettes fraîches, climatisation et Wi-Fi gratuit — sur le boulevard même, à dix minutes de la mer.',
+        photoLabel: 'studio pour deux · central',
       },
     },
   },
@@ -497,6 +586,13 @@ export const APARTMENT_SOURCES: ApartmentSource[] = [
           'סטודיו מרווח בשחור-לבן: מיטה זוגית עם ראש מיטה מרופד, כורסה, שולחן לעבודה ולארוחות ומראה גדולה.\n\nמטבח עם משטח גרניט, מקרר, כיריים, מיקרוגל וקומקום, חדר מקלחת מואר, מיזוג אוויר ו-Wi-Fi חופשי. רחוב שקט, חמש דקות מהשדרה.',
         photoLabel: 'סטודיו גדול · שחור-לבן',
       },
+      fr: {
+        title: 'Agnon Grand Studio',
+        location: AGNON.fr,
+        description:
+          'Un studio spacieux en noir et blanc : lit double avec tête de lit capitonnée, fauteuil, table pour travailler et dîner, et miroir pleine hauteur.\n\nCuisine avec plan de travail en granit, réfrigérateur, plaques, micro-ondes et bouilloire, salle d’eau claire avec produits d’accueil, climatisation et Wi-Fi gratuit. Rue calme, à cinq minutes du boulevard.',
+        photoLabel: 'grand studio · noir et blanc',
+      },
     },
   },
   {
@@ -529,6 +625,13 @@ export const APARTMENT_SOURCES: ApartmentSource[] = [
         description:
           'דירת חמישה חדרים מעוצבת למשפחה גדולה או לשתי משפחות — ארבעה חדרי שינה, שני חדרי רחצה (באחד אמבטיה) ומרפסת רחבה עם גריל גז ונוף לעיר.\n\nלב הדירה הוא המטבח: מטבח כחול עמוק עם אי וכיריים אינדוקציה. מיזוג בכל החדרים, Wi-Fi חופשי, סמארט טי-וי ומכונת כביסה. הליכה קצרה לים.',
         photoLabel: '5 חדרים · מרפסת עם גריל · עיצוב',
+      },
+      fr: {
+        title: 'Seaside Designer Five',
+        location: BAT_YAM.fr,
+        description:
+          'Un appartement de cinq pièces au design soigné, pour une grande famille ou deux familles voyageant ensemble — quatre chambres, deux salles de bain (dont une avec baignoire) et un large balcon avec barbecue à gaz et vue sur la ville.\n\nLa cuisine en est le cœur : bleu profond, avec îlot et plaques à induction. Climatisation dans toutes les pièces, Wi-Fi gratuit, Smart TV, lave-linge. La mer est à quelques minutes à pied.',
+        photoLabel: '5 pièces · balcon avec barbecue · design',
       },
     },
   },
@@ -563,6 +666,13 @@ export const APARTMENT_SOURCES: ApartmentSource[] = [
         description:
           'מיני-פנטהאוז בן שישה חדרים בראש מגדל Sky26, עם בריכה פרטית ומרפסת גג מרוהטת עם מיטות שיזוף ופינת ישיבה.\n\nבפנים: חלל סלון ואוכל פתוח לאורך הדירה, חמישה חדרי שינה (בחדר ההורים חדר רחצה צמוד), שני חדרי רחצה, מטבח מעוצב, חדר כביסה, מיזוג ו-Wi-Fi חופשי. הכתובת הטובה ביותר שלנו.',
         photoLabel: 'בריכה פרטית · מרפסת גג · פנטהאוז',
+      },
+      fr: {
+        title: 'Sky26 Pool Penthouse',
+        location: BAT_YAM.fr,
+        description:
+          'Un mini-penthouse de six pièces au sommet de la tour Sky26, avec piscine privée et terrasse sur le toit aménagée : transats et coin salon.\n\nÀ l’intérieur : un espace salon-salle à manger ouvert sur toute la longueur de l’appartement, cinq chambres (la principale avec sa propre salle de bain), deux salles de bain, une cuisine design, une buanderie, la climatisation et le Wi-Fi gratuit. La plus belle adresse que nous louons.',
+        photoLabel: 'piscine privée · terrasse sur le toit · penthouse',
       },
     },
   },

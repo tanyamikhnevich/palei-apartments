@@ -80,6 +80,19 @@
   gap: 16px;
 }
 
+.errorBox {
+  padding: 12px 14px;
+  border-radius: var(--r-md);
+  background: rgba(180, 35, 24, 0.06);
+  border: 1px solid rgba(180, 35, 24, 0.2);
+}
+
+.error {
+  color: #b42318;
+  font-size: 13.5px;
+  margin: 0;
+}
+
 .formNote {
   font-size: 13px;
   color: var(--ink-soft);

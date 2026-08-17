@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import type { Apartment } from '@/types/apartment';
 import FormattedDescription from '@/components/FormattedDescription/FormattedDescription';
@@ -20,9 +21,11 @@ import {
   submitBookingRequest,
 } from '@/lib/api/client';
 import {
+  EMAIL_INPUT_MAX_LENGTH,
   PERSON_NAME_MAX,
   PHONE_INPUT_MAX_LENGTH,
-  sanitizePhoneInput,
+  looksLikeEmailInput,
+  sanitizeContactInput,
   validatePersonName,
   validatePhoneOrEmail,
 } from '@/lib/validation/contact';
@@ -37,6 +40,12 @@ import {
   SERVICE_UNIT_KEYS,
 } from '@/lib/pricing';
 import styles from './ApartmentDetail.module.scss';
+
+/** Leaflet touches `window` on import, so the mini map is client-only. */
+const ApartmentMiniMap = dynamic(
+  () => import('@/components/ApartmentMiniMap/ApartmentMiniMap'),
+  { ssr: false }
+);
 
 interface ApartmentDetailProps {
   apt: Apartment;
@@ -299,11 +308,10 @@ export default function ApartmentDetail({ apt }: ApartmentDetailProps) {
           <div className={styles.desc}>
             <FormattedDescription text={copy.description} />
           </div>
-
-          <ReviewsSection apartmentId={apt.id} />
         </section>
 
-        <aside className={styles.bookingCol}>
+        {/* `#book` is where the floating booking CTA lands. */}
+        <aside className={styles.bookingCol} id="book">
           <section className={styles.booking}>
             {submitted ? (
               <div className={styles.success}>
@@ -433,10 +441,13 @@ export default function ApartmentDetail({ apt }: ApartmentDetailProps) {
                     autoComplete="tel"
                     value={guestContact}
                     aria-invalid={contactError ? true : undefined}
-                    maxLength={guestContact.includes('@') ? 254 : PHONE_INPUT_MAX_LENGTH}
+                    maxLength={
+                      looksLikeEmailInput(guestContact)
+                        ? EMAIL_INPUT_MAX_LENGTH
+                        : PHONE_INPUT_MAX_LENGTH
+                    }
                     onChange={(e) => {
-                      const raw = e.target.value;
-                      const next = raw.includes('@') ? raw : sanitizePhoneInput(raw);
+                      const next = sanitizeContactInput(e.target.value);
                       setGuestContact(next);
                       setContactError(contactMessage(next, true));
                       setError(null);
@@ -496,6 +507,20 @@ export default function ApartmentDetail({ apt }: ApartmentDetailProps) {
             )}
           </section>
         </aside>
+
+        {/*
+          The map and the reviews follow the booking panel in the DOM, so that
+          on a phone — where the columns stack — the calendar comes first and
+          the map sits right after it. On desktop the grid puts both back in
+          the left column, under the description.
+        */}
+        <section className={styles.mapCol}>
+          <ApartmentMiniMap apt={apt} />
+        </section>
+
+        <section className={styles.reviewsCol}>
+          <ReviewsSection apartmentId={apt.id} />
+        </section>
       </div>
     </div>
   );

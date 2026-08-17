@@ -120,6 +120,24 @@ export function sanitizePhoneInput(value: string): string {
   return cleaned.slice(0, PHONE_INPUT_MAX_LENGTH);
 }
 
+/** Max characters of an email address. */
+export const EMAIL_INPUT_MAX_LENGTH = 254;
+
+/** The guest is typing an email, not a phone — letters count, `@` comes later. */
+export function looksLikeEmailInput(value: string): boolean {
+  return /[a-z@]/i.test(value);
+}
+
+/**
+ * A "phone or email" field accepts both, so phone characters may only be
+ * clamped while the value still looks like a phone — otherwise the letters of
+ * an email get eaten one by one before the `@` is ever typed.
+ */
+export function sanitizeContactInput(value: string): string {
+  if (looksLikeEmailInput(value)) return value.slice(0, EMAIL_INPUT_MAX_LENGTH);
+  return sanitizePhoneInput(value);
+}
+
 export function validateEmail(raw: string): ValidationResult {
   const trimmed = raw.trim();
   if (!trimmed) return { ok: false, code: 'emailRequired' };
@@ -138,6 +156,8 @@ export function validatePhoneOrEmail(raw: string): ValidationResult {
     if (!email.ok) return { ok: false, code: 'contactInvalid' };
     return email;
   }
+  // Letters but no `@` — a half-typed email, not a phone worth diagnosing.
+  if (/[a-z]/i.test(trimmed)) return { ok: false, code: 'contactInvalid' };
   const phone = validatePhone(trimmed);
   if (!phone.ok) return phone;
   return phone;

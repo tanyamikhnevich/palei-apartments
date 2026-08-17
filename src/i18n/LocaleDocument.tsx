@@ -8,7 +8,7 @@ export default function LocaleDocument() {
 
   useEffect(() => {
     const html = document.documentElement;
-    html.lang = locale === 'he' ? 'he' : locale === 'ru' ? 'ru' : 'en';
+    html.lang = locale;
     html.dir = locale === 'he' ? 'rtl' : 'ltr';
     document.title = t('meta.title');
     const meta = document.querySelector('meta[name="description"]');

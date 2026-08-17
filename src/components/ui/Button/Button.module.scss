@@ -35,13 +35,15 @@
 
 /* Variants */
 .primary {
-  background: var(--accent);
+  background: var(--accent-grad);
+  background-size: 180% 180%;
   color: #fff;
-  box-shadow: 0 6px 16px -6px var(--accent);
+  box-shadow: 0 8px 20px -8px var(--accent-glow);
 
   &:hover {
-    background: var(--accent-press);
-    box-shadow: 0 10px 22px -8px var(--accent);
+    background-position: 100% 0;
+    box-shadow: 0 14px 28px -10px var(--accent-glow);
+    transform: translateY(-1px);
   }
 }
 
@@ -62,15 +64,19 @@
   &:hover {
     background: var(--surface);
     border-color: var(--navy);
+    box-shadow: var(--shadow-sm);
   }
 }
 
 .light {
   background: #fff;
   color: var(--navy);
+  box-shadow: 0 6px 20px -8px rgba(10, 20, 30, 0.5);
 
   &:hover {
-    background: #f4efe6;
+    background: #fff;
+    transform: translateY(-1px);
+    box-shadow: 0 12px 28px -10px rgba(10, 20, 30, 0.55);
   }
 }
 

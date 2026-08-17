@@ -11,7 +11,7 @@ import {
 } from 'react';
 import { t as translate } from './getMessage';
 import type { Locale } from './types';
-import { LOCALES } from './types';
+import { isLocale } from './types';
 
 const STORAGE_KEY = 'palei-locale';
 
@@ -26,10 +26,11 @@ const LanguageContext = createContext<LanguageContextValue | null>(null);
 function readStoredLocale(): Locale {
   if (typeof window === 'undefined') return 'en';
   const stored = localStorage.getItem(STORAGE_KEY);
-  if (stored && (LOCALES as readonly string[]).includes(stored)) return stored as Locale;
-  const browser = navigator.language.slice(0, 2);
-  if (browser === 'ru') return 'ru';
-  if (browser === 'he') return 'he';
+  if (stored && isLocale(stored)) return stored;
+  const browser = navigator.language.slice(0, 2).toLowerCase();
+  // Hebrew ships under the legacy `iw` code in some browsers.
+  if (browser === 'iw') return 'he';
+  if (isLocale(browser)) return browser;
   return 'en';
 }
 

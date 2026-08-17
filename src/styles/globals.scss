@@ -1,34 +1,37 @@
 /* ============================================================
    Palei Apartments — design tokens & base styles
-   Warm Mediterranean: deep navy brand, terracotta accent,
-   sand / warm-white neutrals. Modern clean sans.
+   Near-white canvas so the photography carries the page;
+   deep navy brand, terracotta accent, a whisper of warm sand.
    ============================================================ */
 
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
 :root {
   /* Accent */
   --accent:       #c8643c;
   --accent-press: #b1542f;
-  --accent-tint:  #f6e6dc;
+  --accent-tint:  #fbeee7;
+  --accent-glow:  rgba(200, 100, 60, 0.35);
+  /* The CTA gradient — terracotta warmed with a touch of amber. */
+  --accent-grad:  linear-gradient(120deg, #d8703f 0%, #c8643c 45%, #b1542f 100%);
 
   /* Typography */
   --font: 'Plus Jakarta Sans', system-ui, sans-serif;
 
-  /* Neutrals (warm) */
-  --bg:        #faf7f1;
+  /* Neutrals — near-white base, sand only as a whisper */
+  --bg:        #fdfcfb;
   --surface:   #ffffff;
-  --sand:      #f1e9da;
-  --sand-2:    #e9dec9;
+  --sand:      #f7f4ef;
+  --sand-2:    #efeae1;
   --navy:      #1e3a52;
   --navy-2:    #16293b;
   --navy-soft: #2c4a64;
 
-  --ink:       #23211d;
-  --ink-soft:  #6d6655;
-  --ink-faint: #9b9382;
-  --line:      #e8e0d1;
-  --line-2:    #ddd2bd;
+  --ink:       #1c1a17;
+  --ink-soft:  #6b6660;
+  --ink-faint: #9c968e;
+  --line:      #eceae6;
+  --line-2:    #ded9d1;
 
   /* Shape */
   --r-sm: 10px;
@@ -36,10 +39,10 @@
   --r-lg: 24px;
   --r-xl: 32px;
 
-  /* Shadows */
-  --shadow-sm: 0 1px 2px rgba(30, 40, 55, 0.05), 0 2px 6px rgba(30, 40, 55, 0.04);
-  --shadow-md: 0 4px 14px rgba(30, 40, 55, 0.07), 0 12px 30px rgba(30, 40, 55, 0.06);
-  --shadow-lg: 0 10px 30px rgba(30, 40, 55, 0.10), 0 30px 60px rgba(30, 40, 55, 0.10);
+  /* Shadows — cooler and softer against a white page */
+  --shadow-sm: 0 1px 2px rgba(24, 30, 40, 0.04), 0 2px 8px rgba(24, 30, 40, 0.04);
+  --shadow-md: 0 4px 16px rgba(24, 30, 40, 0.06), 0 14px 34px rgba(24, 30, 40, 0.07);
+  --shadow-lg: 0 12px 34px rgba(24, 30, 40, 0.09), 0 34px 70px rgba(24, 30, 40, 0.11);
 
   --maxw: 1200px;
   --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
@@ -54,6 +57,15 @@
 html {
   -webkit-text-size-adjust: 100%;
   overflow-x: hidden;
+  /* In-page jumps (#book, #contact) glide rather than teleport. */
+  scroll-behavior: smooth;
+  scroll-padding-top: 96px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
 }
 
 body {
@@ -93,6 +105,11 @@ h1, h2, h3, h4 {
   line-height: 1.08;
   letter-spacing: -0.02em;
   color: var(--ink);
+}
+
+h1, h2 {
+  font-weight: 800;
+  letter-spacing: -0.03em;
 }
 
 p {
@@ -161,8 +178,8 @@ p {
   color: var(--ink);
   background: var(--surface);
   border: 1px solid var(--line-2);
-  border-radius: var(--r-sm);
-  padding: 12px 14px;
+  border-radius: var(--r-md);
+  padding: 13px 15px;
   transition: border-color 0.15s, box-shadow 0.15s;
   outline: none;
 
@@ -170,9 +187,13 @@ p {
     color: var(--ink-faint);
   }
 
+  &:hover:not(:focus) {
+    border-color: var(--ink-faint);
+  }
+
   &:focus {
     border-color: var(--accent);
-    box-shadow: 0 0 0 3px var(--accent-tint);
+    box-shadow: 0 0 0 4px var(--accent-tint);
   }
 }
 
@@ -212,6 +233,31 @@ p {
 /* Muted text */
 .muted {
   color: var(--ink-soft);
+}
+
+/*
+  Scroll reveal — sections fade up as they enter the viewport.
+  `Reveal` adds `.revealIn` once the block is on screen; without JS (or with
+  reduced motion) the content is simply visible.
+*/
+.reveal {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.7s var(--ease), transform 0.7s var(--ease);
+  will-change: opacity, transform;
+}
+
+.revealIn {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
 }
 
 @media (max-width: 760px) {

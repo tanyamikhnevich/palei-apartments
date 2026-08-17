@@ -21,6 +21,7 @@ export const LANGUAGE_OPTIONS: { value: Locale; label: string }[] = [
   { value: 'en', label: 'English' },
   { value: 'ru', label: 'Русский' },
   { value: 'he', label: 'עברית' },
+  { value: 'fr', label: 'Français' },
 ];
 
 export const DEFAULT_BUSINESS_SETTINGS: BusinessSettings = {

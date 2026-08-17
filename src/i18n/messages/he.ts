@@ -29,6 +29,8 @@ export const he = {
     viewApartments: 'לכל הדירות',
     contactUs: 'צור קשר',
     checkInPlaceholder: 'הוסיפו תאריכים',
+    slides: 'תמונות הדירות',
+    slideN: 'הצגת תמונה {n}',
     guestOptions: {
       one: 'אורח 1',
       two: '2 אורחים',
@@ -203,7 +205,7 @@ export const he = {
       },
       support: {
         title: 'תמיכה אישית',
-        desc: 'מארח אמיתי ב-WhatsApp לפני, במהלך ואחרי — באנגלית, רוסית או עברית.',
+        desc: 'מארח אמיתי ב-WhatsApp לפני, במהלך ואחרי — באנגלית, רוסית, עברית או צרפתית.',
       },
       families: {
         title: 'מסטודיו ועד פנטהאוז',
@@ -243,7 +245,7 @@ export const he = {
       },
       support: {
         title: 'תמיכה אנושית',
-        desc: 'מענה תוך דקות ב-WhatsApp ב-EN / RU / HE.',
+        desc: 'מענה תוך דקות ב-WhatsApp ב-EN / RU / HE / FR.',
       },
       prices: {
         title: 'מחירים שקופים',
@@ -257,8 +259,7 @@ export const he = {
       contactPlaceholder: '+972 ...',
       checkIn: 'צ׳ק-אין',
       checkOut: 'צ׳ק-אאוט',
-      apartment: 'דירה (אופציונלי)',
-      noPreference: 'ללא העדפה',
+      datesInvalid: 'תאריך העזיבה חייב להיות אחרי תאריך ההגעה.',
       message: 'הודעה',
       messagePlaceholder: 'כמה אורחים, מה מחפשים, שאלות…',
       submit: 'שלח בקשה',
@@ -276,6 +277,7 @@ export const he = {
     langEn: 'English',
     langRu: 'Русский',
     langHe: 'עברית',
+    langFr: 'Français',
     copyright: '© 2026 Palei Apartments · חופשה בישראל',
     privacy: 'פרטיות',
     terms: 'תנאים',

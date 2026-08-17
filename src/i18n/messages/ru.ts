@@ -30,6 +30,8 @@ export const ru = {
     viewApartments: 'Смотреть апартаменты',
     contactUs: 'Связаться',
     checkInPlaceholder: 'Выберите даты',
+    slides: 'Фото апартаментов',
+    slideN: 'Показать фото {n}',
     guestOptions: {
       one: '1 гость',
       two: '2 гостя',
@@ -204,7 +206,7 @@ export const ru = {
       },
       support: {
         title: 'Личная поддержка',
-        desc: 'Живой хозяин в WhatsApp до, во время и после заезда — на русском, английском и иврите.',
+        desc: 'Живой хозяин в WhatsApp до, во время и после заезда — на русском, английском, иврите и французском.',
       },
       families: {
         title: 'От студии до пентхауса',
@@ -244,7 +246,7 @@ export const ru = {
       },
       support: {
         title: 'Живая поддержка',
-        desc: 'Ответ за минуты в WhatsApp на EN / RU / HE.',
+        desc: 'Ответ за минуты в WhatsApp на EN / RU / HE / FR.',
       },
       prices: {
         title: 'Прозрачные цены',
@@ -258,8 +260,7 @@ export const ru = {
       contactPlaceholder: '+972 ...',
       checkIn: 'Заезд',
       checkOut: 'Выезд',
-      apartment: 'Апартамент (необязательно)',
-      noPreference: 'Без предпочтений',
+      datesInvalid: 'Дата выезда должна быть позже даты заезда.',
       message: 'Сообщение',
       messagePlaceholder: 'Сколько гостей, пожелания, вопросы…',
       submit: 'Отправить запрос',
@@ -278,6 +279,7 @@ export const ru = {
     langEn: 'English',
     langRu: 'Русский',
     langHe: 'עברית',
+    langFr: 'Français',
     copyright: '© 2026 Palei Apartments · Отдых в Израиле',
     privacy: 'Конфиденциальность',
     terms: 'Условия',

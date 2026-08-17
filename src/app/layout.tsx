@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import '@/styles/globals.scss';
 import { LanguageProvider } from '@/i18n/LanguageProvider';
 import LocaleDocument from '@/i18n/LocaleDocument';
+import BookCta from '@/components/BookCta/BookCta';
 
 export const metadata: Metadata = {
   title: 'Palei Apartments — Bat Yam',
@@ -21,6 +22,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <LanguageProvider>
           <LocaleDocument />
           {children}
+          <BookCta />
         </LanguageProvider>
       </body>
     </html>

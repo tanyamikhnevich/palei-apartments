@@ -28,6 +28,8 @@ export const en = {
     viewApartments: 'View apartments',
     contactUs: 'Contact us',
     checkInPlaceholder: 'Add dates',
+    slides: 'Apartment photos',
+    slideN: 'Show photo {n}',
     guestOptions: {
       one: '1 guest',
       two: '2 guests',
@@ -202,7 +204,7 @@ export const en = {
       },
       support: {
         title: 'Personal support',
-        desc: 'Talk to a real host on WhatsApp before, during and after your stay — in English, Russian or Hebrew.',
+        desc: 'Talk to a real host on WhatsApp before, during and after your stay — in English, Russian, Hebrew or French.',
       },
       families: {
         title: 'From studios to a penthouse',
@@ -242,7 +244,7 @@ export const en = {
       },
       support: {
         title: 'Real human support',
-        desc: 'Reply within minutes on WhatsApp, in EN / RU / HE.',
+        desc: 'Reply within minutes on WhatsApp, in EN / RU / HE / FR.',
       },
       prices: {
         title: 'Transparent prices',
@@ -256,8 +258,7 @@ export const en = {
       contactPlaceholder: '+972 ...',
       checkIn: 'Check in',
       checkOut: 'Check out',
-      apartment: 'Apartment (optional)',
-      noPreference: 'No preference',
+      datesInvalid: 'Check-out must be after check-in.',
       message: 'Message',
       messagePlaceholder: "How many guests, what you're looking for, any questions…",
       submit: 'Send request',
@@ -277,6 +278,7 @@ export const en = {
     langEn: 'English',
     langRu: 'Русский',
     langHe: 'עברית',
+    langFr: 'Français',
     copyright: '© 2026 Palei Apartments · Vacation in Israel',
     privacy: 'Privacy',
     terms: 'Terms',

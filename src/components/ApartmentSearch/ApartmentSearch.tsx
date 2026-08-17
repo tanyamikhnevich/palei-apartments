@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Button from '@/components/ui/Button/Button';
+import Icon from '@/components/ui/Icon/Icon';
 import DateRangeCalendar from '@/components/DateRangeCalendar/DateRangeCalendar';
 import { useLanguage } from '@/i18n/LanguageProvider';
 import {
@@ -91,6 +92,7 @@ export default function ApartmentSearch({ variant = 'hero', initial }: Apartment
       <div className={styles.bar}>
         <div className={styles.cell} ref={dateCellRef}>
           <label htmlFor={`search-dates-${variant}`}>{t('hero.checkIn')}</label>
+          {/* The calendar icon is what makes this read as a date picker at a glance. */}
           <button
             id={`search-dates-${variant}`}
             type="button"
@@ -99,7 +101,13 @@ export default function ApartmentSearch({ variant = 'hero', initial }: Apartment
             aria-expanded={calendarOpen}
             aria-haspopup="dialog"
           >
-            {dateLabel ?? t('hero.checkInPlaceholder')}
+            <Icon name="calendar" size={17} className={styles.cellIcon} />
+            <span className={styles.dateText}>{dateLabel ?? t('hero.checkInPlaceholder')}</span>
+            <Icon
+              name="chevron"
+              size={15}
+              className={`${styles.caret} ${calendarOpen ? styles.caretOpen : ''}`}
+            />
           </button>
           {calendarOpen && (
             <div className={styles.popover} ref={popoverRef} role="dialog" aria-label={t('hero.checkIn')}>
@@ -120,8 +128,9 @@ export default function ApartmentSearch({ variant = 'hero', initial }: Apartment
           )}
         </div>
 
-        <div className={styles.cell}>
+        <div className={`${styles.cell} ${styles.cellGuests}`}>
           <label htmlFor={`search-guests-${variant}`}>{t('hero.guests')}</label>
+          <Icon name="guest" size={17} className={styles.cellIcon} />
           <select
             id={`search-guests-${variant}`}
             value={guests}

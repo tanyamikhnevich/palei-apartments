@@ -4,7 +4,7 @@ import { getDb, schema } from '@/db/index';
 import { rowToSettings } from '@/db/map';
 import type { BusinessSettings } from '@/types/settings';
 import { DEFAULT_BUSINESS_SETTINGS } from '@/types/settings';
-import type { Locale } from '@/i18n/types';
+import { isLocale } from '@/i18n/types';
 import type { CurrencyCode } from '@/types/settings';
 import { dbUnavailableResponse, isDbConfigured, jsonError } from '@/lib/api/errors';
 import {
@@ -41,10 +41,9 @@ export async function PUT(request: Request) {
 
   try {
     const body = (await request.json()) as BusinessSettings;
-    const locales: Locale[] = ['en', 'ru', 'he'];
     const currencies: CurrencyCode[] = ['ILS', 'USD', 'EUR'];
 
-    if (!locales.includes(body.defaultLanguage) || !currencies.includes(body.currency)) {
+    if (!isLocale(body.defaultLanguage ?? '') || !currencies.includes(body.currency)) {
       return jsonError('Invalid settings payload');
     }
 

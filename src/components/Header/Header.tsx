@@ -61,8 +61,18 @@ export default function Header() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  /*
+    Only the home page has a photo to show through — everywhere else the bar
+    keeps its solid panel from the first pixel. An open drawer drops the overlay
+    too: the panel below it is opaque, so a see-through bar above would float.
+  */
+  const overlay = pathname === '/' && !menuOpen;
+  const onPhoto = overlay && !stuck;
+
   return (
-    <header className={`${styles.hdr} ${stuck ? styles.stuck : ''}`}>
+    <header
+      className={`${styles.hdr} ${overlay ? styles.overlay : ''} ${stuck ? styles.stuck : ''}`}
+    >
       <div className={`wrap ${styles.bar}`}>
         <button type="button" className={styles.logoLink} onClick={goHome} aria-label={t('brand')}>
           <Image
@@ -95,7 +105,7 @@ export default function Header() {
           {/* Kept in the bar on mobile too — buried in the drawer nobody finds it. */}
           <LangSwitch />
           <Button
-            variant="navy"
+            variant={onPhoto ? 'light' : 'navy'}
             size="sm"
             as="a"
             href="/contact"

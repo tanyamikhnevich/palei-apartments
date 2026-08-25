@@ -1,37 +1,55 @@
 /* ============================================================
    Palei Apartments — design tokens & base styles
    Near-white canvas so the photography carries the page;
-   deep navy brand, terracotta accent, a whisper of warm sand.
+   deep navy brand, marine-blue accent, a whisper of cool mist.
+
+   Two blues, deliberately: `--navy` is structure (footer, dark
+   type, secondary buttons) and `--accent` is action. The accent
+   is the brighter, more saturated of the pair so a call to
+   action never sinks into the navy around it.
    ============================================================ */
 
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
 :root {
-  /* Accent */
-  --accent:       #c8643c;
-  --accent-press: #b1542f;
-  --accent-tint:  #fbeee7;
-  --accent-glow:  rgba(200, 100, 60, 0.35);
-  /* The CTA gradient — terracotta warmed with a touch of amber. */
-  --accent-grad:  linear-gradient(120deg, #d8703f 0%, #c8643c 45%, #b1542f 100%);
+  /* Accent — 5.6:1 on white, so white button type clears AA at any size. */
+  --accent:       #1b6ca8;
+  --accent-press: #155a8a;
+  --accent-tint:  #e8f2f9;
+  --accent-glow:  rgba(27, 108, 168, 0.35);
+  /* The CTA gradient — marine blue lifted towards open-water azure. */
+  --accent-grad:  linear-gradient(120deg, #2379b8 0%, #1b6ca8 45%, #155a8a 100%);
 
   /* Typography */
   --font: 'Plus Jakarta Sans', system-ui, sans-serif;
 
-  /* Neutrals — near-white base, sand only as a whisper */
-  --bg:        #fdfcfb;
+  /* Neutrals — near-white base, mist only as a whisper */
+  --bg:        #fbfcfd;
   --surface:   #ffffff;
-  --sand:      #f7f4ef;
-  --sand-2:    #efeae1;
+  --mist:      #f1f5f9;
+  --mist-2:    #e3ebf2;
   --navy:      #1e3a52;
-  --navy-2:    #16293b;
+  --navy-2:    #15283a;
   --navy-soft: #2c4a64;
 
-  --ink:       #1c1a17;
-  --ink-soft:  #6b6660;
-  --ink-faint: #9c968e;
-  --line:      #eceae6;
-  --line-2:    #ded9d1;
+  --ink:       #151e27;
+  --ink-soft:  #5b6875;
+  --ink-faint: #8593a1;
+  --line:      #e7edf3;
+  --line-2:    #d4dee7;
+
+  /*
+    Status tones. Kept out of the brand blue on purpose — a badge has to say
+    "free / taken / being worked on" at a glance, and it cannot do that in the
+    same colour as everything else on the page.
+  */
+  --ok-bg:     #e4f1e9;
+  --ok-fg:     #2f6b43;
+  --busy-bg:   #fdeaea;
+  --busy-line: #eab8b8;
+  --busy-fg:   #a63d3d;
+  --warn-bg:   #f6efdf;
+  --warn-fg:   #7a6636;
 
   /* Shape */
   --r-sm: 10px;
@@ -39,13 +57,31 @@
   --r-lg: 24px;
   --r-xl: 32px;
 
-  /* Shadows — cooler and softer against a white page */
-  --shadow-sm: 0 1px 2px rgba(24, 30, 40, 0.04), 0 2px 8px rgba(24, 30, 40, 0.04);
-  --shadow-md: 0 4px 16px rgba(24, 30, 40, 0.06), 0 14px 34px rgba(24, 30, 40, 0.07);
-  --shadow-lg: 0 12px 34px rgba(24, 30, 40, 0.09), 0 34px 70px rgba(24, 30, 40, 0.11);
+  /* Shadows — a cool cast, so they read as depth rather than dirt */
+  --shadow-sm: 0 1px 2px rgba(18, 32, 48, 0.04), 0 2px 8px rgba(18, 32, 48, 0.04);
+  --shadow-md: 0 4px 16px rgba(18, 32, 48, 0.06), 0 14px 34px rgba(18, 32, 48, 0.07);
+  --shadow-lg: 0 12px 34px rgba(18, 32, 48, 0.09), 0 34px 70px rgba(18, 32, 48, 0.11);
 
   --maxw: 1200px;
   --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+
+  /* Height of the sticky bar — the hero slides this far up to sit behind it. */
+  --hdr-h: 76px;
+  /* Side gutter of `.wrap` — exposed so full-bleed blocks can cancel it out. */
+  --wrap-pad: 28px;
+}
+
+@media (max-width: 760px) {
+  :root {
+    --hdr-h: 64px;
+    --wrap-pad: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  :root {
+    --wrap-pad: 16px;
+  }
 }
 
 *,
@@ -56,16 +92,21 @@
 
 html {
   -webkit-text-size-adjust: 100%;
+  /*
+    `clip` contains stray horizontal overflow without turning the root into a
+    scroll container — `hidden` does, and that silently kills `position: sticky`
+    on the header in mobile Safari. `hidden` stays first as the old-Safari
+    fallback.
+  */
   overflow-x: hidden;
-  /* In-page jumps (#book, #contact) glide rather than teleport. */
-  scroll-behavior: smooth;
+  overflow-x: clip;
+  /*
+    Deliberately not `scroll-behavior: smooth`. It also animates the router's
+    scroll-to-top on every navigation, and that animation loses its race with
+    the incoming page — you land mid-document instead of at the top. In-page
+    jumps ask for the glide themselves, through `scrollToHash`.
+  */
   scroll-padding-top: 96px;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
 }
 
 body {
@@ -78,6 +119,7 @@ body {
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   overflow-x: hidden;
+  overflow-x: clip;
 }
 
 img {
@@ -120,7 +162,7 @@ p {
 .wrap {
   max-width: var(--maxw);
   margin: 0 auto;
-  padding: 0 28px;
+  padding: 0 var(--wrap-pad);
   width: 100%;
 }
 
@@ -224,7 +266,7 @@ p {
 
 .select {
   appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%236d6655' stroke-width='1.6' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%235b6875' stroke-width='1.6' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 14px center;
   padding-right: 38px;
@@ -273,10 +315,6 @@ p {
     padding: 52px 0;
   }
 
-  .wrap {
-    padding: 0 20px;
-  }
-
   .section-sub {
     font-size: 16px;
     margin-top: 12px;
@@ -289,10 +327,6 @@ p {
 }
 
 @media (max-width: 480px) {
-  .wrap {
-    padding: 0 16px;
-  }
-
   .section {
     padding: 48px 0;
   }

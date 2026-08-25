@@ -1,6 +1,6 @@
 .section {
   padding: 96px 0;
-  background: var(--sand);
+  background: var(--mist);
 }
 
 .grid {
@@ -31,7 +31,7 @@
   border-radius: 11px;
   display: grid;
   place-items: center;
-  background: var(--sand-2);
+  background: var(--mist-2);
   color: var(--navy);
 }
 
@@ -109,8 +109,8 @@
   width: 64px;
   height: 64px;
   border-radius: 50%;
-  background: #e6f0e8;
-  color: #2f6b43;
+  background: var(--ok-bg);
+  color: var(--ok-fg);
   display: grid;
   place-items: center;
   margin: 0 auto 18px;
@@ -164,4 +164,14 @@
     width: 100%;
     justify-content: center;
   }
+}
+
+/* Anti-bot field: out of sight and out of the tab order, but still a real input. */
+.honeypot {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
 }

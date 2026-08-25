@@ -40,7 +40,7 @@
   transition: background 0.12s;
 
   &:hover {
-    background: var(--sand);
+    background: var(--mist);
   }
 }
 
@@ -119,14 +119,14 @@
   transition: 0.15s;
 
   &:hover {
-    background: var(--sand);
+    background: var(--mist);
     border-color: var(--navy);
   }
 
   &.danger:hover {
-    background: #fbe9e4;
-    border-color: #d9876f;
-    color: #b1542f;
+    background: var(--busy-bg);
+    border-color: var(--busy-line);
+    color: var(--busy-fg);
   }
 }
 

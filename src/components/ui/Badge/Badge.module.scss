@@ -7,7 +7,7 @@
   letter-spacing: 0.01em;
   padding: 5px 11px;
   border-radius: 999px;
-  background: var(--sand);
+  background: var(--mist);
   color: var(--navy);
 }
 
@@ -27,16 +27,16 @@
 }
 
 .ok {
-  background: #e6f0e8;
-  color: #2f6b43;
+  background: var(--ok-bg);
+  color: var(--ok-fg);
 }
 
 .booked {
-  background: #fbe9e4;
-  color: #b1542f;
+  background: var(--busy-bg);
+  color: var(--busy-fg);
 }
 
 .maint {
-  background: #f1ece0;
-  color: #8a7a52;
+  background: var(--warn-bg);
+  color: var(--warn-fg);
 }

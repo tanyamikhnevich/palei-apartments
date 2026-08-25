@@ -64,7 +64,7 @@
 
   &:hover {
     border-color: var(--navy);
-    background: var(--sand);
+    background: var(--mist);
   }
 }
 
@@ -137,14 +137,14 @@
   height: 28px;
   border: none;
   border-radius: 8px;
-  background: var(--sand);
+  background: var(--mist);
   color: var(--ink);
   display: grid;
   place-items: center;
   cursor: pointer;
 
   &:hover {
-    background: var(--sand-2);
+    background: var(--mist-2);
     color: var(--accent-press);
   }
 }

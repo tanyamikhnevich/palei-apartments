@@ -5,6 +5,11 @@
   align-items: stretch;
 }
 
+/* Hero search: dates + button only, so the date cell takes the freed column. */
+.barDatesOnly {
+  grid-template-columns: 1fr auto;
+}
+
 .hero {
   margin-top: 34px;
   background: rgba(255, 255, 255, 0.97);
@@ -35,7 +40,7 @@
   transition: background 0.15s;
 
   &:hover {
-    background: var(--sand);
+    background: var(--mist);
   }
 
   &:hover .cellIcon {
@@ -146,8 +151,16 @@
     grid-template-columns: 1fr 1fr;
   }
 
+  .barDatesOnly {
+    grid-template-columns: 1fr auto;
+  }
+
   .go {
     grid-column: 1 / -1;
+  }
+
+  .barDatesOnly .go {
+    grid-column: auto;
   }
 }
 
@@ -161,11 +174,20 @@
     margin-top: 20px;
   }
 
-  .bar {
+  .bar,
+  .barDatesOnly {
     grid-template-columns: 1fr;
   }
 
-  .go {
-    width: 100%;
+  /*
+    Stacked, the button fills its own row — and the 4px side margin from the
+    inline layout has to go with it. Kept next to a 100% width it pushed the
+    button off centre and let it overhang the card's end edge.
+  */
+  .go,
+  .barDatesOnly .go {
+    grid-column: 1 / -1;
+    width: auto;
+    margin: 0;
   }
 }

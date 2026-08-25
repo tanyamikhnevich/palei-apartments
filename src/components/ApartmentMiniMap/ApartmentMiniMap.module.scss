@@ -10,7 +10,7 @@
   border: 1px solid var(--line);
   border-radius: var(--r-lg);
   overflow: hidden;
-  background: var(--sand);
+  background: var(--mist);
   box-shadow: var(--shadow-sm);
 }
 
@@ -20,7 +20,7 @@
 
   :global(.leaflet-container) {
     font-family: var(--font);
-    background: var(--sand);
+    background: var(--mist);
     /* Non-interactive by design — no grab cursor to promise otherwise. */
     cursor: default;
   }

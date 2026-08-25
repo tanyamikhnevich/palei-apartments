@@ -70,7 +70,9 @@ export default function Footer() {
             </ul>
           </div>
 
-          <div className={styles.col}>
+          {/* Phones switch language from the bar at the top; a second set here
+              only lengthens an already tall footer. */}
+          <div className={`${styles.col} ${styles.colLang}`}>
             <h5>{t('footer.language')}</h5>
             <ul>
               {LANG_LINKS.map(({ locale, key }) => (

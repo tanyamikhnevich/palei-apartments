@@ -15,6 +15,7 @@ import {
   validatePhoneOrEmail,
 } from '@/lib/validation/contact';
 import { resolveValidationMessage } from '@/lib/validation/resolveMessage';
+import { ApiError, submitContactRequest } from '@/lib/api/client';
 import styles from './ContactSection.module.scss';
 
 const FEAT_KEYS: { icon: IconName; key: string }[] = [
@@ -29,13 +30,12 @@ export default function ContactSection() {
 
   const [name, setName] = useState('');
   const [contact, setContact] = useState('');
-  const [checkIn, setCheckIn] = useState('');
-  const [checkOut, setCheckOut] = useState('');
   const [message, setMessage] = useState('');
+  const [honeypot, setHoneypot] = useState('');
+  const [sending, setSending] = useState(false);
 
   const [nameError, setNameError] = useState<string | null>(null);
   const [contactError, setContactError] = useState<string | null>(null);
-  const [dateError, setDateError] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
 
   /**
@@ -52,41 +52,57 @@ export default function ContactSection() {
     return resolveValidationMessage(locale, r.code);
   };
 
-  /** Dates are optional, but a check-out before check-in is still wrong. */
-  const dateMessage = (from: string, to: string): string | null =>
-    from && to && to <= from ? t('contact.form.datesInvalid') : null;
-
   const reset = () => {
     setName('');
     setContact('');
-    setCheckIn('');
-    setCheckOut('');
     setMessage('');
+    setHoneypot('');
     setNameError(null);
     setContactError(null);
-    setDateError(null);
     setFormError(null);
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     const nameResult = validatePersonName(name);
     const nextNameError = nameResult.ok ? null : resolveValidationMessage(locale, nameResult.code);
     const nextContactError = contactMessage(contact, false);
-    const nextDateError = dateMessage(checkIn, checkOut);
 
     setNameError(nextNameError);
     setContactError(nextContactError);
-    setDateError(nextDateError);
 
-    if (nextNameError || nextContactError || nextDateError) {
+    if (nextNameError || nextContactError) {
       setFormError(t('booking.fillRequired'));
       return;
     }
 
     setFormError(null);
-    setSent(true);
+    setSending(true);
+    try {
+      await submitContactRequest({
+        name,
+        contact,
+        message: message.trim() || undefined,
+        honeypot,
+        page: window.location.pathname,
+      });
+      setSent(true);
+    } catch (err) {
+      /*
+        The API answers in English for the server log's sake; the guest gets the
+        message in their own language. Only the rate limit is worth telling
+        apart — "try again" would be misleading advice for it.
+      */
+      console.error('contact form submit', err);
+      setFormError(
+        err instanceof ApiError && err.status === 429
+          ? t('contact.form.tooMany')
+          : t('contact.form.sendError')
+      );
+    } finally {
+      setSending(false);
+    }
   };
 
   return (
@@ -146,7 +162,11 @@ export default function ContactSection() {
                 </div>
               </div>
             ) : (
-              <form className={styles.formStack} onSubmit={handleSubmit} noValidate>
+              <form
+                className={styles.formStack}
+                onSubmit={(e) => void handleSubmit(e)}
+                noValidate
+              >
                 <div className={styles.formRow}>
                   <label className="field">
                     <span>{t('contact.form.name')}</span>
@@ -193,37 +213,6 @@ export default function ContactSection() {
                     {contactError && <span className="fieldError">{contactError}</span>}
                   </label>
                 </div>
-                <div className={styles.formRow}>
-                  <label className="field">
-                    <span>{t('contact.form.checkIn')}</span>
-                    <input
-                      className={`input ${dateError ? 'inputInvalid' : ''}`}
-                      type="date"
-                      value={checkIn}
-                      onChange={(e) => {
-                        setCheckIn(e.target.value);
-                        setDateError(dateMessage(e.target.value, checkOut));
-                        setFormError(null);
-                      }}
-                    />
-                  </label>
-                  <label className="field">
-                    <span>{t('contact.form.checkOut')}</span>
-                    <input
-                      className={`input ${dateError ? 'inputInvalid' : ''}`}
-                      type="date"
-                      value={checkOut}
-                      min={checkIn || undefined}
-                      aria-invalid={dateError ? true : undefined}
-                      onChange={(e) => {
-                        setCheckOut(e.target.value);
-                        setDateError(dateMessage(checkIn, e.target.value));
-                        setFormError(null);
-                      }}
-                    />
-                    {dateError && <span className="fieldError">{dateError}</span>}
-                  </label>
-                </div>
                 <label className="field">
                   <span>{t('contact.form.message')}</span>
                   <textarea
@@ -233,13 +222,30 @@ export default function ContactSection() {
                     placeholder={t('contact.form.messagePlaceholder')}
                   />
                 </label>
+                {/* Honeypot: hidden from users, tempting to bots. */}
+                <input
+                  className={styles.honeypot}
+                  tabIndex={-1}
+                  autoComplete="off"
+                  aria-hidden="true"
+                  value={honeypot}
+                  onChange={(e) => setHoneypot(e.target.value)}
+                />
+
                 {formError && (
                   <div className={styles.errorBox}>
                     <p className={styles.error}>{formError}</p>
                   </div>
                 )}
-                <Button variant="primary" size="lg" block type="submit" iconRight="arrow">
-                  {t('contact.form.submit')}
+                <Button
+                  variant="primary"
+                  size="lg"
+                  block
+                  type="submit"
+                  iconRight="arrow"
+                  disabled={sending}
+                >
+                  {sending ? t('contact.form.sending') : t('contact.form.submit')}
                 </Button>
                 <p className={styles.formNote}>{t('contact.form.note')}</p>
               </form>

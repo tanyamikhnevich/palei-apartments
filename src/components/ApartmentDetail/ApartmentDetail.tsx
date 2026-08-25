@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import type { Apartment } from '@/types/apartment';
@@ -15,6 +15,7 @@ import ReviewsSection from '@/components/ReviewsSection/ReviewsSection';
 import { useLanguage } from '@/i18n/LanguageProvider';
 import { getApartmentCopy } from '@/i18n/apartmentLocale';
 import { formatDateRange, nightsBetween } from '@/lib/dates';
+import { scrollToHash } from '@/lib/scrollToHash';
 import {
   fetchBookingAvailability,
   saveBookingDraft,
@@ -76,10 +77,33 @@ export default function ApartmentDetail({ apt }: ApartmentDetailProps) {
   const [contactError, setContactError] = useState<string | null>(null);
   const [dateError, setDateError] = useState<string | null>(null);
   const [showFormErrors, setShowFormErrors] = useState(false);
+  const [descOpen, setDescOpen] = useState(false);
+  const [descClipped, setDescClipped] = useState(false);
+  const descRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     fetchBookingAvailability(apt.id).then(setBlocked).catch(() => setBlocked([]));
   }, [apt.id]);
+
+  /*
+    Only offer "show more" when the clamp actually cuts something off — a short
+    description should not grow a button that does nothing. Measured rather than
+    guessed from the character count, since the cut-off depends on the column
+    width and the font. Once expanded there is nothing left to measure, so the
+    effect steps aside and the flag keeps its value.
+  */
+  useEffect(() => {
+    if (descOpen) return;
+    const el = descRef.current?.firstElementChild as HTMLElement | null;
+    if (!el) return;
+
+    const check = () => setDescClipped(el.scrollHeight - el.clientHeight > 4);
+    check();
+    // Web fonts land after first paint and change where the lines break.
+    void document.fonts?.ready.then(check);
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, [copy.description, descOpen]);
 
   const nights =
     checkIn && checkOut && checkOut > checkIn ? nightsBetween(checkIn, checkOut) : 0;
@@ -305,8 +329,28 @@ export default function ApartmentDetail({ apt }: ApartmentDetailProps) {
             />
           </div>
 
-          <div className={styles.desc}>
-            <FormattedDescription text={copy.description} />
+          <div className={styles.descBlock}>
+            <div
+              className={`${styles.desc} ${descOpen ? '' : styles.descClamped}`}
+              ref={descRef}
+            >
+              <FormattedDescription text={copy.description} />
+            </div>
+            {descClipped && (
+              <button
+                type="button"
+                className={styles.descToggle}
+                onClick={() => setDescOpen((o) => !o)}
+                aria-expanded={descOpen}
+              >
+                {descOpen ? t('apartments.showLess') : t('apartments.showMore')}
+                <Icon
+                  name="chevron"
+                  size={15}
+                  className={`${styles.descChevron} ${descOpen ? styles.descChevronUp : ''}`}
+                />
+              </button>
+            )}
           </div>
         </section>
 
@@ -522,6 +566,44 @@ export default function ApartmentDetail({ apt }: ApartmentDetailProps) {
           <ReviewsSection apartmentId={apt.id} />
         </section>
       </div>
+
+      {/*
+        Phones only: the booking panel is a long scroll away once the columns
+        stack, so the price and the way into it stay pinned to the bottom. It
+        shows the live quote as soon as dates are picked, and disappears once
+        the request is in — there is nothing left to reserve.
+      */}
+      {!submitted && (
+        <div className={styles.reserveBar}>
+          <div className={styles.reservePrice}>
+            {nightsValid ? (
+              <>
+                <span className={styles.reserveAmount}>₪{total}</span>
+                <span className={styles.reserveNote}>
+                  {t('booking.total')} · {formatDateRange(checkIn!, checkOut!, locale)}
+                </span>
+              </>
+            ) : (
+              <>
+                {hasPriceTiers(apt) && (
+                  <span className={styles.reserveFrom}>{t('apartments.from')}</span>
+                )}
+                <span className={styles.reserveAmount}>₪{priceFrom(apt)}</span>
+                <span className={styles.reserveNote}>{t('apartments.perNight')}</span>
+              </>
+            )}
+          </div>
+          <Button
+            variant="primary"
+            as="a"
+            href="#book"
+            className={styles.reserveBtn}
+            onClick={(e) => scrollToHash(e, '#book')}
+          >
+            {t('booking.reserve')}
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

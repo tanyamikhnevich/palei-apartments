@@ -67,12 +67,12 @@
 
 .featureTag {
   font-family: ui-monospace, 'SF Mono', Menlo, monospace;
-  font-size: 11px;
+  font-size: var(--fs-2xs);
   letter-spacing: 0.02em;
   color: var(--navy);
   background: rgba(255, 255, 255, 0.94);
   backdrop-filter: blur(2px);
-  padding: 6px 10px;
+  padding: 0.55em 0.91em;
   border-radius: 999px;
   border: 1px solid rgba(30, 58, 82, 0.08);
   box-shadow: var(--shadow-sm);
@@ -86,15 +86,15 @@
   backdrop-filter: blur(2px);
   color: var(--navy);
   font-weight: 800;
-  font-size: 15px;
-  padding: 7px 14px;
+  font-size: var(--fs-md);
+  padding: 0.47em 0.93em;
   border-radius: 999px;
   box-shadow: 0 4px 14px rgba(15, 25, 35, 0.18);
   white-space: nowrap;
 
   span {
     font-weight: 500;
-    font-size: 12.5px;
+    font-size: var(--fs-xs);
     color: var(--ink-soft);
   }
 }
@@ -121,7 +121,7 @@
 }
 
 .name {
-  font-size: 20px;
+  font-size: var(--fs-lg);
   font-weight: 800;
   letter-spacing: -0.025em;
   overflow: hidden;
@@ -135,7 +135,7 @@
   align-items: center;
   gap: 6px;
   color: var(--ink-soft);
-  font-size: 14px;
+  font-size: var(--fs-sm);
   margin-top: 2px;
 }
 
@@ -143,7 +143,7 @@
   display: flex;
   align-items: center;
   gap: 5px;
-  font-size: 14px;
+  font-size: var(--fs-sm);
   font-weight: 600;
   color: var(--navy);
   flex: none;
@@ -154,18 +154,18 @@
 }
 
 .ratingNew {
-  padding: 2px 9px;
+  padding: 0.15em 0.69em;
   border-radius: 999px;
   background: var(--accent-tint);
   color: var(--accent-press);
-  font-size: 12px;
+  font-size: var(--fs-xs);
   letter-spacing: 0.01em;
 }
 
 .desc {
   flex: none;
   color: var(--ink-soft);
-  font-size: 14.5px;
+  font-size: var(--fs-sm);
   line-height: 1.5;
 }
 
@@ -188,10 +188,10 @@
 }
 
 .price {
-  font-size: 15px;
+  font-size: var(--fs-md);
 
   b {
-    font-size: 22px;
+    font-size: var(--fs-xl);
     font-weight: 800;
     letter-spacing: -0.02em;
     color: var(--ink);
@@ -199,7 +199,7 @@
 
   span {
     color: var(--ink-soft);
-    font-size: 13px;
+    font-size: var(--fs-xs);
   }
 }
 
@@ -219,7 +219,7 @@
 
   .featureTag {
     max-width: 100%;
-    font-size: 10px;
+    font-size: var(--fs-2xs);
   }
 
   .body {
@@ -227,7 +227,7 @@
   }
 
   .name {
-    font-size: 17px;
+    font-size: var(--fs-base);
     white-space: normal;
     display: -webkit-box;
     -webkit-line-clamp: 2;

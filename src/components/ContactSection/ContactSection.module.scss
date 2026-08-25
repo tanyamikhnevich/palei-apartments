@@ -36,13 +36,13 @@
 }
 
 .featTitle {
-  font-size: 15.5px;
+  font-size: var(--fs-md);
   margin-bottom: 2px;
 }
 
 .featDesc {
   color: var(--ink-soft);
-  font-size: 14px;
+  font-size: var(--fs-sm);
 }
 
 .whatsapp {
@@ -89,12 +89,12 @@
 
 .error {
   color: #b42318;
-  font-size: 13.5px;
+  font-size: var(--fs-sm);
   margin: 0;
 }
 
 .formNote {
-  font-size: 13px;
+  font-size: var(--fs-xs);
   color: var(--ink-soft);
   text-align: center;
 }
@@ -117,7 +117,7 @@
 }
 
 .sentTitle {
-  font-size: 22px;
+  font-size: var(--fs-xl);
 }
 
 .sentDesc {

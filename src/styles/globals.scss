@@ -23,6 +23,23 @@
   /* Typography */
   --font: 'Plus Jakarta Sans', system-ui, sans-serif;
 
+  /*
+    Type scale in rem, so every size follows the reader's own font setting.
+    Seven steps replacing twenty-one ad-hoc pixel values — the half-pixel
+    distinctions (13.5 vs 14 vs 14.5) were invisible and only made the sheet
+    harder to keep consistent. px equivalents assume a 16px root.
+  */
+  --fs-2xs:  0.6875rem; /* 11 */
+  --fs-xs:   0.8125rem; /* 13 */
+  --fs-sm:   0.875rem;  /* 14 */
+  --fs-md:   0.9375rem; /* 15 */
+  --fs-base: 1.0625rem; /* 17 */
+  --fs-lg:   1.1875rem; /* 19 */
+  --fs-xl:   1.375rem;  /* 22 */
+
+  /* Page copy — one notch down on phones, where the column is narrower. */
+  --fs-body: var(--fs-base);
+
   /* Neutrals — near-white base, mist only as a whisper */
   --bg:        #fbfcfd;
   --surface:   #ffffff;
@@ -65,16 +82,20 @@
   --maxw: 1200px;
   --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
 
-  /* Height of the sticky bar — the hero slides this far up to sit behind it. */
-  --hdr-h: 76px;
+  /*
+    Height of the sticky bar — the hero slides this far up to sit behind it.
+    In rem so the bar grows with its own type instead of clipping it.
+  */
+  --hdr-h: 4.75rem;
   /* Side gutter of `.wrap` — exposed so full-bleed blocks can cancel it out. */
   --wrap-pad: 28px;
 }
 
 @media (max-width: 760px) {
   :root {
-    --hdr-h: 64px;
+    --hdr-h: 4rem;
     --wrap-pad: 20px;
+    --fs-body: 1rem;
   }
 }
 
@@ -90,8 +111,30 @@
   box-sizing: border-box;
 }
 
+/*
+  iOS: `-apple-system-body` resolves to the system font at the reader's Dynamic
+  Type size, which is the only way Safari hands that setting to a web page. We
+  take it purely for the size — the root becomes the Dynamic Type body size, so
+  every rem below follows it — and `body` puts the brand typeface straight back.
+
+  Fenced behind an iOS-only probe on purpose. `-webkit-touch-callout` exists on
+  iOS Safari and nowhere else, and the fence matters: on macOS the very same
+  keyword resolves to 13px, which would shrink the whole desktop site by a
+  fifth. Everything outside the fence keeps its own 16px root.
+*/
+@supports (-webkit-touch-callout: none) {
+  :root {
+    font: -apple-system-body;
+  }
+}
+
 html {
-  -webkit-text-size-adjust: 100%;
+  /*
+    `auto`, not `100%`. The old value opted the page out of Android's text
+    scaling, which is where Chrome applies the reader's accessibility font size.
+  */
+  -webkit-text-size-adjust: auto;
+  text-size-adjust: auto;
   /*
     `clip` contains stray horizontal overflow without turning the root into a
     scroll container — `hidden` does, and that silently kills `position: sticky`
@@ -106,15 +149,16 @@ html {
     the incoming page — you land mid-document instead of at the top. In-page
     jumps ask for the glide themselves, through `scrollToHash`.
   */
-  scroll-padding-top: 96px;
+  scroll-padding-top: calc(var(--hdr-h) + 20px);
 }
 
 body {
   margin: 0;
+  /* Restores the brand face after the Dynamic Type shorthand above. */
   font-family: var(--font);
   background: var(--bg);
   color: var(--ink);
-  font-size: 17px;
+  font-size: var(--fs-body);
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
@@ -177,7 +221,7 @@ p {
 
 /* Eyebrow label */
 .eyebrow {
-  font-size: 13px;
+  font-size: var(--fs-xs);
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -186,12 +230,12 @@ p {
 }
 
 .section-title {
-  font-size: clamp(28px, 3.6vw, 44px);
+  font-size: clamp(1.75rem, 3.6vw + 0.25rem, 2.75rem);
 }
 
 .section-sub {
   color: var(--ink-soft);
-  font-size: 18px;
+  font-size: var(--fs-lg);
   margin-top: 16px;
   max-width: 60ch;
 }
@@ -204,7 +248,7 @@ p {
 
   > label,
   > span {
-    font-size: 13px;
+    font-size: var(--fs-xs);
     font-weight: 600;
     color: var(--ink);
     letter-spacing: -0.01em;
@@ -216,12 +260,13 @@ p {
 .textarea {
   width: 100%;
   font-family: inherit;
-  font-size: 15px;
+  font-size: var(--fs-md);
   color: var(--ink);
   background: var(--surface);
   border: 1px solid var(--line-2);
   border-radius: var(--r-md);
-  padding: 13px 15px;
+  /* em: the field grows with the text it holds instead of cropping it. */
+  padding: 0.87em 1em;
   transition: border-color 0.15s, box-shadow 0.15s;
   outline: none;
 
@@ -253,7 +298,7 @@ p {
 .fieldError {
   display: block;
   margin-top: 6px;
-  font-size: 12.5px;
+  font-size: var(--fs-xs);
   color: #b42318;
   line-height: 1.4;
 }
@@ -303,9 +348,6 @@ p {
 }
 
 @media (max-width: 760px) {
-  body {
-    font-size: 16px;
-  }
 
   .section {
     padding: 64px 0;
@@ -316,12 +358,12 @@ p {
   }
 
   .section-sub {
-    font-size: 16px;
+    font-size: var(--fs-body);
     margin-top: 12px;
   }
 
   .eyebrow {
-    font-size: 12px;
+    font-size: var(--fs-xs);
     margin-bottom: 10px;
   }
 }

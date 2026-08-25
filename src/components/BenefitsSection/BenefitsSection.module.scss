@@ -40,13 +40,13 @@
 }
 
 .title {
-  font-size: 18px;
+  font-size: var(--fs-lg);
   margin-bottom: 8px;
 }
 
 .desc {
   color: var(--ink-soft);
-  font-size: 15px;
+  font-size: var(--fs-md);
 }
 
 @media (max-width: 1000px) {

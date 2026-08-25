@@ -21,10 +21,10 @@ const TRUST_KEYS = [
  */
 const SLIDES = [
   { src: '/hero/01-beach-sunset.webp', position: 'center 55%' },
-  { src: '/hero/02-moonlit-sea.webp', position: 'center 35%' },
-  { src: '/hero/03-sunset-clouds.webp', position: 'center 45%' },
   { src: '/hero/04-living-room.webp', position: 'center' },
+  { src: '/hero/03-sunset-clouds.webp', position: 'center 45%' },
   { src: '/hero/05-kitchen-dining.webp', position: 'center' },
+  { src: '/hero/02-moonlit-sea.webp', position: 'center 45%' },
 ];
 
 const SLIDE_MS = 3800;

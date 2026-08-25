@@ -32,13 +32,13 @@
 }
 
 .pointTitle {
-  font-size: 16px;
+  font-size: var(--fs-base);
   margin-bottom: 3px;
 }
 
 .pointDesc {
   color: var(--ink-soft);
-  font-size: 14.5px;
+  font-size: var(--fs-sm);
 }
 
 .cta {

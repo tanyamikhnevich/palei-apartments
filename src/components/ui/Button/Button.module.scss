@@ -39,15 +39,23 @@
 }
 
 /* Variants */
+/*
+  Fill, label and glow come through custom properties so a single button can be
+  recoloured from the outside — a plain class override would land on the same
+  element with the same specificity and win or lose by source order.
+*/
 .primary {
-  background: var(--accent-grad);
+  background: var(--btn-fill, var(--accent-grad));
   background-size: 180% 180%;
-  color: #fff;
-  box-shadow: 0 8px 20px -8px var(--accent-glow);
+  color: var(--btn-ink, #fff);
+  box-shadow: 0 8px 20px -8px var(--btn-glow, var(--accent-glow));
 
   &:hover {
+    background: var(--btn-fill-hover, var(--btn-fill, var(--accent-grad)));
+    /* The shorthand above resets it, and the gradient needs it back. */
+    background-size: 180% 180%;
     background-position: 100% 0;
-    box-shadow: 0 14px 28px -10px var(--accent-glow);
+    box-shadow: 0 14px 28px -10px var(--btn-glow, var(--accent-glow));
     transform: translateY(-1px);
   }
 }

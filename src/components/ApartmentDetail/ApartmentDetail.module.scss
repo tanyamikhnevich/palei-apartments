@@ -437,6 +437,10 @@
 
 .reserveBtn {
   flex: none;
+  --btn-fill: var(--coral);
+  --btn-fill-hover: var(--coral-press);
+  --btn-ink: var(--coral-ink);
+  --btn-glow: var(--coral-glow);
 }
 
 @media (max-width: 980px) {

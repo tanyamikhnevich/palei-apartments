@@ -2,14 +2,71 @@
   position: sticky;
   top: 0;
   z-index: 50;
-  background: rgba(253, 252, 251, 0.86);
+  background: rgba(251, 252, 253, 0.86);
   backdrop-filter: blur(14px) saturate(1.1);
   border-bottom: 1px solid transparent;
-  transition: border-color 0.25s, box-shadow 0.25s, background 0.25s;
+  transition: border-color 0.25s, box-shadow 0.25s, background 0.25s,
+    backdrop-filter 0.25s;
+
+  .logo,
+  .link,
+  .langBtn,
+  .burger {
+    transition: color 0.25s, background 0.15s, border-color 0.25s, filter 0.25s;
+  }
 
   &.stuck {
     border-color: var(--line);
     box-shadow: 0 1px 0 rgba(30, 40, 55, 0.03);
+  }
+}
+
+/*
+  Home page, before the first scroll: no panel at all, so the hero photo reads
+  edge to edge from the very top. The hero's own scrim already darkens that
+  strip, so the bar flips to white type and leans on it — a light panel here
+  would only fog the photo.
+*/
+.overlay:not(.stuck) {
+  background: transparent;
+  backdrop-filter: none;
+
+  .logo {
+    filter: brightness(0) invert(1) drop-shadow(0 1px 10px rgba(8, 16, 26, 0.5));
+  }
+
+  .link {
+    color: rgba(255, 255, 255, 0.94);
+    text-shadow: 0 1px 12px rgba(8, 16, 26, 0.45);
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.16);
+    }
+  }
+
+  .linkOn {
+    background: rgba(255, 255, 255, 0.2);
+    color: #fff;
+  }
+
+  .lang {
+    background: rgba(255, 255, 255, 0.16);
+    border: 1px solid rgba(255, 255, 255, 0.28);
+  }
+
+  .langBtn {
+    color: rgba(255, 255, 255, 0.86);
+
+    &.langOn {
+      background: #fff;
+      color: var(--navy);
+    }
+  }
+
+  .burger {
+    border-color: rgba(255, 255, 255, 0.42);
+    color: #fff;
+    background: rgba(255, 255, 255, 0.12);
   }
 }
 
@@ -50,22 +107,23 @@
 }
 
 .link {
-  font-size: 15px;
+  font-size: var(--fs-md);
   font-weight: 500;
   color: var(--ink);
-  padding: 9px 14px;
+  /* em padding: the pill hugs its own label at any type size. */
+  padding: 0.6em 0.93em;
   border-radius: 999px;
   transition: background 0.15s, color 0.15s;
   border: none;
   background: none;
 
   &:hover {
-    background: var(--sand);
+    background: var(--mist);
   }
 }
 
 .linkOn {
-  background: var(--sand);
+  background: var(--mist);
   color: var(--navy);
   font-weight: 600;
 }
@@ -90,7 +148,8 @@
 /* Language switch */
 .lang {
   display: inline-flex;
-  background: var(--sand);
+  background: var(--mist);
+  border: 1px solid transparent;
   border-radius: 999px;
   padding: 3px;
 }
@@ -98,10 +157,10 @@
 .langBtn {
   border: none;
   background: none;
-  font-size: 12.5px;
+  font-size: var(--fs-xs);
   font-weight: 600;
   color: var(--ink-soft);
-  padding: 6px 11px;
+  padding: 0.46em 0.85em;
   border-radius: 999px;
   transition: 0.15s;
   letter-spacing: 0.02em;
@@ -137,7 +196,7 @@
   a {
     display: block;
     padding: 13px 8px;
-    font-size: 17px;
+    font-size: var(--fs-base);
     font-weight: 500;
     border-bottom: 1px solid var(--line);
     color: var(--ink);
@@ -190,8 +249,8 @@
   }
 
   .langBtn {
-    font-size: 11.5px;
-    padding: 5px 7px;
+    font-size: var(--fs-2xs);
+    padding: 0.45em 0.64em;
   }
 }
 
@@ -216,7 +275,7 @@
 
 @media (max-width: 480px) {
   .drawerPanel a {
-    font-size: 16px;
+    font-size: var(--fs-body);
     padding: 12px 6px;
   }
 

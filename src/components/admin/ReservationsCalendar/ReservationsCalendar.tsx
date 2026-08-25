@@ -22,7 +22,7 @@ interface ReservationsCalendarProps {
 
 /** Booking channels shown on the calendar, plus colours. Unknown → grey. */
 const CHANNEL_COLOR: Record<string, string> = {
-  Website: '#c8643c',
+  Website: '#1b6ca8',
   WhatsApp: '#25a35a',
   Booking: '#2c4a64',
   Airbnb: '#e0565b',
@@ -30,7 +30,7 @@ const CHANNEL_COLOR: Record<string, string> = {
 };
 
 function channelColor(channel: string): string {
-  return CHANNEL_COLOR[channel] ?? '#6d6655';
+  return CHANNEL_COLOR[channel] ?? '#6b7683';
 }
 
 // Statuses that occupy the calendar. Declined/Draft never appear.

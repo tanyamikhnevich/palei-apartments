@@ -15,6 +15,14 @@ export interface BookingNotification {
   channel: string;
 }
 
+export interface ContactNotification {
+  name: string;
+  contact: string;
+  message?: string;
+  /** Where on the site the form was submitted from. */
+  page?: string;
+}
+
 export function isTelegramConfigured(): boolean {
   return Boolean(process.env.TELEGRAM_BOT_TOKEN && process.env.TELEGRAM_CHAT_ID);
 }
@@ -23,11 +31,15 @@ function escapeHtml(value: string): string {
   return value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
-/** Send a raw HTML message. Never throws — a failed notify must not break the flow. */
-export async function sendTelegramMessage(text: string): Promise<void> {
+/**
+ * Send a raw HTML message. Never throws — a failed notify must not break the
+ * flow that triggered it. Returns whether Telegram actually accepted it, so a
+ * caller with nowhere else to store the message can tell the guest the truth.
+ */
+export async function sendTelegramMessage(text: string): Promise<boolean> {
   const token = process.env.TELEGRAM_BOT_TOKEN;
   const chatId = process.env.TELEGRAM_CHAT_ID;
-  if (!token || !chatId) return;
+  if (!token || !chatId) return false;
 
   try {
     const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
@@ -42,9 +54,12 @@ export async function sendTelegramMessage(text: string): Promise<void> {
     });
     if (!res.ok) {
       console.error('Telegram sendMessage failed', res.status, await res.text());
+      return false;
     }
+    return true;
   } catch (e) {
     console.error('Telegram notify error', e);
+    return false;
   }
 }
 
@@ -60,4 +75,21 @@ export async function notifyNewBooking(b: BookingNotification): Promise<void> {
   ].filter(Boolean) as string[];
 
   await sendTelegramMessage(lines.join('\n'));
+}
+
+/**
+ * A message from the site's contact form. Unlike a booking there is no database
+ * row behind it — Telegram is the only place it lands — so the delivery result
+ * is handed back to the caller rather than swallowed.
+ */
+export async function notifyContactMessage(c: ContactNotification): Promise<boolean> {
+  const lines = [
+    '✉️ <b>New message from the website</b>',
+    `👤 ${escapeHtml(c.name)}`,
+    `📞 ${escapeHtml(c.contact)}`,
+    c.message ? `\n💬 ${escapeHtml(c.message)}` : null,
+    c.page ? `\n🔗 ${escapeHtml(c.page)}` : null,
+  ].filter(Boolean) as string[];
+
+  return sendTelegramMessage(lines.join('\n'));
 }

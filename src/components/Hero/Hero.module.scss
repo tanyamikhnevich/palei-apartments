@@ -1,6 +1,12 @@
 .hero {
   position: relative;
   padding: 0;
+  /*
+    On the home page the bar is a translucent panel laid over the photo, so the
+    hero starts behind it. The content pays the height back as top padding, and
+    the slide keeps its full frame.
+  */
+  margin-top: calc(-1 * var(--hdr-h));
 }
 
 .media {
@@ -58,7 +64,7 @@
 
 .inner {
   position: relative;
-  padding: 132px 0 72px;
+  padding: calc(132px + var(--hdr-h)) 0 72px;
   max-width: 720px;
 }
 
@@ -70,23 +76,29 @@
   border: 1px solid rgba(255, 255, 255, 0.34);
   backdrop-filter: blur(8px);
   color: #fff;
-  font-size: 13.5px;
+  font-size: var(--fs-sm);
   font-weight: 600;
-  padding: 7px 15px;
+  /* em padding, so the pill keeps its proportions as the label grows. */
+  padding: 0.5em 1.07em;
   border-radius: 999px;
   margin-bottom: 22px;
 }
 
 .h1 {
   color: #fff;
-  font-size: clamp(38px, 5.6vw, 66px);
+  /*
+    Both ends in rem so the heading answers the reader's font setting; the vw
+    term carries a rem share too, otherwise the middle of the range would be
+    the one place the setting had no effect.
+  */
+  font-size: clamp(2.375rem, 5.6vw + 0.25rem, 4.125rem);
   letter-spacing: -0.035em;
   text-shadow: 0 2px 30px rgba(10, 20, 30, 0.35);
 }
 
 .sub {
   color: rgba(255, 255, 255, 0.94);
-  font-size: clamp(17px, 2vw, 21px);
+  font-size: clamp(1.0625rem, 2vw + 0.25rem, 1.3125rem);
   margin-top: 20px;
   max-width: 36ch;
   text-shadow: 0 1px 16px rgba(10, 20, 30, 0.35);
@@ -140,7 +152,7 @@
   display: flex;
   align-items: center;
   gap: 11px;
-  font-size: 15px;
+  font-size: var(--fs-md);
   font-weight: 500;
   color: var(--ink);
 }
@@ -162,7 +174,7 @@
   }
 
   .inner {
-    padding: 96px 0 56px;
+    padding: calc(40px + var(--hdr-h)) 0 56px;
   }
 
   .cta {
@@ -192,22 +204,22 @@
   }
 
   .inner {
-    padding: 80px 0 48px;
+    padding: calc(30px + var(--hdr-h)) 0 48px;
   }
 
   .pill {
-    font-size: 12px;
-    padding: 6px 12px;
+    font-size: var(--fs-xs);
     margin-bottom: 16px;
   }
 
   .sub {
     max-width: none;
-    font-size: 16px;
+    /* The hero subtitle is body copy — it tracks the page's body size. */
+    font-size: var(--fs-body);
   }
 
   .trustItem {
-    font-size: 14px;
+    font-size: var(--fs-sm);
     flex: 1 1 100%;
   }
 }

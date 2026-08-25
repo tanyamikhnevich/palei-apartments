@@ -21,9 +21,9 @@
   border: 1px solid var(--line-2);
   background: var(--surface);
   color: var(--ink);
-  font-size: 14px;
+  font-size: var(--fs-sm);
   font-weight: 600;
-  padding: 9px 16px;
+  padding: 0.64em 1.14em;
   border-radius: 999px;
   transition: 0.15s;
   cursor: pointer;
@@ -54,9 +54,9 @@
   background: var(--surface);
   color: var(--ink);
   font-family: inherit;
-  font-size: 14px;
+  font-size: var(--fs-sm);
   font-weight: 600;
-  padding: 9px 16px;
+  padding: 0.64em 1.14em;
   border-radius: 999px;
   cursor: pointer;
   transition: 0.15s;
@@ -101,7 +101,7 @@
 }
 
 .moreLink {
-  font-size: 15px;
+  font-size: var(--fs-md);
   font-weight: 600;
   color: var(--accent-press);
   text-decoration: none;

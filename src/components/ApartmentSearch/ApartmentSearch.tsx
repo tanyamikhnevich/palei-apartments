@@ -86,10 +86,15 @@ export default function ApartmentSearch({ variant = 'hero', initial }: Apartment
   };
 
   const rootClass = variant === 'hero' ? styles.hero : styles.page;
+  /*
+    The hero search asks for dates only — guest count is a filter people reach
+    for once they are looking at apartments, so it lives on the results page.
+  */
+  const showGuests = variant !== 'hero';
 
   return (
     <div className={rootClass}>
-      <div className={styles.bar}>
+      <div className={`${styles.bar} ${showGuests ? '' : styles.barDatesOnly}`}>
         <div className={styles.cell} ref={dateCellRef}>
           <label htmlFor={`search-dates-${variant}`}>{t('hero.checkIn')}</label>
           {/* The calendar icon is what makes this read as a date picker at a glance. */}
@@ -128,20 +133,22 @@ export default function ApartmentSearch({ variant = 'hero', initial }: Apartment
           )}
         </div>
 
-        <div className={`${styles.cell} ${styles.cellGuests}`}>
-          <label htmlFor={`search-guests-${variant}`}>{t('hero.guests')}</label>
-          <Icon name="guest" size={17} className={styles.cellIcon} />
-          <select
-            id={`search-guests-${variant}`}
-            value={guests}
-            onChange={(e) => setGuests(parseInt(e.target.value, 10))}
-          >
-            <option value={1}>{t('hero.guestOptions.one')}</option>
-            <option value={2}>{t('hero.guestOptions.two')}</option>
-            <option value={3}>{t('hero.guestOptions.three')}</option>
-            <option value={4}>{t('hero.guestOptions.fourPlus')}</option>
-          </select>
-        </div>
+        {showGuests && (
+          <div className={`${styles.cell} ${styles.cellGuests}`}>
+            <label htmlFor={`search-guests-${variant}`}>{t('hero.guests')}</label>
+            <Icon name="guest" size={17} className={styles.cellIcon} />
+            <select
+              id={`search-guests-${variant}`}
+              value={guests}
+              onChange={(e) => setGuests(parseInt(e.target.value, 10))}
+            >
+              <option value={1}>{t('hero.guestOptions.one')}</option>
+              <option value={2}>{t('hero.guestOptions.two')}</option>
+              <option value={3}>{t('hero.guestOptions.three')}</option>
+              <option value={4}>{t('hero.guestOptions.fourPlus')}</option>
+            </select>
+          </div>
+        )}
 
         <Button className={styles.go} variant="primary" icon="search" onClick={runSearch}>
           {t('hero.search')}

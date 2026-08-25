@@ -11,7 +11,7 @@
   align-items: center;
   gap: 8px;
   align-self: flex-start;
-  font-size: 14.5px;
+  font-size: var(--fs-sm);
   font-weight: 600;
   color: var(--ink-soft);
   transition: color 0.15s;
@@ -42,7 +42,7 @@
 }
 
 .title {
-  font-size: clamp(26px, 3.2vw, 38px);
+  font-size: clamp(1.625rem, 3.2vw + 0.25rem, 2.375rem);
 }
 
 .meta {
@@ -52,7 +52,7 @@
   gap: 8px 18px;
   margin-top: 10px;
   color: var(--ink-soft);
-  font-size: 14.5px;
+  font-size: var(--fs-sm);
 }
 
 .loc,
@@ -65,11 +65,11 @@
 .priceBox {
   flex: none;
   color: var(--ink-soft);
-  font-size: 14px;
+  font-size: var(--fs-sm);
 
   b {
     color: var(--ink);
-    font-size: 30px;
+    font-size: 1.875rem;
     font-weight: 800;
     letter-spacing: -0.03em;
   }
@@ -123,23 +123,71 @@
   flex-wrap: wrap;
   gap: 16px;
   color: var(--ink-soft);
-  font-size: 14px;
+  font-size: var(--fs-sm);
+}
+
+.descBlock {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
 }
 
 .desc {
   color: var(--ink-soft);
-  font-size: 16px;
+  font-size: var(--fs-body);
   line-height: 1.65;
+  align-self: stretch;
+}
+
+/*
+  The clamp goes on the paragraph itself — `-webkit-box` only counts lines of
+  the text it directly holds, and the wrapper is what carries the measuring ref.
+*/
+.descClamped p {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 8;
+  overflow: hidden;
+}
+
+.descToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  border: none;
+  background: none;
+  font-family: inherit;
+  font-size: var(--fs-md);
+  font-weight: 700;
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color 0.15s;
+
+  &:hover {
+    color: var(--accent);
+  }
+}
+
+.descChevron {
+  transform: rotate(90deg);
+  transition: transform 0.25s var(--ease);
+}
+
+.descChevronUp {
+  transform: rotate(-90deg);
 }
 
 .bookingCol {
   grid-column: 2;
   grid-row: 1 / span 3;
   position: sticky;
-  top: 96px;
+  top: calc(var(--hdr-h) + 20px);
   min-width: 0;
   /* Clears the sticky header when the floating CTA jumps to `#book`. */
-  scroll-margin-top: 96px;
+  scroll-margin-top: calc(var(--hdr-h) + 20px);
 }
 
 .booking {
@@ -155,7 +203,7 @@
 
 .minStay {
   margin: 0;
-  font-size: 13px;
+  font-size: var(--fs-xs);
   color: var(--ink-soft);
 }
 
@@ -170,17 +218,17 @@
   border-radius: var(--r-md);
   background: var(--bg);
   border: 1px solid var(--line);
-  font-size: 14px;
+  font-size: var(--fs-sm);
   color: var(--ink-soft);
 
   strong {
     color: var(--ink);
-    font-size: 18px;
+    font-size: var(--fs-lg);
   }
 }
 
 .muted {
-  font-size: 13px;
+  font-size: var(--fs-xs);
   color: var(--ink-soft);
   margin: 0;
 }
@@ -194,7 +242,7 @@
 
 .error {
   color: #b42318;
-  font-size: 13.5px;
+  font-size: var(--fs-sm);
   margin: 0;
 }
 
@@ -218,12 +266,12 @@
 }
 
 .successTitle {
-  font-size: 20px;
+  font-size: var(--fs-lg);
 }
 
 .successDesc {
   color: var(--ink-soft);
-  font-size: 14.5px;
+  font-size: var(--fs-sm);
 }
 
 @media (max-width: 980px) {
@@ -253,11 +301,6 @@
     padding-bottom: 48px;
   }
 
-  .gallery {
-    aspect-ratio: 4 / 3;
-    border-radius: var(--r-md);
-  }
-
   .head {
     align-items: flex-start;
   }
@@ -283,7 +326,7 @@
 }
 
 .ratesTitle {
-  font-size: 11.5px;
+  font-size: var(--fs-2xs);
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -295,7 +338,7 @@
   display: flex;
   justify-content: space-between;
   gap: 12px;
-  font-size: 13.5px;
+  font-size: var(--fs-sm);
   color: var(--ink-soft);
 }
 
@@ -310,7 +353,7 @@
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
   gap: 8px;
-  font-size: 13.5px;
+  font-size: var(--fs-sm);
   cursor: pointer;
 
   input {
@@ -328,7 +371,7 @@
 }
 
 .summaryDates {
-  font-size: 13px;
+  font-size: var(--fs-xs);
   color: var(--ink-soft);
   margin-bottom: 8px;
 }
@@ -337,7 +380,7 @@
   display: flex;
   justify-content: space-between;
   gap: 12px;
-  font-size: 13.5px;
+  font-size: var(--fs-sm);
   color: var(--ink-soft);
   padding: 2px 0;
 }
@@ -351,5 +394,114 @@
   padding-top: 10px;
   border-top: 1px solid var(--line);
   color: var(--ink-soft);
-  font-size: 13.5px;
+  font-size: var(--fs-sm);
+}
+
+/*
+  The pinned reserve bar. Desktop keeps the booking panel in view on its own
+  sticky column, so the bar only exists once the layout has stacked.
+*/
+.reserveBar {
+  display: none;
+}
+
+.reservePrice {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0 6px;
+  min-width: 0;
+}
+
+.reserveAmount {
+  font-size: var(--fs-lg);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+.reserveFrom {
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+
+.reserveNote {
+  font-size: var(--fs-xs);
+  color: var(--ink-soft);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.reserveBtn {
+  flex: none;
+}
+
+@media (max-width: 980px) {
+  .reserveBar {
+    position: fixed;
+    inset-inline: 0;
+    bottom: 0;
+    z-index: 900;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 12px var(--wrap-pad);
+    padding-bottom: calc(12px + env(safe-area-inset-bottom));
+    background: rgba(251, 252, 253, 0.94);
+    backdrop-filter: blur(14px) saturate(1.1);
+    border-top: 1px solid var(--line);
+    box-shadow: 0 -8px 26px -14px rgba(20, 25, 35, 0.3);
+  }
+
+  /* Room for the bar so it never sits on the last line of the page. */
+  .page {
+    padding-bottom: calc(84px + env(safe-area-inset-bottom));
+  }
+}
+
+/*
+  Phone layout, borrowed from the booking apps: the photo runs edge to edge,
+  above the title. The back link keeps its default order so there is always a
+  way out at the top.
+*/
+@media (max-width: 720px) {
+  /*
+    The two-class selector is load-bearing: PhotoGallery's own root sets
+    `width: 100%`, which measures the padded column and leaves the frame short
+    on the end side once the negative margins pull it out. Winning on
+    specificity is what makes the photo reach both edges.
+  */
+  .page .gallery {
+    order: 1;
+    aspect-ratio: 4 / 3;
+    width: calc(100% + 2 * var(--wrap-pad));
+    margin-inline: calc(-1 * var(--wrap-pad));
+    border-radius: 0;
+    border-inline: none;
+    border-top: none;
+    box-shadow: none;
+  }
+
+  .head {
+    order: 2;
+    margin-top: 6px;
+  }
+
+  .layout {
+    order: 3;
+  }
+
+  /* The pinned bar carries the price on phones — twice is once too many. */
+  .priceBox {
+    display: none;
+  }
+
+  .title {
+    font-size: 1.5625rem;
+    line-height: 1.2;
+  }
 }

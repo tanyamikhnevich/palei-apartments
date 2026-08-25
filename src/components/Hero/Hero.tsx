@@ -15,15 +15,16 @@ const TRUST_KEYS = [
 ];
 
 /**
- * The reason someone books: sunset over the sea, a rooftop, a pool.
- * `position` keeps the subject in frame once the wide crop bites — the sunset
- * shot is a portrait photo, so it is anchored above centre.
+ * The reason someone books: the sea off the balcony, then the rooms themselves.
+ * `position` keeps the subject in frame once the wide crop bites — the sea shots
+ * are 4:3, so they need an anchor; the interiors are already 16:9 and sit flush.
  */
 const SLIDES = [
-  { src: '/hero/01-sunset.webp', position: 'center 38%' },
-  { src: '/hero/02-terrace.webp', position: 'center 55%' },
-  { src: '/hero/03-pool.webp', position: 'center' },
-  { src: '/hero/04-living.webp', position: 'center' },
+  { src: '/hero/01-beach-sunset.webp', position: 'center 55%' },
+  { src: '/hero/04-living-room.webp', position: 'center' },
+  { src: '/hero/03-sunset-clouds.webp', position: 'center 45%' },
+  { src: '/hero/05-kitchen-dining.webp', position: 'center' },
+  { src: '/hero/02-moonlit-sea.webp', position: 'center 45%' },
 ];
 
 const SLIDE_MS = 3800;

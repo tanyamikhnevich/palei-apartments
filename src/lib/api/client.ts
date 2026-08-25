@@ -163,6 +163,26 @@ export async function submitBookingRequest(booking: Booking): Promise<Booking> {
   return data.booking;
 }
 
+export type ContactRequest = {
+  name: string;
+  contact: string;
+  message?: string;
+  /** Hidden anti-bot field — must stay empty. */
+  honeypot?: string;
+  /** Where the form was submitted from, for context in the chat. */
+  page?: string;
+};
+
+/** Sends a contact-form message to the team's Telegram chat. */
+export async function submitContactRequest(payload: ContactRequest): Promise<void> {
+  const res = await fetch('/api/contact', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  await parseJson<{ ok: true }>(res);
+}
+
 export async function updateBookingStatus(id: string, status: BookingStatus): Promise<Booking> {
   const res = await fetch(`/api/bookings/${id}`, {
     method: 'PATCH',

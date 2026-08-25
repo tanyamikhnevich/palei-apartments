@@ -10,7 +10,7 @@
   border: 1px solid var(--line);
   border-radius: var(--r-lg);
   overflow: hidden;
-  background: var(--sand);
+  background: var(--mist);
   box-shadow: var(--shadow-sm);
 }
 
@@ -20,14 +20,14 @@
 
   :global(.leaflet-container) {
     font-family: var(--font);
-    background: var(--sand);
+    background: var(--mist);
     /* Non-interactive by design — no grab cursor to promise otherwise. */
     cursor: default;
   }
 
   /* OpenStreetMap's tiles require credit; keep it legible but quiet. */
   :global(.leaflet-control-attribution) {
-    font-size: 10px;
+    font-size: var(--fs-2xs);
     background: rgba(255, 255, 255, 0.8);
 
     a {
@@ -61,7 +61,7 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  font-size: 14.5px;
+  font-size: var(--fs-sm);
   font-weight: 600;
   color: var(--ink);
   min-width: 0;
@@ -76,7 +76,7 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 14px;
+  font-size: var(--fs-sm);
   font-weight: 600;
   color: var(--accent-press);
   white-space: nowrap;
@@ -100,6 +100,6 @@
   }
 
   .address {
-    font-size: 14px;
+    font-size: var(--fs-sm);
   }
 }

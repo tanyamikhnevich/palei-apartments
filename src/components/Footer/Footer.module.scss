@@ -25,7 +25,7 @@
   }
 
   p {
-    font-size: 14.5px;
+    font-size: var(--fs-sm);
     line-height: 1.6;
     max-width: 36ch;
   }
@@ -55,7 +55,7 @@
 .col {
   h5 {
     color: #fff;
-    font-size: 13px;
+    font-size: var(--fs-xs);
     letter-spacing: 0.08em;
     text-transform: uppercase;
     margin-bottom: 16px;
@@ -73,7 +73,7 @@
 
   a,
   .langBtn {
-    font-size: 14.5px;
+    font-size: var(--fs-sm);
     color: rgba(255, 255, 255, 0.72);
     transition: color 0.15s;
   }
@@ -99,7 +99,7 @@
   justify-content: space-between;
   gap: 20px;
   padding-top: 26px;
-  font-size: 13.5px;
+  font-size: var(--fs-sm);
   flex-wrap: wrap;
 }
 
@@ -124,36 +124,83 @@
   }
 }
 
+/*
+  Phones: the language column drops out, and the two remaining link columns sit
+  side by side instead of stacking — the footer was scrolling for far longer
+  than its contents deserved. Type and gaps tighten to match.
+*/
 @media (max-width: 760px) {
   .footer {
-    padding: 48px 0 28px;
+    padding: 32px 0 20px;
   }
 
   .top {
-    grid-template-columns: 1fr;
-    gap: 28px;
-    padding-bottom: 28px;
+    grid-template-columns: 1fr 1fr;
+    gap: 22px 20px;
+    padding-bottom: 20px;
+  }
+
+  .colLang {
+    display: none;
+  }
+
+  .logoWrap {
+    grid-column: 1 / -1;
+
+    img {
+      height: 32px;
+      padding: 6px 11px;
+      margin-bottom: 12px;
+    }
+
+    p {
+      font-size: var(--fs-xs);
+      line-height: 1.55;
+    }
+  }
+
+  .social {
+    margin-top: 12px;
+    gap: 8px;
+
+    a {
+      width: 36px;
+      height: 36px;
+    }
+  }
+
+  .col {
+    h5 {
+      font-size: var(--fs-2xs);
+      margin-bottom: 9px;
+    }
+
+    ul {
+      gap: 7px;
+    }
+
+    a,
+    .langBtn {
+      font-size: var(--fs-sm);
+    }
   }
 
   .bottom {
     flex-direction: column;
     align-items: flex-start;
-    gap: 14px;
+    gap: 8px;
+    padding-top: 16px;
+    font-size: var(--fs-xs);
   }
 
   .bottomLinks {
     flex-wrap: wrap;
-    gap: 14px 18px;
+    gap: 8px 16px;
   }
 }
 
 @media (max-width: 480px) {
   .footer {
-    padding: 40px 0 24px;
-  }
-
-  .social a {
-    width: 44px;
-    height: 44px;
+    padding: 28px 0 18px;
   }
 }

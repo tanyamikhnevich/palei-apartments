@@ -12,20 +12,20 @@
   font-size: var(--fs-md);
   font-weight: 700;
   letter-spacing: -0.01em;
-  color: #fff;
-  background: var(--accent-grad);
-  background-size: 180% 180%;
-  box-shadow: 0 10px 30px -8px var(--accent-glow), 0 2px 10px rgba(20, 25, 35, 0.16);
+
+  color: var(--coral-ink);
+  background: var(--coral);
+  box-shadow: 0 10px 30px -8px var(--coral-glow), 0 2px 10px rgba(20, 25, 35, 0.16);
   /* Hidden until the page scrolls — and untappable while it is. */
   opacity: 0;
   pointer-events: none;
   transform: translateY(14px) scale(0.96);
   transition: opacity 0.5s var(--ease), transform 0.5s var(--ease),
-    box-shadow 0.3s var(--ease), background-position 0.6s var(--ease);
+    box-shadow 0.3s var(--ease), background 0.2s var(--ease);
 
   &:hover {
-    background-position: 100% 0;
-    box-shadow: 0 16px 40px -10px var(--accent-glow), 0 3px 12px rgba(20, 25, 35, 0.2);
+    background: var(--coral-press);
+    box-shadow: 0 16px 40px -10px var(--coral-glow), 0 3px 12px rgba(20, 25, 35, 0.2);
     transform: translateY(-2px) scale(1.02);
   }
 
@@ -48,7 +48,7 @@
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  background: var(--accent);
+  background: var(--coral);
   opacity: 0.5;
   z-index: -1;
   animation: halo 2.8s var(--ease) infinite;

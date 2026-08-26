@@ -1,18 +1,25 @@
 'use client';
 
 import Icon from '@/components/ui/Icon/Icon';
-import { AdminField } from '@/components/admin/ui/AdminField';
+import { AdminField, blurOnWheel } from '@/components/admin/ui/AdminField';
 import type { PriceTier } from '@/types/apartment';
 import styles from './AdminPricing.module.scss';
 
 type AdminPriceTiersProps = {
+  /** Currency symbol of the apartment's region, for the field labels. */
+  currencySymbol: string;
   basePrice: number;
   tiers: PriceTier[];
   onChange: (tiers: PriceTier[]) => void;
 };
 
 /** Longer-stay rates. The base price covers everything below the first tier. */
-export default function AdminPriceTiers({ basePrice, tiers, onChange }: AdminPriceTiersProps) {
+export default function AdminPriceTiers({
+  basePrice,
+  tiers,
+  onChange,
+  currencySymbol,
+}: AdminPriceTiersProps) {
   const patch = (index: number, next: Partial<PriceTier>) =>
     onChange(tiers.map((tier, i) => (i === index ? { ...tier, ...next } : tier)));
 
@@ -44,6 +51,9 @@ export default function AdminPriceTiers({ basePrice, tiers, onChange }: AdminPri
                   <input
                     className="input"
                     type="number"
+                    inputMode="numeric"
+                    step={1}
+                    onWheel={blurOnWheel}
                     min={2}
                     value={tier.minNights}
                     onChange={(e) =>
@@ -52,10 +62,13 @@ export default function AdminPriceTiers({ basePrice, tiers, onChange }: AdminPri
                   />
                 </label>
                 <label>
-                  <span className={styles.cellLabel}>Price per night (₪)</span>
+                  <span className={styles.cellLabel}>Price per night ({currencySymbol})</span>
                   <input
                     className="input"
                     type="number"
+                    inputMode="numeric"
+                    step={1}
+                    onWheel={blurOnWheel}
                     min={0}
                     value={tier.price}
                     onChange={(e) =>

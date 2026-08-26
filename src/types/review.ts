@@ -9,7 +9,7 @@ export interface Review {
   rating: number;
   /** Optional free text — a review can be stars only. */
   text?: string;
-  /** Optional phone/email, never exposed publicly — admin moderation only. */
+  /** Optional phone number, never exposed publicly — admin moderation only. */
   contact?: string;
   status: ReviewStatus;
   /** ISO timestamp of submission. */

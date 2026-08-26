@@ -13,6 +13,8 @@ import { useLanguage } from '@/i18n/LanguageProvider';
 import { filterApartmentsBySearch, parseApartmentSearchParams } from '@/lib/apartmentSearch';
 import { collectApartmentTags, formatTagLabel } from '@/lib/apartmentTags';
 import { fetchAllBookingAvailability, fetchApartments } from '@/lib/api/client';
+import { apartmentsInCountry } from '@/lib/regions';
+import type { Region } from '@/types/region';
 import styles from './ApartmentGrid.module.scss';
 
 // Leaflet touches `window` on import, so the map is client-only and is not
@@ -24,7 +26,21 @@ const ApartmentMap = dynamic(() => import('@/components/ApartmentMap/ApartmentMa
 
 const SKELETON_COUNT = 6;
 
-export default function ApartmentGridFull() {
+type ApartmentGridFullProps = {
+  /** Scopes the grid to one country's listings; omit to show every region. */
+  country?: Region['country'];
+  /** Copy keys, so the Cyprus page can title itself. */
+  eyebrowKey?: string;
+  titleKey?: string;
+  subKey?: string;
+};
+
+export default function ApartmentGridFull({
+  country,
+  eyebrowKey = 'apartments.eyebrow',
+  titleKey = 'apartments.allTitle',
+  subKey = 'apartments.allSub',
+}: ApartmentGridFullProps = {}) {
   const { t } = useLanguage();
   const searchParams = useSearchParams();
   const search = useMemo(
@@ -45,11 +61,11 @@ export default function ApartmentGridFull() {
   useEffect(() => {
     Promise.all([fetchApartments({ publicOnly: true }), fetchAllBookingAvailability()])
       .then(([{ apartments: list }, blocked]) => {
-        setApartments(list);
+        setApartments(apartmentsInCountry(list, country));
         setBlockedByApartment(blocked);
       })
       .finally(() => setLoading(false));
-  }, []);
+  }, [country]);
 
   const tags = useMemo(() => collectApartmentTags(apartments), [apartments]);
 
@@ -64,9 +80,9 @@ export default function ApartmentGridFull() {
       <div className="wrap">
         <div className={styles.header}>
           <div>
-            <div className="eyebrow">{t('apartments.eyebrow')}</div>
-            <h2 className="section-title">{t('apartments.allTitle')}</h2>
-            <p className="section-sub">{t('apartments.allSub')}</p>
+            <div className="eyebrow">{t(eyebrowKey)}</div>
+            <h2 className="section-title">{t(titleKey)}</h2>
+            <p className="section-sub">{t(subKey)}</p>
           </div>
           <Button variant="ghost" iconRight="arrow" as="a" href="/">
             {t('apartments.backHome')}

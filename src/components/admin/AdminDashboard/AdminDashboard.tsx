@@ -12,6 +12,8 @@ import AdminApartmentCard, {
 import AdminListBar, { type AdminListMode } from '@/components/admin/AdminListBar/AdminListBar';
 import AdminApartmentModal from '@/components/admin/AdminApartmentModal/AdminApartmentModal';
 import AdminSettings from '@/components/admin/AdminSettings/AdminSettings';
+import AdminCars from '@/components/admin/AdminCars/AdminCars';
+import AdminFlowers from '@/components/admin/AdminFlowers/AdminFlowers';
 import BookingsTable from '@/components/admin/BookingsTable/BookingsTable';
 import ReservationsCalendar from '@/components/admin/ReservationsCalendar/ReservationsCalendar';
 import ReviewsTable from '@/components/admin/ReviewsTable/ReviewsTable';
@@ -25,12 +27,16 @@ import {
   updateApartment,
 } from '@/lib/api/client';
 import { toggleApartmentListing } from '@/lib/apartmentVisibility';
+import { apartmentsInCountry, countryOf } from '@/lib/regions';
+import type { Region } from '@/types/region';
 import styles from './AdminDashboard.module.scss';
 
 export default function AdminDashboard() {
   const [view, setView] = useState<AdminView>('apartments');
   const [listMode, setListMode] = useState<AdminListMode>('grid');
   const [query, setQuery] = useState('');
+  /** Which country's listings are on screen; null shows every region. */
+  const [country, setCountry] = useState<Region['country'] | null>(null);
   const [navOpen, setNavOpen] = useState(false);
   const [list, setList] = useState<Apartment[]>([]);
   const [loading, setLoading] = useState(true);
@@ -61,16 +67,17 @@ export default function AdminDashboard() {
   }, [view]);
 
   const filtered = useMemo(() => {
+    const scoped = apartmentsInCountry(list, country ?? undefined);
     const q = query.trim().toLowerCase();
-    if (!q) return list;
-    return list.filter((a) => {
+    if (!q) return scoped;
+    return scoped.filter((a) => {
       const text = Object.values(a.locales)
         .map((loc) => `${loc.title} ${loc.location} ${loc.description}`)
         .join(' ')
         .toLowerCase();
       return text.includes(q) || a.area.toLowerCase().includes(q);
     });
-  }, [list, query]);
+  }, [list, query, country]);
 
   const persist = async (action: () => Promise<void>) => {
     if (!fromDb) return;
@@ -161,7 +168,13 @@ export default function AdminDashboard() {
                 </p>
               )}
               <AdminStats apartments={list} />
-              <AdminListBar mode={listMode} onModeChange={setListMode} />
+              <AdminListBar
+                mode={listMode}
+                onModeChange={setListMode}
+                country={country}
+                onCountryChange={setCountry}
+                count={filtered.length}
+              />
               {loading ? (
                 <p className={styles.empty}>Loading apartments…</p>
               ) : filtered.length === 0 ? (
@@ -188,6 +201,10 @@ export default function AdminDashboard() {
               )}
             </>
           )}
+
+          {view === 'cars' && <AdminCars />}
+
+          {view === 'flowers' && <AdminFlowers />}
 
           {view === 'bookings' && <BookingsTable />}
 

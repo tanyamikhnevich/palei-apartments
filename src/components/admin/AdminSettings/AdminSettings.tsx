@@ -15,14 +15,13 @@ import {
   PHONE_INPUT_MAX_LENGTH,
   sanitizePhoneInput,
   validateBusinessName,
-  validateEmail,
   validatePhone,
   validationMessageEn,
   type ValidationCode,
 } from '@/lib/validation/contact';
 import styles from './AdminSettings.module.scss';
 
-type FieldKey = 'businessName' | 'contactPhone' | 'contactEmail' | 'whatsappNumber';
+type FieldKey = 'businessName' | 'contactPhone' | 'whatsappNumber';
 
 function validateAll(settings: BusinessSettings): Partial<Record<FieldKey, string>> {
   const next: Partial<Record<FieldKey, string>> = {};
@@ -36,8 +35,6 @@ function validateAll(settings: BusinessSettings): Partial<Record<FieldKey, strin
   const whatsapp = validatePhone(settings.whatsappNumber);
   if (!whatsapp.ok) next.whatsappNumber = validationMessageEn(whatsapp.code);
 
-  const email = validateEmail(settings.contactEmail);
-  if (!email.ok) next.contactEmail = validationMessageEn(email.code);
 
   return next;
 }
@@ -51,9 +48,6 @@ function validateField(key: FieldKey, value: string): string | undefined {
     case 'contactPhone':
     case 'whatsappNumber':
       result = validatePhone(value);
-      break;
-    case 'contactEmail':
-      result = validateEmail(value);
       break;
   }
   if (!result.ok) return validationMessageEn(result.code as ValidationCode);
@@ -84,7 +78,7 @@ export default function AdminSettings() {
   const update = <K extends keyof BusinessSettings>(key: K, value: BusinessSettings[K]) => {
     setSettings((prev) => ({ ...prev, [key]: value }));
     setStatus(null);
-    if (key === 'businessName' || key === 'contactPhone' || key === 'contactEmail' || key === 'whatsappNumber') {
+    if (key === 'businessName' || key === 'contactPhone' || key === 'whatsappNumber') {
       setFieldErrors((prev) => ({ ...prev, [key]: undefined }));
     }
   };
@@ -104,7 +98,6 @@ export default function AdminSettings() {
 
     const phone = validatePhone(settings.contactPhone);
     const whatsapp = validatePhone(settings.whatsappNumber);
-    const email = validateEmail(settings.contactEmail);
     const business = validateBusinessName(settings.businessName);
 
     const payload: BusinessSettings = {
@@ -112,7 +105,6 @@ export default function AdminSettings() {
       businessName: business.ok ? business.normalized! : settings.businessName.trim(),
       contactPhone: phone.ok ? phone.normalized! : settings.contactPhone,
       whatsappNumber: whatsapp.ok ? whatsapp.normalized! : settings.whatsappNumber,
-      contactEmail: email.ok ? email.normalized! : settings.contactEmail.trim(),
     };
 
     setSaving(true);
@@ -166,17 +158,6 @@ export default function AdminSettings() {
               maxLength={PHONE_INPUT_MAX_LENGTH}
               onChange={(e) => update('contactPhone', sanitizePhoneInput(e.target.value))}
               onBlur={() => blurField('contactPhone')}
-            />
-            <AdminInput
-              label="Contact email"
-              type="email"
-              inputMode="email"
-              autoComplete="email"
-              value={settings.contactEmail}
-              maxLength={254}
-              error={fieldErrors.contactEmail}
-              onChange={(e) => update('contactEmail', e.target.value)}
-              onBlur={() => blurField('contactEmail')}
             />
           </div>
           <AdminInput

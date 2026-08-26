@@ -119,11 +119,6 @@ export default function ApartmentSearch({ variant = 'hero', initial }: Apartment
               <DateRangeCalendar
                 locale={locale}
                 hint={calendarHint}
-                labels={{
-                  prev: t('booking.prevMonth'),
-                  next: t('booking.nextMonth'),
-                  weekdays: [],
-                }}
                 blocked={[]}
                 checkIn={checkIn}
                 checkOut={checkOut}

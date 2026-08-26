@@ -33,7 +33,7 @@ async function seed() {
       id: 'default',
       businessName: DEFAULT_BUSINESS_SETTINGS.businessName,
       contactPhone: DEFAULT_BUSINESS_SETTINGS.contactPhone,
-      contactEmail: DEFAULT_BUSINESS_SETTINGS.contactEmail,
+      contactEmail: '',
       whatsappNumber: DEFAULT_BUSINESS_SETTINGS.whatsappNumber,
       defaultLanguage: DEFAULT_BUSINESS_SETTINGS.defaultLanguage,
       currency: DEFAULT_BUSINESS_SETTINGS.currency,
@@ -44,7 +44,7 @@ async function seed() {
       set: {
         businessName: DEFAULT_BUSINESS_SETTINGS.businessName,
         contactPhone: DEFAULT_BUSINESS_SETTINGS.contactPhone,
-        contactEmail: DEFAULT_BUSINESS_SETTINGS.contactEmail,
+      contactEmail: '',
         whatsappNumber: DEFAULT_BUSINESS_SETTINGS.whatsappNumber,
         defaultLanguage: DEFAULT_BUSINESS_SETTINGS.defaultLanguage,
         currency: DEFAULT_BUSINESS_SETTINGS.currency,

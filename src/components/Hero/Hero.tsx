@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import ApartmentSearch from '@/components/ApartmentSearch/ApartmentSearch';
 import Button from '@/components/ui/Button/Button';
 import Icon from '@/components/ui/Icon/Icon';
@@ -15,16 +15,19 @@ const TRUST_KEYS = [
 ];
 
 /**
- * The reason someone books: the sea off the balcony, then the rooms themselves.
- * `position` keeps the subject in frame once the wide crop bites — the sea shots
- * are 4:3, so they need an anchor; the interiors are already 16:9 and sit flush.
+ * The reason someone books: the terrace, the rooms, and the sunset off them.
+ * `position` keeps the subject in frame once the wide crop bites — the terrace
+ * is anchored low so the ceiling drops out, and the sunset high enough to hold
+ * the sun. The interiors are already 16:9 and sit flush.
  */
 const SLIDES = [
-  { src: '/hero/01-beach-sunset.webp', position: 'center 55%' },
-  { src: '/hero/04-living-room.webp', position: 'center' },
-  { src: '/hero/03-sunset-clouds.webp', position: 'center 45%' },
-  { src: '/hero/05-kitchen-dining.webp', position: 'center' },
-  { src: '/hero/02-moonlit-sea.webp', position: 'center 45%' },
+  { src: '/hero/01-terrace-sea.webp', position: 'center 60%' },
+  { src: '/hero/02-beach.webp', position: 'center 60%' },
+  { src: '/hero/03-living-room.webp', position: 'center' },
+  { src: '/hero/04-kitchen-blue.webp', position: 'center' },
+  { src: '/hero/05-bedroom-yellow.webp', position: 'center' },
+  { src: '/hero/06-sunset-sea.webp', position: 'center 45%' },
+  { src: '/hero/07-blue-sofa.webp', position: 'center 55%' },
 ];
 
 const SLIDE_MS = 3800;
@@ -32,33 +35,35 @@ const SLIDE_MS = 3800;
 export default function Hero() {
   const { t } = useLanguage();
   const [active, setActive] = useState(0);
-  const [paused, setPaused] = useState(false);
-  const timer = useRef<ReturnType<typeof setInterval> | null>(null);
+  /* Bumped when a dot is tapped, to restart the cycle from that slide. */
+  const [cycle, setCycle] = useState(0);
 
   const go = useCallback((index: number) => {
     setActive((index + SLIDES.length) % SLIDES.length);
+    setCycle((c) => c + 1);
   }, []);
 
+  /*
+    No pause on hover. It used to sit on the whole media block, which is the
+    full height of the first screen — so on a desktop the pointer was almost
+    always inside it and the slideshow simply never ran. On a phone it was
+    worse: a tap fires mouseenter with no mouseleave to follow, so one touch
+    stopped it for good. The photos are background, and nothing is lost by
+    letting them carry on behind the cursor.
+  */
   useEffect(() => {
-    if (paused) return;
     const reduced =
       typeof window !== 'undefined' &&
       window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (reduced) return;
 
-    timer.current = setInterval(() => setActive((i) => (i + 1) % SLIDES.length), SLIDE_MS);
-    return () => {
-      if (timer.current) clearInterval(timer.current);
-    };
-  }, [paused]);
+    const id = setInterval(() => setActive((i) => (i + 1) % SLIDES.length), SLIDE_MS);
+    return () => clearInterval(id);
+  }, [cycle]);
 
   return (
     <section className={styles.hero} id="top">
-      <div
-        className={styles.media}
-        onMouseEnter={() => setPaused(true)}
-        onMouseLeave={() => setPaused(false)}
-      >
+      <div className={styles.media}>
         {/*
           The slides are clipped by their own layer, not by the hero — the date
           picker opens past the bottom edge and must not be cut off.

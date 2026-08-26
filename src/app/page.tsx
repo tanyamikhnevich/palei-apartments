@@ -4,6 +4,7 @@ import ApartmentCarousel from '@/components/ApartmentCarousel/ApartmentCarousel'
 import AboutSection from '@/components/AboutSection/AboutSection';
 import BenefitsSection from '@/components/BenefitsSection/BenefitsSection';
 import LocationSection from '@/components/LocationSection/LocationSection';
+import GroupSection from '@/components/GroupSection/GroupSection';
 import ContactSection from '@/components/ContactSection/ContactSection';
 import Footer from '@/components/Footer/Footer';
 import Reveal from '@/components/ui/Reveal/Reveal';
@@ -23,6 +24,9 @@ export default function HomePage() {
         </Reveal>
         <Reveal>
           <LocationSection />
+        </Reveal>
+        <Reveal>
+          <GroupSection />
         </Reveal>
         <Reveal>
           <ContactSection />

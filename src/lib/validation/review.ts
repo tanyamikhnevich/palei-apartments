@@ -2,7 +2,7 @@
 
 import {
   validatePersonName,
-  validatePhoneOrEmail,
+  validatePhone,
   validationMessageEn,
   type ValidationCode,
 } from './contact';
@@ -60,7 +60,7 @@ export function validateReview(input: ReviewInput): ReviewValidation {
 
   let contact: string | undefined;
   if (input.contact != null && input.contact.trim()) {
-    const result = validatePhoneOrEmail(input.contact);
+    const result = validatePhone(input.contact);
     if (!result.ok) return { ok: false, code: result.code };
     contact = result.normalized;
   }

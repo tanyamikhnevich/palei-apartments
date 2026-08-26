@@ -2,6 +2,9 @@ import type { Apartment } from '@/types/apartment';
 import Icon from '@/components/ui/Icon/Icon';
 import type { IconName } from '@/components/ui/Icon/Icon';
 import styles from './AdminStats.module.scss';
+import { formatMoney } from '@/lib/money';
+import { currencyForArea } from '@/lib/regions';
+import { DEFAULT_AREA } from '@/types/region';
 
 interface AdminStatsProps {
   apartments: Apartment[];
@@ -18,7 +21,15 @@ export default function AdminStats({ apartments }: AdminStatsProps) {
     { icon: 'home', value: apartments.length, label: 'Total apartments' },
     { icon: 'check', value: available, label: 'Available now' },
     { icon: 'calendar', value: booked, label: 'Currently booked' },
-    { icon: 'sparkle', value: `₪${avgPrice}`, label: 'Avg. price / night' },
+    {
+      icon: 'sparkle',
+      /*
+        Shown in the home region's currency. Once listings span two currencies
+        a single average stops meaning anything — split it by region then.
+      */
+      value: formatMoney(avgPrice, currencyForArea(DEFAULT_AREA), 'en'),
+      label: 'Avg. price / night',
+    },
   ];
 
   return (

@@ -1,0 +1,257 @@
+.section {
+  padding: 48px 0 96px;
+}
+
+.header {
+  max-width: 60ch;
+  margin-bottom: 24px;
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 28px;
+}
+
+.chip {
+  padding: 0.64em 1.14em;
+  border-radius: 999px;
+  border: 1px solid var(--line-2);
+  background: var(--surface);
+  font-family: inherit;
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: 0.15s;
+
+  &:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+}
+
+.chipOn {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.2s var(--ease), transform 0.2s var(--ease);
+
+  &:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+  }
+}
+
+.media {
+  aspect-ratio: 4 / 5;
+  border-bottom: 1px solid var(--line);
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px 18px 18px;
+  flex: 1;
+}
+
+.name {
+  margin: 0;
+  font-size: var(--fs-base);
+  letter-spacing: -0.01em;
+}
+
+.note {
+  margin: 0;
+  font-size: var(--fs-sm);
+  color: var(--ink-soft);
+  line-height: 1.5;
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0.3em 0.7em;
+  border-radius: 999px;
+  background: var(--mist);
+  color: var(--ink-soft);
+  font-size: var(--fs-2xs);
+  font-weight: 700;
+}
+
+/* Same-day is the thing people scan for — it gets the colour. */
+.tagFast {
+  background: var(--ok-bg);
+  color: var(--ok-fg);
+}
+
+.foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
+.price {
+  font-size: var(--fs-lg);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.empty {
+  padding: 56px 20px;
+  border: 1px dashed var(--line-2);
+  border-radius: var(--r-lg);
+  text-align: center;
+  color: var(--ink-soft);
+}
+
+/* Order sheet */
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(12, 22, 34, 0.5);
+  backdrop-filter: blur(3px);
+}
+
+.sheet {
+  width: min(620px, 100%);
+  max-height: 88vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+}
+
+.sheetHead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 20px;
+  border-bottom: 1px solid var(--line);
+
+  h2 { margin: 0; font-size: var(--fs-lg); letter-spacing: -0.02em; }
+  span { font-size: var(--fs-sm); color: var(--ink-soft); }
+}
+
+.close {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  flex: none;
+  border: 1px solid var(--line-2);
+  border-radius: 10px;
+  background: none;
+  color: var(--ink-soft);
+  cursor: pointer;
+
+  &:hover { background: var(--mist); color: var(--navy); }
+}
+
+.sheetBody {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  overflow-y: auto;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.hint {
+  margin: 0;
+  font-size: var(--fs-xs);
+  color: var(--warn-fg);
+  background: var(--warn-bg);
+  padding: 10px 12px;
+  border-radius: var(--r-sm);
+}
+
+.error {
+  margin: 0;
+  font-size: var(--fs-xs);
+  color: var(--busy-fg);
+  background: var(--busy-bg);
+  border: 1px solid var(--busy-line);
+  padding: 10px 12px;
+  border-radius: var(--r-sm);
+}
+
+.sent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 12px;
+  padding: 40px 24px;
+
+  h3 { margin: 0; font-size: var(--fs-xl); }
+  p { margin: 0; color: var(--ink-soft); font-size: var(--fs-sm); max-width: 44ch; }
+}
+
+.sentIcon {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--ok-bg);
+  color: var(--ok-fg);
+}
+
+/* Anti-bot field: out of sight and out of the tab order, but a real input. */
+.honeypot {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+@media (max-width: 640px) {
+  .section { padding: 32px 0 72px; }
+  .row { grid-template-columns: 1fr; }
+  .overlay { padding: 0; align-items: flex-end; }
+  .sheet { max-height: 92vh; border-radius: var(--r-lg) var(--r-lg) 0 0; }
+}

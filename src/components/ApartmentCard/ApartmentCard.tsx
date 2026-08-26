@@ -13,6 +13,8 @@ import { formatApartmentTags, getApartmentPhotos } from '@/lib/apartmentMedia';
 import { getPrimaryTagLabel } from '@/lib/apartmentTags';
 import { hasPriceTiers, priceFrom } from '@/lib/pricing';
 import styles from './ApartmentCard.module.scss';
+import { formatMoney } from '@/lib/money';
+import { currencyOf } from '@/lib/regions';
 
 interface ApartmentCardProps {
   apt: Apartment;
@@ -39,7 +41,8 @@ export default function ApartmentCard({ apt }: ApartmentCardProps) {
         <div className={styles.mediaBar}>
           {tagLine ? <span className={styles.featureTag}>{tagLine}</span> : <span />}
           <span className={styles.priceTag}>
-            {showFrom && <span>{t('apartments.from')} </span>}₪{fromPrice}{' '}
+            {showFrom && <span>{t('apartments.from')} </span>}
+            {formatMoney(fromPrice, currencyOf(apt), locale)}{' '}
             <span>{t('apartments.perNight')}</span>
           </span>
         </div>
@@ -88,7 +91,8 @@ export default function ApartmentCard({ apt }: ApartmentCardProps) {
         <div className={styles.foot}>
           <div className={styles.price}>
             {showFrom && <span>{t('apartments.from')} </span>}
-            <b>₪{fromPrice}</b> <span>{t('apartments.perNight')}</span>
+            <b>{formatMoney(fromPrice, currencyOf(apt), locale)}</b>{' '}
+            <span>{t('apartments.perNight')}</span>
           </div>
           <Button
             variant="ghost"

@@ -5,7 +5,6 @@ export type CurrencyCode = 'ILS' | 'USD' | 'EUR';
 export interface BusinessSettings {
   businessName: string;
   contactPhone: string;
-  contactEmail: string;
   whatsappNumber: string;
   defaultLanguage: Locale;
   currency: CurrencyCode;
@@ -27,7 +26,6 @@ export const LANGUAGE_OPTIONS: { value: Locale; label: string }[] = [
 export const DEFAULT_BUSINESS_SETTINGS: BusinessSettings = {
   businessName: 'Palei Apartments',
   contactPhone: '+972 50 000 0000',
-  contactEmail: 'hello@paleiapartments.com',
   whatsappNumber: '+972 50 000 0000',
   defaultLanguage: 'en',
   currency: 'ILS',

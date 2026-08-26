@@ -1,23 +1,22 @@
 'use client';
 
-import { useRef, useState } from 'react';
-import Image from 'next/image';
+import { useState } from 'react';
 import type { Apartment, ApartmentLocaleCopy, ApartmentStatus } from '@/types/apartment';
 import { DEFAULT_AVAILABILITY } from '@/lib/availability';
 import Button from '@/components/ui/Button/Button';
 import Icon from '@/components/ui/Icon/Icon';
-import Placeholder from '@/components/ui/Placeholder/Placeholder';
 import AdminAvailabilityCalendar from '@/components/admin/AdminAvailabilityCalendar/AdminAvailabilityCalendar';
 // import AdminCalendarSync from '@/components/admin/AdminCalendarSync/AdminCalendarSync';
 import AdminTagPicker from '@/components/admin/AdminTagPicker/AdminTagPicker';
-import { isPhotoUrl } from '@/lib/apartmentMedia';
 import { photoLabelFromTags } from '@/lib/apartmentTags';
-import { AdminField, AdminInput, AdminTextarea } from '@/components/admin/ui/AdminField';
+import PhotoManager from '@/components/admin/ui/PhotoManager';
+import { AdminField, AdminInput, AdminTextarea, blurOnWheel } from '@/components/admin/ui/AdminField';
 import AdminPriceTiers from '@/components/admin/AdminPricing/AdminPriceTiers';
 import AdminServices from '@/components/admin/AdminPricing/AdminServices';
-import { uploadApartmentPhotos } from '@/lib/api/client';
-import { IMAGE_UPLOAD_ACCEPT, IMAGE_UPLOAD_MAX_FILES } from '@/lib/imageUpload';
 import styles from './AdminApartmentModal.module.scss';
+import { CURRENCY_SYMBOL } from '@/lib/money';
+import { currencyForArea } from '@/lib/regions';
+import { DEFAULT_AREA, REGIONS } from '@/types/region';
 
 const STATUSES: ApartmentStatus[] = ['Available', 'Booked', 'Maintenance'];
 
@@ -40,178 +39,6 @@ function segClass(status: ApartmentStatus, active: ApartmentStatus): string {
   return `${styles.segBtn} ${styles.on} ${map[status]}`;
 }
 
-function PhotoManager({
-  photos,
-  onChange,
-}: {
-  photos: string[];
-  onChange: (photos: string[]) => void;
-}) {
-  const inputRef = useRef<HTMLInputElement>(null);
-  const [uploading, setUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState<string | null>(null);
-  const [uploadError, setUploadError] = useState<string | null>(null);
-  const [dragOver, setDragOver] = useState(false);
-  const [dragIndex, setDragIndex] = useState<number | null>(null);
-  const [dropIndex, setDropIndex] = useState<number | null>(null);
-
-  const del = (i: number) => onChange(photos.filter((_, idx) => idx !== i));
-
-  const reorder = (from: number, to: number) => {
-    if (from === to || from < 0 || to < 0 || from >= photos.length || to >= photos.length) return;
-    const next = [...photos];
-    const [item] = next.splice(from, 1);
-    next.splice(to, 0, item);
-    onChange(next);
-  };
-
-  const uploadFiles = async (fileList: FileList | File[] | null) => {
-    if (!fileList?.length) return;
-
-    const files = Array.from(fileList).slice(0, IMAGE_UPLOAD_MAX_FILES);
-    if (!files.length) return;
-
-    setUploading(true);
-    setUploadError(null);
-    setUploadProgress(
-      files.length === 1 ? '1 photo' : `${files.length} photos`
-    );
-
-    try {
-      const { urls } = await uploadApartmentPhotos(files);
-      onChange([...photos, ...urls]);
-      setUploadProgress(null);
-    } catch (e) {
-      setUploadError(e instanceof Error ? e.message : 'Upload failed');
-      setUploadProgress(null);
-    } finally {
-      setUploading(false);
-      if (inputRef.current) inputRef.current.value = '';
-    }
-  };
-
-  const onInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    void uploadFiles(e.target.files);
-  };
-
-  const onDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setDragOver(false);
-    if (uploading) return;
-    void uploadFiles(e.dataTransfer.files);
-  };
-
-  return (
-    <AdminField label="Photos">
-      <input
-        ref={inputRef}
-        type="file"
-        accept={IMAGE_UPLOAD_ACCEPT}
-        multiple
-        className={styles.fileInput}
-        onChange={onInputChange}
-      />
-
-      <div
-        className={`${styles.dropzone} ${dragOver ? styles.dropzoneOver : ''} ${uploading ? styles.dropzoneBusy : ''}`}
-        onDragEnter={(e) => {
-          e.preventDefault();
-          setDragOver(true);
-        }}
-        onDragOver={(e) => {
-          e.preventDefault();
-          setDragOver(true);
-        }}
-        onDragLeave={(e) => {
-          e.preventDefault();
-          if (e.currentTarget === e.target) setDragOver(false);
-        }}
-        onDrop={onDrop}
-      >
-        <button
-          type="button"
-          className={styles.dropzoneBtn}
-          disabled={uploading}
-          onClick={() => inputRef.current?.click()}
-        >
-          <Icon name="image" size={22} />
-          <span className={styles.dropzoneTitle}>
-            {uploading ? 'Uploading photos…' : 'Add photos'}
-          </span>
-          <span className={styles.dropzoneHint}>
-            Select or drop files here · JPEG, PNG, WebP, AVIF · up to 5 MB each
-          </span>
-          <span className={styles.dropzoneHint}>Drag photos below to change order (first = cover)</span>
-          {uploadProgress && <span className={styles.dropzoneProgress}>{uploadProgress}</span>}
-        </button>
-      </div>
-
-      {photos.length > 0 && (
-        <div className={styles.photos}>
-          {photos.map((p, i) => (
-            <div
-              key={p}
-              className={`${styles.photo} ${dragIndex === i ? styles.photoDragging : ''} ${dropIndex === i ? styles.photoDropTarget : ''}`}
-              draggable
-              onDragStart={(e) => {
-                setDragIndex(i);
-                e.dataTransfer.effectAllowed = 'move';
-                e.dataTransfer.setData('text/plain', String(i));
-              }}
-              onDragEnd={() => {
-                setDragIndex(null);
-                setDropIndex(null);
-              }}
-              onDragOver={(e) => {
-                e.preventDefault();
-                e.dataTransfer.dropEffect = 'move';
-                setDropIndex(i);
-              }}
-              onDragLeave={() => setDropIndex((prev) => (prev === i ? null : prev))}
-              onDrop={(e) => {
-                e.preventDefault();
-                const from = dragIndex ?? parseInt(e.dataTransfer.getData('text/plain'), 10);
-                if (!Number.isNaN(from)) reorder(from, i);
-                setDragIndex(null);
-                setDropIndex(null);
-              }}
-            >
-              {isPhotoUrl(p) ? (
-                <Image src={p} alt="" fill sizes="120px" className={styles.photoImg} unoptimized draggable={false} />
-              ) : (
-                <Placeholder className={styles.photoImg} label={p} />
-              )}
-              <span className={styles.photoDrag} aria-hidden>
-                ⋮⋮
-              </span>
-              <span className={styles.photoTag}>{i === 0 ? 'cover' : `#${i + 1}`}</span>
-              <button
-                type="button"
-                className={styles.photoDel}
-                aria-label="Remove photo"
-                onClick={() => del(i)}
-              >
-                <Icon name="x" size={14} />
-              </button>
-            </div>
-          ))}
-          <button
-            type="button"
-            className={styles.photoAdd}
-            disabled={uploading}
-            onClick={() => inputRef.current?.click()}
-            aria-label="Add more photos"
-          >
-            <Icon name="plus" size={20} />
-            More
-          </button>
-        </div>
-      )}
-
-      {uploadError && <p className={styles.uploadError}>{uploadError}</p>}
-    </AdminField>
-  );
-}
 
 interface AdminApartmentModalProps {
   initial: Apartment | null;
@@ -236,7 +63,7 @@ export default function AdminApartmentModal({ initial, onClose, onSave }: AdminA
     const en = emptyEnCopy();
     return {
       id: `a${Date.now()}`,
-      area: 'Bat Yam',
+      area: DEFAULT_AREA,
       guests: 2,
       bedrooms: 1,
       beds: 1,
@@ -256,6 +83,8 @@ export default function AdminApartmentModal({ initial, onClose, onSave }: AdminA
   });
 
   const en = form.locales.en;
+  /* Prices are entered in the currency of the region the apartment sits in. */
+  const currencySymbol = CURRENCY_SYMBOL[currencyForArea(form.area)];
 
   const setEn = (patch: Partial<ApartmentLocaleCopy>) => {
     setForm((prev) => ({
@@ -345,11 +174,35 @@ export default function AdminApartmentModal({ initial, onClose, onSave }: AdminA
             />
           </div>
 
+          {/*
+            Region is not decoration: it decides which currency the prices below
+            are in, and which site the listing belongs to once the group splits
+            across domains.
+          */}
           <div className={styles.grid}>
-            <AdminField label="Price per night (₪)">
+            <AdminField label="Region">
+              <select
+                className="select"
+                value={form.area}
+                onChange={(e) => setField('area', e.target.value as Apartment['area'])}
+              >
+                {REGIONS.map((region) => (
+                  <option key={region.area} value={region.area}>
+                    {region.area} · {region.country} · {region.currency}
+                  </option>
+                ))}
+              </select>
+            </AdminField>
+          </div>
+
+          <div className={styles.grid}>
+            <AdminField label={`Price per night (${currencySymbol})`}>
               <input
                 className="input"
                 type="number"
+                inputMode="numeric"
+                step={1}
+                onWheel={blurOnWheel}
                 min={0}
                 value={form.price}
                 onChange={(e) => setNum('price', e.target.value)}
@@ -359,6 +212,9 @@ export default function AdminApartmentModal({ initial, onClose, onSave }: AdminA
               <input
                 className="input"
                 type="number"
+                inputMode="numeric"
+                step={1}
+                onWheel={blurOnWheel}
                 min={1}
                 value={form.minNights}
                 onChange={(e) => setNum('minNights', e.target.value)}
@@ -367,12 +223,14 @@ export default function AdminApartmentModal({ initial, onClose, onSave }: AdminA
           </div>
 
           <AdminPriceTiers
+            currencySymbol={currencySymbol}
             basePrice={form.price}
             tiers={form.priceTiers ?? []}
             onChange={(priceTiers) => setField('priceTiers', priceTiers)}
           />
 
           <AdminServices
+            currencySymbol={currencySymbol}
             services={form.services ?? []}
             onChange={(services) => setField('services', services)}
           />
@@ -382,7 +240,9 @@ export default function AdminApartmentModal({ initial, onClose, onSave }: AdminA
               <input
                 className="input"
                 type="number"
+                inputMode="decimal"
                 step="any"
+                onWheel={blurOnWheel}
                 placeholder="32.0227269"
                 value={form.lat ?? ''}
                 onChange={(e) => setCoord('lat', e.target.value)}
@@ -392,7 +252,9 @@ export default function AdminApartmentModal({ initial, onClose, onSave }: AdminA
               <input
                 className="input"
                 type="number"
+                inputMode="decimal"
                 step="any"
+                onWheel={blurOnWheel}
                 placeholder="34.7439456"
                 value={form.lng ?? ''}
                 onChange={(e) => setCoord('lng', e.target.value)}
@@ -416,6 +278,9 @@ export default function AdminApartmentModal({ initial, onClose, onSave }: AdminA
               <input
                 className="input"
                 type="number"
+                inputMode="numeric"
+                step={1}
+                onWheel={blurOnWheel}
                 min={1}
                 value={form.guests}
                 onChange={(e) => setNum('guests', e.target.value)}
@@ -425,6 +290,9 @@ export default function AdminApartmentModal({ initial, onClose, onSave }: AdminA
               <input
                 className="input"
                 type="number"
+                inputMode="numeric"
+                step={1}
+                onWheel={blurOnWheel}
                 min={0}
                 value={form.bedrooms}
                 onChange={(e) => setNum('bedrooms', e.target.value)}
@@ -434,6 +302,9 @@ export default function AdminApartmentModal({ initial, onClose, onSave }: AdminA
               <input
                 className="input"
                 type="number"
+                inputMode="numeric"
+                step={1}
+                onWheel={blurOnWheel}
                 min={1}
                 value={form.beds}
                 onChange={(e) => setNum('beds', e.target.value)}
@@ -443,6 +314,9 @@ export default function AdminApartmentModal({ initial, onClose, onSave }: AdminA
               <input
                 className="input"
                 type="number"
+                inputMode="numeric"
+                step={1}
+                onWheel={blurOnWheel}
                 min={0}
                 value={form.bathrooms}
                 onChange={(e) => setNum('bathrooms', e.target.value)}

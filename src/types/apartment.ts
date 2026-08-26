@@ -6,7 +6,13 @@ export type BookingStatus = 'Draft' | 'New request' | 'Confirmed' | 'Declined';
 
 export type BookingChannel = 'WhatsApp' | 'Website' | 'Booking';
 
-export type ApartmentArea = 'Bat Yam';
+/*
+  Areas now come from the region table, which also carries each one's currency
+  and country — see `src/types/region.ts`. Re-exported here so the many callers
+  that import it from the apartment types keep working.
+*/
+import type { ApartmentArea } from './region';
+export type { ApartmentArea };
 
 export type ApartmentTagId =
   | 'seaView'

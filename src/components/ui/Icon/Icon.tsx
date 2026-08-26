@@ -4,7 +4,8 @@ export type IconName =
   | 'guest' | 'bed' | 'bath' | 'pin' | 'star' | 'arrow' | 'wave'
   | 'sparkle' | 'heart' | 'home' | 'check' | 'plus' | 'x' | 'edit'
   | 'trash' | 'menu' | 'phone' | 'mail' | 'calendar' | 'grid' | 'inbox'
-  | 'gear' | 'chevron' | 'image' | 'shield' | 'search' | 'logout';
+  | 'gear' | 'chevron' | 'image' | 'shield' | 'search' | 'logout'
+  | 'car' | 'flower';
 
 interface IconProps {
   name: IconName;
@@ -51,6 +52,32 @@ const PATHS: Record<IconName, React.ReactNode> = {
     <>
       <path d="M5 12h14" />
       <path d="M13 6l6 6-6 6" />
+    </>
+  ),
+  /* A three-quarter car: cabin, bonnet and two wheels, on the same 24px grid. */
+  car: (
+    <>
+      <path d="M4.5 16.5h-1a1 1 0 0 1-1-1v-2.6a2 2 0 0 1 .4-1.2l2.3-3.1A2.5 2.5 0 0 1 7.2 7.5h9.6a2.5 2.5 0 0 1 2 1.1l2.3 3.1a2 2 0 0 1 .4 1.2v2.6a1 1 0 0 1-1 1h-1" />
+      <path d="M2.9 12.4h18.2" />
+      <circle cx="7" cy="16.5" r="2" />
+      <circle cx="17" cy="16.5" r="2" />
+      <path d="M9 16.5h6" />
+    </>
+  ),
+  /*
+    Five petals on a ring, sized so they touch without overlapping — overlapping
+    strokes turn into a blob below 20px, which is where this icon mostly lives.
+  */
+  flower: (
+    <>
+      <circle cx="12" cy="5.5" r="1.6" />
+      <circle cx="14.76" cy="7.5" r="1.6" />
+      <circle cx="13.7" cy="10.75" r="1.6" />
+      <circle cx="10.3" cy="10.75" r="1.6" />
+      <circle cx="9.24" cy="7.5" r="1.6" />
+      <circle cx="12" cy="8.4" r="1.15" fill="currentColor" stroke="none" />
+      <path d="M12 12.6V21" />
+      <path d="M12 16.6c-1.7 0-3-1.2-3.2-2.9 1.9-.3 3.2.8 3.2 2.9z" fill="currentColor" stroke="none" />
     </>
   ),
   wave: (

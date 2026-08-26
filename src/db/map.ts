@@ -169,7 +169,6 @@ export function rowToSettings(row: BusinessSettingsRow | undefined): BusinessSet
   return {
     businessName: row.businessName,
     contactPhone: row.contactPhone,
-    contactEmail: row.contactEmail,
     whatsappNumber: row.whatsappNumber,
     defaultLanguage: row.defaultLanguage as Locale,
     currency: row.currency as CurrencyCode,

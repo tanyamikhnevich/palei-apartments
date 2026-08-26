@@ -13,7 +13,11 @@
     "db:migrate": "tsx src/db/migrate.ts",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
-    "db:seed": "tsx src/db/seed.ts"
+    "db:seed": "tsx src/db/seed.ts",
+    "db:cars:generate": "drizzle-kit generate --config drizzle.cars.config.ts",
+    "db:cars:migrate": "tsx src/db/cars/migrate.ts",
+    "db:flowers:generate": "drizzle-kit generate --config drizzle.flowers.config.ts",
+    "db:flowers:migrate": "tsx src/db/flowers/migrate.ts"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.1.0",

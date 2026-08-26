@@ -17,7 +17,7 @@ export default function ApartmentsPage() {
           </Suspense>
         </div>
         <Suspense fallback={<ApartmentGridSkeleton withFilters />}>
-          <ApartmentGridFull />
+          <ApartmentGridFull country="IL" />
         </Suspense>
       </main>
       <Footer />

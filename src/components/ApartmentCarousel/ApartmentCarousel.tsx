@@ -8,6 +8,7 @@ import Button from '@/components/ui/Button/Button';
 import Icon from '@/components/ui/Icon/Icon';
 import { useLanguage } from '@/i18n/LanguageProvider';
 import { fetchApartments } from '@/lib/api/client';
+import { apartmentsInCountry } from '@/lib/regions';
 import styles from './ApartmentCarousel.module.scss';
 
 const CAROUSEL_LIMIT = 8;
@@ -24,7 +25,7 @@ export default function ApartmentCarousel() {
 
   useEffect(() => {
     fetchApartments({ publicOnly: true })
-      .then(({ apartments: list }) => setApartments(list))
+      .then(({ apartments: list }) => setApartments(apartmentsInCountry(list, 'IL')))
       .finally(() => setLoading(false));
   }, []);
 

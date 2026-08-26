@@ -12,37 +12,55 @@
   line-height: 1.45;
 }
 
-.nav {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 12px;
-}
+/*
+  Months stack and the whole strip scrolls. The height is capped so the picker
+  stays a picker — tall enough to show a month and the start of the next, which
+  is the hint that there is more below.
+*/
+.scroller {
+  max-height: 292px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scroll-snap-type: y proximity;
+  /* Room for the scrollbar so it never sits on top of a Saturday. */
+  padding-inline-end: 4px;
+  margin-inline-end: -4px;
 
-.navBtn {
-  border: 1px solid var(--line);
-  background: var(--surface);
-  border-radius: 999px;
-  padding: 6px 12px;
-  font-size: var(--fs-xs);
-  color: var(--navy);
-  cursor: pointer;
-
-  &:hover {
-    border-color: var(--line-2);
+  &:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: var(--r-sm);
   }
 }
 
 .month {
-  font-weight: 600;
-  font-size: var(--fs-md);
+  scroll-snap-align: start;
+
+  & + & {
+    margin-top: 14px;
+  }
+}
+
+/* Rides along the top of the scroller so you always know which month you are in. */
+.monthLabel {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  margin: 0 0 8px;
+  padding: 4px 0;
+  font-weight: 700;
+  font-size: var(--fs-sm);
+  letter-spacing: -0.01em;
+  background: var(--bg);
 }
 
 .weekdays {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   gap: 4px;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--line);
 
   span {
     text-align: center;

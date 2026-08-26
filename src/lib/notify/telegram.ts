@@ -15,6 +15,29 @@ export interface BookingNotification {
   channel: string;
 }
 
+export interface CarNotification {
+  car: string;
+  dates: string;
+  days: number;
+  pickup: string;
+  total: string;
+  guest: string;
+  contact: string;
+}
+
+export interface FlowerNotification {
+  bouquet: string;
+  price: string;
+  date: string;
+  slot: string;
+  address: string;
+  recipient: string;
+  recipientPhone: string;
+  card?: string;
+  guest: string;
+  contact: string;
+}
+
 export interface ContactNotification {
   name: string;
   contact: string;
@@ -75,6 +98,43 @@ export async function notifyNewBooking(b: BookingNotification): Promise<void> {
   ].filter(Boolean) as string[];
 
   await sendTelegramMessage(lines.join('\n'));
+}
+
+/**
+ * A car hire request. The fleet has no table yet, so — like the contact form —
+ * Telegram is the only place it lands, and the delivery result comes back to
+ * the caller rather than being swallowed.
+ */
+export async function notifyCarRequest(c: CarNotification): Promise<boolean> {
+  const lines = [
+    '🚗 <b>New car hire request</b>',
+    `🚙 ${escapeHtml(c.car)}`,
+    `📅 ${escapeHtml(c.dates)} · ${c.days} day(s)`,
+    `📍 ${escapeHtml(c.pickup)}`,
+    `💰 ${escapeHtml(c.total)}`,
+    `👤 ${escapeHtml(c.guest)}`,
+    `📞 ${escapeHtml(c.contact)}`,
+  ];
+
+  return sendTelegramMessage(lines.join('\n'));
+}
+
+/**
+ * A flower delivery order. No table behind it yet, so Telegram is the only
+ * place it lands and the delivery result comes back to the caller.
+ */
+export async function notifyFlowerOrder(f: FlowerNotification): Promise<boolean> {
+  const lines = [
+    '💐 <b>New flower order</b>',
+    `🌸 ${escapeHtml(f.bouquet)} — ${escapeHtml(f.price)}`,
+    `📅 ${escapeHtml(f.date)} · ${escapeHtml(f.slot)}`,
+    `📍 ${escapeHtml(f.address)}`,
+    `🎁 ${escapeHtml(f.recipient)} · ${escapeHtml(f.recipientPhone)}`,
+    f.card ? `✍️ «${escapeHtml(f.card)}»` : null,
+    `👤 ${escapeHtml(f.guest)} · ${escapeHtml(f.contact)}`,
+  ].filter(Boolean) as string[];
+
+  return sendTelegramMessage(lines.join('\n'));
 }
 
 /**

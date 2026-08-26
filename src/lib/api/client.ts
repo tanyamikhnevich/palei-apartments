@@ -1,6 +1,13 @@
 import type { Apartment, Booking, BookingStatus } from '@/types/apartment';
 import type { BusinessSettings } from '@/types/settings';
 import type { Review, ReviewStatus } from '@/types/review';
+import type { Car } from '@/types/car';
+import type {
+  Bouquet,
+  FlowerOrder,
+  FlowerOrderDraft,
+  FlowerOrderStatus,
+} from '@/types/flower';
 import type { CalendarFeed, CalendarFeedInput, CalendarSyncOutcome } from '@/types/calendar';
 import { apartments as fallbackApartments } from '@/data/apartments';
 
@@ -161,6 +168,157 @@ export async function submitBookingRequest(booking: Booking): Promise<Booking> {
   });
   const data = await parseJson<{ booking: Booking }>(res);
   return data.booking;
+}
+
+export type CarsLoadResult = {
+  cars: Car[];
+  /** The list came from the fleet database, not the built-in sample. */
+  fromDb: boolean;
+  /** The fleet tables exist, so admin edits will stick. */
+  writable: boolean;
+};
+
+export async function fetchCars(): Promise<CarsLoadResult> {
+  try {
+    const res = await fetch('/api/cars', { cache: 'no-store' });
+    const data = await parseJson<{
+      cars: Car[];
+      source?: 'database' | 'mock';
+      writable?: boolean;
+    }>(res);
+    return {
+      cars: data.cars,
+      fromDb: data.source === 'database',
+      writable: data.writable === true,
+    };
+  } catch (e) {
+    console.warn('fetchCars fallback', e);
+    const { cars } = await import('@/data/cars');
+    return { cars, fromDb: false, writable: false };
+  }
+}
+
+export async function saveCar(car: Car): Promise<Car> {
+  const res = await fetch('/api/cars', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(car),
+  });
+  const data = await parseJson<{ car: Car }>(res);
+  return data.car;
+}
+
+export async function deleteCar(id: string): Promise<void> {
+  const res = await fetch(`/api/cars?id=${encodeURIComponent(id)}`, { method: 'DELETE' });
+  await parseJson<{ ok: true }>(res);
+}
+
+export async function blockCarDates(payload: {
+  carId: string;
+  from: string;
+  to: string;
+  note?: string;
+}): Promise<void> {
+  const res = await fetch('/api/cars/blocks', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  await parseJson<{ blocks: unknown[] }>(res);
+}
+
+export async function freeCarDates(carId: string, id: string): Promise<void> {
+  const res = await fetch(
+    `/api/cars/blocks?carId=${encodeURIComponent(carId)}&id=${encodeURIComponent(id)}`,
+    { method: 'DELETE' }
+  );
+  await parseJson<{ ok: true }>(res);
+}
+
+export type BouquetsLoadResult = { bouquets: Bouquet[]; fromDb: boolean; writable: boolean };
+
+export async function fetchBouquets(): Promise<BouquetsLoadResult> {
+  try {
+    const res = await fetch('/api/flowers', { cache: 'no-store' });
+    const data = await parseJson<{
+      bouquets: Bouquet[];
+      source?: 'database' | 'mock';
+      writable?: boolean;
+    }>(res);
+    return {
+      bouquets: data.bouquets,
+      fromDb: data.source === 'database',
+      writable: data.writable === true,
+    };
+  } catch (e) {
+    console.warn('fetchBouquets failed', e);
+    return { bouquets: [], fromDb: false, writable: false };
+  }
+}
+
+export async function fetchFlowerOrders(): Promise<FlowerOrder[]> {
+  const res = await fetch('/api/flowers/orders', { cache: 'no-store' });
+  const data = await parseJson<{ orders: FlowerOrder[] }>(res);
+  return data.orders;
+}
+
+export async function updateFlowerOrderStatus(
+  id: string,
+  status: FlowerOrderStatus
+): Promise<FlowerOrder> {
+  const res = await fetch('/api/flowers/orders', {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id, status }),
+  });
+  const data = await parseJson<{ order: FlowerOrder }>(res);
+  return data.order;
+}
+
+export async function saveBouquet(bouquet: Bouquet): Promise<Bouquet> {
+  const res = await fetch('/api/flowers', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(bouquet),
+  });
+  const data = await parseJson<{ bouquet: Bouquet }>(res);
+  return data.bouquet;
+}
+
+export async function deleteBouquet(id: string): Promise<void> {
+  const res = await fetch(`/api/flowers?id=${encodeURIComponent(id)}`, { method: 'DELETE' });
+  await parseJson<{ ok: true }>(res);
+}
+
+/** Sends a flower delivery order to the team's Telegram chat. */
+export async function submitFlowerOrder(payload: FlowerOrderDraft & { honeypot?: string }) {
+  const res = await fetch('/api/flowers/request', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  await parseJson<{ ok: true }>(res);
+}
+
+export type CarRequest = {
+  carId: string;
+  from: string;
+  to: string;
+  pickup: string;
+  name: string;
+  contact: string;
+  /** Hidden anti-bot field — must stay empty. */
+  honeypot?: string;
+};
+
+/** Sends a car hire request to the team's Telegram chat. */
+export async function submitCarRequest(payload: CarRequest): Promise<void> {
+  const res = await fetch('/api/cars/request', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  await parseJson<{ ok: true }>(res);
 }
 
 export type ContactRequest = {

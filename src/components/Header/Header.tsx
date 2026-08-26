@@ -8,6 +8,7 @@ import Button from '@/components/ui/Button/Button';
 import Icon from '@/components/ui/Icon/Icon';
 import { useLanguage } from '@/i18n/LanguageProvider';
 import { LOCALES, LOCALE_LABELS } from '@/i18n/types';
+import { brandForPath } from '@/lib/services';
 import styles from './Header.module.scss';
 
 const NAV = [
@@ -69,6 +70,9 @@ export default function Header() {
   const overlay = pathname === '/' && !menuOpen;
   const onPhoto = overlay && !stuck;
 
+  /* Inside a section the bar wears that section's logo; elsewhere, the group's. */
+  const brand = brandForPath(pathname);
+
   return (
     <header
       className={`${styles.hdr} ${overlay ? styles.overlay : ''} ${stuck ? styles.stuck : ''}`}
@@ -76,10 +80,11 @@ export default function Header() {
       <div className={`wrap ${styles.bar}`}>
         <button type="button" className={styles.logoLink} onClick={goHome} aria-label={t('brand')}>
           <Image
-            src="/palei-logo.png"
+            key={brand.logo}
+            src={brand.logo}
             alt=""
-            width={135}
-            height={40}
+            width={200}
+            height={60}
             className={styles.logo}
             priority
           />

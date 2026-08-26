@@ -2,7 +2,7 @@
 
 import {
   validatePersonName,
-  validatePhoneOrEmail,
+  validatePhone,
   validationMessageEn,
   type ValidationCode,
 } from './contact';
@@ -32,7 +32,7 @@ export function validateContactMessage(input: ContactMessageInput): ContactMessa
   const name = validatePersonName(input.name ?? '');
   if (!name.ok) return { ok: false, code: name.code };
 
-  const contact = validatePhoneOrEmail(input.contact ?? '');
+  const contact = validatePhone(input.contact ?? '');
   if (!contact.ok) return { ok: false, code: contact.code };
 
   let message: string | undefined;

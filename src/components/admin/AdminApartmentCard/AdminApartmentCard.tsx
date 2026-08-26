@@ -6,6 +6,8 @@ import { getApartmentCopy } from '@/i18n/apartmentLocale';
 import { formatApartmentTags, TAG_LABELS_EN } from '@/lib/apartmentMedia';
 import { isApartmentListedOnSite } from '@/lib/apartmentVisibility';
 import styles from './AdminApartmentCard.module.scss';
+import { formatMoney } from '@/lib/money';
+import { currencyOf } from '@/lib/regions';
 
 interface AdminApartmentCardProps {
   apt: Apartment;
@@ -78,7 +80,7 @@ export default function AdminApartmentCard({
 
         <div className={styles.row}>
           <div className={styles.price}>
-            <b>₪{apt.price}</b> <span>/ night</span>
+            <b>{formatMoney(apt.price, currencyOf(apt), 'en')}</b> <span>/ night</span>
           </div>
           <button
             type="button"

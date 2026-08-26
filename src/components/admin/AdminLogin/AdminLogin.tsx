@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Button from '@/components/ui/Button/Button';
+import { GROUP_BRAND } from '@/lib/services';
 import styles from './AdminLogin.module.scss';
 
 export default function AdminLogin() {
@@ -48,10 +49,10 @@ export default function AdminLogin() {
     <div className={styles.screen}>
       <form className={styles.card} onSubmit={submit}>
         <Image
-          src="/palei-logo.png"
-          alt="Palei Apartments"
-          width={135}
-          height={40}
+          src={GROUP_BRAND.logo}
+          alt={GROUP_BRAND.alt}
+          width={200}
+          height={210}
           className={styles.logo}
           priority
         />

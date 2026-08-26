@@ -6,13 +6,11 @@ import Icon from '@/components/ui/Icon/Icon';
 import type { IconName } from '@/components/ui/Icon/Icon';
 import { useLanguage } from '@/i18n/LanguageProvider';
 import {
-  EMAIL_INPUT_MAX_LENGTH,
   PERSON_NAME_MAX,
   PHONE_INPUT_MAX_LENGTH,
-  looksLikeEmailInput,
-  sanitizeContactInput,
+  sanitizePhoneInput,
   validatePersonName,
-  validatePhoneOrEmail,
+  validatePhone,
 } from '@/lib/validation/contact';
 import { resolveValidationMessage } from '@/lib/validation/resolveMessage';
 import { ApiError, submitContactRequest } from '@/lib/api/client';
@@ -39,16 +37,16 @@ export default function ContactSection() {
   const [formError, setFormError] = useState<string | null>(null);
 
   /**
-   * Contact error copy for the current locale. While typing (`live`) we skip the
+   * Phone error copy for the current locale. While typing (`live`) we skip the
    * "required / too short" nags and only flag hard problems, so a number that is
    * still being typed does not read as broken.
    */
   const contactMessage = (raw: string, live: boolean): string | null => {
     const trimmed = raw.trim();
-    if (!trimmed) return live ? null : resolveValidationMessage(locale, 'contactRequired');
-    const r = validatePhoneOrEmail(trimmed);
+    if (!trimmed) return live ? null : resolveValidationMessage(locale, 'phoneRequired');
+    const r = validatePhone(trimmed);
     if (r.ok) return null;
-    if (live && (r.code === 'phoneTooShort' || r.code === 'emailRequired')) return null;
+    if (live && r.code === 'phoneTooShort') return null;
     return resolveValidationMessage(locale, r.code);
   };
 
@@ -198,11 +196,9 @@ export default function ContactSection() {
                       autoComplete="tel"
                       value={contact}
                       aria-invalid={contactError ? true : undefined}
-                      maxLength={
-                        looksLikeEmailInput(contact) ? EMAIL_INPUT_MAX_LENGTH : PHONE_INPUT_MAX_LENGTH
-                      }
+                      maxLength={PHONE_INPUT_MAX_LENGTH}
                       onChange={(e) => {
-                        const next = sanitizeContactInput(e.target.value);
+                        const next = sanitizePhoneInput(e.target.value);
                         setContact(next);
                         setContactError(contactMessage(next, true));
                         setFormError(null);

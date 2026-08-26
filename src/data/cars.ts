@@ -1,0 +1,70 @@
+import type { Car } from '@/types/car';
+
+/**
+ * The fleet, in code until it earns a table.
+ *
+ * Edit here to add or retire a car; everything else — listing, availability,
+ * quote, request — reads from this one array.
+ */
+export const cars: Car[] = [
+  {
+    id: 'yaris-2023',
+    area: 'Bat Yam',
+    make: 'Toyota',
+    model: 'Yaris',
+    year: 2023,
+    carClass: 'economy',
+    transmission: 'automatic',
+    seats: 5,
+    bags: 2,
+    airConditioning: true,
+    pricePerDay: 150,
+    rateTiers: [
+      { minDays: 7, price: 130 },
+      { minDays: 21, price: 115 },
+    ],
+    minDays: 2,
+    deposit: 1500,
+    pickupPoints: ['Bat Yam', 'Ben Gurion Airport'],
+    status: 'Available',
+    blocks: [],
+  },
+  {
+    id: 'sportage-2024',
+    area: 'Bat Yam',
+    make: 'Kia',
+    model: 'Sportage',
+    year: 2024,
+    carClass: 'crossover',
+    transmission: 'automatic',
+    seats: 5,
+    bags: 3,
+    airConditioning: true,
+    pricePerDay: 260,
+    rateTiers: [{ minDays: 7, price: 235 }],
+    minDays: 2,
+    deposit: 2500,
+    pickupPoints: ['Bat Yam', 'Ben Gurion Airport'],
+    status: 'Available',
+    blocks: [],
+  },
+  {
+    id: 'vclass-2022',
+    area: 'Bat Yam',
+    make: 'Mercedes-Benz',
+    model: 'V-Class',
+    year: 2022,
+    carClass: 'van',
+    transmission: 'automatic',
+    seats: 7,
+    bags: 5,
+    airConditioning: true,
+    pricePerDay: 480,
+    rateTiers: [{ minDays: 7, price: 440 }],
+    minDays: 3,
+    deposit: 4000,
+    pickupPoints: ['Bat Yam'],
+    status: 'Available',
+    blocks: [],
+  },
+];

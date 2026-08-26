@@ -4,9 +4,17 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import Icon from '@/components/ui/Icon/Icon';
 import type { IconName } from '@/components/ui/Icon/Icon';
+import { GROUP_BRAND } from '@/lib/services';
 import styles from './AdminSidebar.module.scss';
 
-export type AdminView = 'apartments' | 'bookings' | 'calendar' | 'reviews' | 'settings';
+export type AdminView =
+  | 'apartments'
+  | 'cars'
+  | 'flowers'
+  | 'bookings'
+  | 'calendar'
+  | 'reviews'
+  | 'settings';
 
 interface NavItem {
   id: AdminView;
@@ -42,6 +50,8 @@ export default function AdminSidebar({
 
   const items: NavItem[] = [
     { id: 'apartments', icon: 'grid', label: 'Apartments', count: apartmentCount },
+    { id: 'cars', icon: 'car', label: 'Cars' },
+    { id: 'flowers', icon: 'flower', label: 'Flowers & balloons' },
     { id: 'bookings', icon: 'inbox', label: 'Bookings', count: requestCount },
     { id: 'calendar', icon: 'calendar', label: 'Calendar' },
     { id: 'reviews', icon: 'star', label: 'Reviews', count: reviewCount },
@@ -51,7 +61,7 @@ export default function AdminSidebar({
   return (
     <aside className={`${styles.side} ${open ? styles.open : ''}`}>
       <a href="/" className={styles.logoLink} title="View public site">
-        <Image src="/palei-logo.png" alt="Palei Apartments" width={135} height={40} />
+        <Image src={GROUP_BRAND.logo} alt={GROUP_BRAND.alt} width={200} height={210} />
       </a>
 
       <div className={styles.label}>Manage</div>

@@ -14,7 +14,6 @@ export const PHONE_DIGITS_MAX = 15;
 
 const PERSON_NAME_RE = /^[\p{L}\p{M}'\s.\-]+$/u;
 const BUSINESS_NAME_RE = /^[\p{L}\p{M}0-9'\s.\-&]+$/u;
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i;
 
 /** General E.164: leading +, country code (1–9), 8–15 digits total. */
 const E164_RE = /^\+[1-9]\d{7,14}$/;
@@ -31,11 +30,7 @@ export type ValidationCode =
   | 'phoneRequired'
   | 'phoneTooShort'
   | 'phoneTooLong'
-  | 'phoneInvalid'
-  | 'emailRequired'
-  | 'emailInvalid'
-  | 'contactRequired'
-  | 'contactInvalid';
+  | 'phoneInvalid';
 
 export type ValidationResult =
   | { ok: true; normalized?: string }
@@ -120,48 +115,10 @@ export function sanitizePhoneInput(value: string): string {
   return cleaned.slice(0, PHONE_INPUT_MAX_LENGTH);
 }
 
-/** Max characters of an email address. */
-export const EMAIL_INPUT_MAX_LENGTH = 254;
 
-/** The guest is typing an email, not a phone — letters count, `@` comes later. */
-export function looksLikeEmailInput(value: string): boolean {
-  return /[a-z@]/i.test(value);
-}
 
-/**
- * A "phone or email" field accepts both, so phone characters may only be
- * clamped while the value still looks like a phone — otherwise the letters of
- * an email get eaten one by one before the `@` is ever typed.
- */
-export function sanitizeContactInput(value: string): string {
-  if (looksLikeEmailInput(value)) return value.slice(0, EMAIL_INPUT_MAX_LENGTH);
-  return sanitizePhoneInput(value);
-}
 
-export function validateEmail(raw: string): ValidationResult {
-  const trimmed = raw.trim();
-  if (!trimmed) return { ok: false, code: 'emailRequired' };
-  if (!EMAIL_RE.test(trimmed) || trimmed.length > 254) {
-    return { ok: false, code: 'emailInvalid' };
-  }
-  return { ok: true, normalized: trimmed.toLowerCase() };
-}
 
-/** Booking contact field: Israeli phone or email. */
-export function validatePhoneOrEmail(raw: string): ValidationResult {
-  const trimmed = raw.trim();
-  if (!trimmed) return { ok: false, code: 'contactRequired' };
-  if (trimmed.includes('@')) {
-    const email = validateEmail(trimmed);
-    if (!email.ok) return { ok: false, code: 'contactInvalid' };
-    return email;
-  }
-  // Letters but no `@` — a half-typed email, not a phone worth diagnosing.
-  if (/[a-z]/i.test(trimmed)) return { ok: false, code: 'contactInvalid' };
-  const phone = validatePhone(trimmed);
-  if (!phone.ok) return phone;
-  return phone;
-}
 
 export function validatePersonName(raw: string): ValidationResult {
   const trimmed = raw.trim();
@@ -195,10 +152,6 @@ export const VALIDATION_MESSAGES_EN: Record<ValidationCode, string> = {
   phoneTooShort: 'Phone number is too short.',
   phoneTooLong: 'Phone number is too long (max 15 digits).',
   phoneInvalid: 'Enter a valid number with country code, e.g. +972 50 123 4567 or +1 202 555 0100 (Israeli 05X… also works).',
-  emailRequired: 'Please enter an email address.',
-  emailInvalid: 'Enter a valid email address.',
-  contactRequired: 'Please enter a phone number or email.',
-  contactInvalid: 'Enter a valid phone number or email address.',
 };
 
 export function validationMessageEn(code: ValidationCode): string {
@@ -218,8 +171,8 @@ export function validateBookingGuest(
     const name = validatePersonName(guest);
     if (!name.ok) return name;
     if (options.requireContact || guestContact?.trim()) {
-      if (!guestContact?.trim()) return { ok: false, code: 'contactRequired' };
-      const contact = validatePhoneOrEmail(guestContact);
+      if (!guestContact?.trim()) return { ok: false, code: 'phoneRequired' };
+      const contact = validatePhone(guestContact);
       if (!contact.ok) return { ok: false, code: contact.code };
       return {
         ok: true,
@@ -239,8 +192,8 @@ export function validateBookingGuest(
 
   let normalizedContact: string | undefined;
   if (guestContact?.trim()) {
-    const contact = validatePhoneOrEmail(guestContact);
-    if (!contact.ok) return { ok: false, code: contact.code === 'contactInvalid' ? 'contactInvalid' : contact.code };
+    const contact = validatePhone(guestContact);
+    if (!contact.ok) return { ok: false, code: contact.code };
     normalizedContact = contact.normalized;
   }
 

@@ -2,8 +2,8 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import Icon from '@/components/ui/Icon/Icon';
 import { useLanguage } from '@/i18n/LanguageProvider';
+import { GROUP_BRAND, SERVICES } from '@/lib/services';
 import type { Locale } from '@/i18n/types';
 import styles from './Footer.module.scss';
 
@@ -29,19 +29,9 @@ export default function Footer() {
       <div className="wrap">
         <div className={styles.top}>
           <div className={styles.logoWrap}>
-            <Image src="/palei-logo.png" alt={t('brand')} width={135} height={40} />
+            {/* The footer speaks for the group, whichever section you came from. */}
+            <Image src={GROUP_BRAND.logo} alt={GROUP_BRAND.alt} width={200} height={210} />
             <p>{t('footer.tagline')}</p>
-            <div className={styles.social}>
-              <a href="#" aria-label={t('footer.instagram')}>
-                <Icon name="sparkle" size={17} />
-              </a>
-              <a href="#" aria-label={t('footer.email')}>
-                <Icon name="mail" size={17} />
-              </a>
-              <a href="#" aria-label={t('footer.whatsapp')}>
-                <Icon name="phone" size={17} />
-              </a>
-            </div>
           </div>
 
           <div className={styles.col}>
@@ -62,9 +52,6 @@ export default function Footer() {
                 <a href="tel:+97250000000">+972 50 000 0000</a>
               </li>
               <li>
-                <a href="mailto:hello@paleiapartments.com">hello@paleiapartments.com</a>
-              </li>
-              <li>
                 <a href="#">Bat Yam, Israel</a>
               </li>
             </ul>
@@ -72,6 +59,22 @@ export default function Footer() {
 
           {/* Phones switch language from the bar at the top; a second set here
               only lengthens an already tall footer. */}
+          {/*
+            The group, on every page. The footer is where a visitor looks when
+            they are done with the page in front of them, which is exactly when
+            "there is also a florist" is welcome rather than an interruption.
+          */}
+          <div className={styles.col}>
+            <h5>{t('footer.group')}</h5>
+            <ul>
+              {SERVICES.map((service) => (
+                <li key={service.href}>
+                  <Link href={service.href}>{t(`group.services.${service.key}.label`)}</Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
           <div className={`${styles.col} ${styles.colLang}`}>
             <h5>{t('footer.language')}</h5>
             <ul>

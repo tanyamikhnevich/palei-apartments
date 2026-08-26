@@ -8,6 +8,11 @@ const TITLES: Record<AdminView, { title: string; sub: string }> = {
     title: 'Apartments',
     sub: 'Manage availability, pricing and photos',
   },
+  cars: { title: 'Cars', sub: 'The fleet and when each car is out.' },
+  flowers: {
+    title: 'Flowers & balloons',
+    sub: 'The window, and the orders placed from it.',
+  },
   bookings: {
     title: 'Bookings & requests',
     sub: 'Confirm or decline guest enquiries',

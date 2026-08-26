@@ -1,0 +1,104 @@
+/*
+  A dark band. The page alternates near-white and mist, and Location and this
+  block landed on the same ground — two full screens with no seam between them.
+  Navy also earns its keep: the group of services is a different kind of
+  statement from the sections around it, and now it looks like one.
+*/
+.section {
+  background: var(--navy-2);
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.head {
+  max-width: 60ch;
+  margin-bottom: 32px;
+
+  :global(.eyebrow) {
+    color: #7cc0e8;
+  }
+
+  :global(.section-title) {
+    color: #fff;
+  }
+
+  :global(.section-sub) {
+    color: rgba(255, 255, 255, 0.72);
+  }
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 14px;
+}
+
+/*
+  The blue outline is the resting state, not a hover reward — it marks all four
+  as one set. Hover switches it to the booking coral, the same colour the
+  floating call to action uses, so a card reads as something to act on.
+*/
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 22px 44px 22px 22px;
+  background: var(--surface);
+  border: 1px solid transparent;
+  border-radius: var(--r-lg);
+  box-shadow: 0 10px 30px -18px rgba(0, 0, 0, 0.6);
+  transition: border-color 0.18s var(--ease), box-shadow 0.18s var(--ease),
+    transform 0.18s var(--ease);
+
+  &:hover {
+    border-color: var(--coral);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+  }
+
+  &:hover .go {
+    color: var(--coral);
+    transform: translateX(3px);
+  }
+}
+
+.label {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: var(--fs-base);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  line-height: 1.25;
+}
+
+.soon {
+  font-size: var(--fs-2xs);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  background: var(--mist-2);
+  border-radius: 999px;
+  padding: 0.3em 0.7em;
+}
+
+.note {
+  font-size: var(--fs-sm);
+  color: var(--ink-soft);
+  line-height: 1.4;
+}
+
+.go {
+  position: absolute;
+  top: 24px;
+  inset-inline-end: 20px;
+  color: var(--ink-faint);
+  transition: color 0.18s var(--ease), transform 0.18s var(--ease);
+
+  :global([dir='rtl']) & {
+    transform: rotate(180deg);
+  }
+}

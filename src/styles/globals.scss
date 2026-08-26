@@ -315,6 +315,24 @@ p {
   line-height: 1.55;
 }
 
+/*
+  Number fields keep the numeric keyboard on phones but lose the spinners: they
+  are a tiny target next to the text, and — worse — a scroll with the field
+  focused used to silently change a price. The wheel is stopped in JS; this only
+  removes the arrows.
+*/
+input[type='number'] {
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+input[type='number']::-webkit-outer-spin-button,
+input[type='number']::-webkit-inner-spin-button {
+  appearance: none;
+  -webkit-appearance: none;
+  margin: 0;
+}
+
 .select {
   appearance: none;
   background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%235b6875' stroke-width='1.6' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");

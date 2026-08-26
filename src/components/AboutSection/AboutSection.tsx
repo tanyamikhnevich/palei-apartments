@@ -4,15 +4,18 @@ import { useEffect, useMemo, useState } from 'react';
 import type { Apartment } from '@/types/apartment';
 import Skeleton from '@/components/ui/Skeleton/Skeleton';
 import { useLanguage } from '@/i18n/LanguageProvider';
+import type { Locale } from '@/i18n/types';
 import { LOCALES } from '@/i18n/types';
 import { fetchApartments } from '@/lib/api/client';
 import { priceFrom } from '@/lib/pricing';
 import styles from './AboutSection.module.scss';
+import { formatMoney } from '@/lib/money';
+import { apartmentsInCountry, currencyOf } from '@/lib/regions';
 
 type Stat = { value: string; key: string };
 
 /** Every figure here is read from the live listing — nothing is hard-coded. */
-function buildStats(apartments: Apartment[]): Stat[] {
+function buildStats(apartments: Apartment[], locale: Locale): Stat[] {
   const reviews = apartments.reduce((n, a) => n + a.reviews, 0);
   const rated = apartments.filter((a) => a.reviews > 0);
 
@@ -23,7 +26,13 @@ function buildStats(apartments: Apartment[]): Stat[] {
       key: 'about.stats.sleeps',
     },
     {
-      value: `₪${Math.min(...apartments.map((a) => priceFrom(a)))}`,
+      // Cheapest across the whole collection, shown in its own region's currency.
+      value: (() => {
+        const cheapest = apartments.reduce((low, a) =>
+          priceFrom(a) < priceFrom(low) ? a : low
+        );
+        return formatMoney(priceFrom(cheapest), currencyOf(cheapest), locale);
+      })(),
       key: 'about.stats.from',
     },
   ];
@@ -39,18 +48,18 @@ function buildStats(apartments: Apartment[]): Stat[] {
 }
 
 export default function AboutSection() {
-  const { t } = useLanguage();
+  const { locale, t } = useLanguage();
   const [apartments, setApartments] = useState<Apartment[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchApartments({ publicOnly: true })
-      .then(({ apartments: list }) => setApartments(list))
+      .then(({ apartments: list }) => setApartments(apartmentsInCountry(list, 'IL')))
       .finally(() => setLoading(false));
   }, []);
 
   const stats = useMemo(
-    () => (apartments.length ? buildStats(apartments) : []),
+    () => (apartments.length ? buildStats(apartments, locale) : []),
     [apartments]
   );
 

@@ -9,7 +9,6 @@ import type { CurrencyCode } from '@/types/settings';
 import { dbUnavailableResponse, isDbConfigured, jsonError } from '@/lib/api/errors';
 import {
   validateBusinessName,
-  validateEmail,
   validatePhone,
   validationMessageEn,
 } from '@/lib/validation/contact';
@@ -53,8 +52,6 @@ export async function PUT(request: Request) {
     if (!phone.ok) return jsonError(validationMessageEn(phone.code), 400);
     const whatsapp = validatePhone(body.whatsappNumber ?? '');
     if (!whatsapp.ok) return jsonError(validationMessageEn(whatsapp.code), 400);
-    const email = validateEmail(body.contactEmail ?? '');
-    if (!email.ok) return jsonError(validationMessageEn(email.code), 400);
 
     const db = getDb();
     const now = new Date();
@@ -62,7 +59,12 @@ export async function PUT(request: Request) {
       id: SETTINGS_ID,
       businessName: business.normalized!,
       contactPhone: phone.normalized!,
-      contactEmail: email.normalized!,
+      /*
+        Email was dropped from the product but the column is still NOT NULL, and
+        dropping it needs a migration against the live database. Writing an empty
+        string keeps inserts working; retire the column with the next migration.
+      */
+      contactEmail: '',
       whatsappNumber: whatsapp.normalized!,
       defaultLanguage: body.defaultLanguage,
       currency: body.currency,
@@ -77,7 +79,6 @@ export async function PUT(request: Request) {
         set: {
           businessName: values.businessName,
           contactPhone: values.contactPhone,
-          contactEmail: values.contactEmail,
           whatsappNumber: values.whatsappNumber,
           defaultLanguage: values.defaultLanguage,
           currency: values.currency,

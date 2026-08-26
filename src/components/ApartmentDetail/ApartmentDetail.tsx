@@ -12,6 +12,7 @@ import Icon from '@/components/ui/Icon/Icon';
 import SpecStat from '@/components/ui/SpecStat/SpecStat';
 import DateRangeCalendar from '@/components/DateRangeCalendar/DateRangeCalendar';
 import ReviewsSection from '@/components/ReviewsSection/ReviewsSection';
+import BookingUpsell from '@/components/BookingUpsell/BookingUpsell';
 import { useLanguage } from '@/i18n/LanguageProvider';
 import { getApartmentCopy } from '@/i18n/apartmentLocale';
 import { formatDateRange, nightsBetween } from '@/lib/dates';
@@ -22,13 +23,11 @@ import {
   submitBookingRequest,
 } from '@/lib/api/client';
 import {
-  EMAIL_INPUT_MAX_LENGTH,
   PERSON_NAME_MAX,
   PHONE_INPUT_MAX_LENGTH,
-  looksLikeEmailInput,
-  sanitizeContactInput,
+  sanitizePhoneInput,
   validatePersonName,
-  validatePhoneOrEmail,
+  validatePhone,
 } from '@/lib/validation/contact';
 import { resolveValidationMessage } from '@/lib/validation/resolveMessage';
 import { formatApartmentTags, getApartmentPhotos } from '@/lib/apartmentMedia';
@@ -41,6 +40,8 @@ import {
   SERVICE_UNIT_KEYS,
 } from '@/lib/pricing';
 import styles from './ApartmentDetail.module.scss';
+import { formatMoney } from '@/lib/money';
+import { countryOf, currencyOf } from '@/lib/regions';
 
 /** Leaflet touches `window` on import, so the mini map is client-only. */
 const ApartmentMiniMap = dynamic(
@@ -110,7 +111,7 @@ export default function ApartmentDetail({ apt }: ApartmentDetailProps) {
   const rangeReady = Boolean(checkIn && checkOut && checkOut > checkIn);
   const nightsValid = rangeReady && nights >= minNights;
   const nameValid = validatePersonName(guestName).ok;
-  const contactValid = validatePhoneOrEmail(guestContact).ok;
+  const contactValid = validatePhone(guestContact).ok;
   const formComplete = nightsValid && nameValid && contactValid;
 
   const calendarHint = useMemo(() => {
@@ -201,7 +202,7 @@ export default function ApartmentDetail({ apt }: ApartmentDetailProps) {
     }
     setNameError(null);
 
-    const contactResult = validatePhoneOrEmail(guestContact);
+    const contactResult = validatePhone(guestContact);
     if (!contactResult.ok) {
       setContactError(resolveValidationMessage(locale, contactResult.code));
       return null;
@@ -252,25 +253,30 @@ export default function ApartmentDetail({ apt }: ApartmentDetailProps) {
   const quote = quoteStay(apt, nights, guests, selectedServices);
   const total = quote.total;
 
+  /** Every price on this page is in the currency of the apartment's region. */
+  const money = (amount: number) => formatMoney(amount, currencyOf(apt), locale);
+
+  /* Back to the listing this apartment actually belongs to. */
+  const listingHref = countryOf(apt) === 'CY' ? '/cyprus' : '/apartments';
+
+
   /**
-   * Contact error message for the current locale.
+   * Phone error message for the current locale.
    * While typing (`live`), we skip the "required / too short" nags and only
    * flag hard problems (too long, wrong format) so the field validates as you go.
    */
   const contactMessage = (raw: string, live: boolean): string | null => {
     const trimmed = raw.trim();
-    if (!trimmed) return live ? null : resolveValidationMessage(locale, 'contactRequired');
-    const r = validatePhoneOrEmail(trimmed);
+    if (!trimmed) return live ? null : resolveValidationMessage(locale, 'phoneRequired');
+    const r = validatePhone(trimmed);
     if (r.ok) return null;
-    if (live && (r.code === 'phoneTooShort' || r.code === 'contactRequired' || r.code === 'emailRequired')) {
-      return null;
-    }
+    if (live && r.code === 'phoneTooShort') return null;
     return resolveValidationMessage(locale, r.code);
   };
 
   return (
     <div className={`wrap ${styles.page}`}>
-      <Link href="/apartments" className={styles.back}>
+      <Link href={listingHref} className={styles.back}>
         <Icon name="arrow" size={16} className={styles.backIcon} />
         {t('apartments.backToAll')}
       </Link>
@@ -296,7 +302,7 @@ export default function ApartmentDetail({ apt }: ApartmentDetailProps) {
         </div>
         <div className={styles.priceBox}>
           {hasPriceTiers(apt) && <span>{t('apartments.from')} </span>}
-          <b>₪{priceFrom(apt)}</b> <span>{t('apartments.perNight')}</span>
+          <b>{money(priceFrom(apt))}</b> <span>{t('apartments.perNight')}</span>
         </div>
       </header>
 
@@ -364,9 +370,18 @@ export default function ApartmentDetail({ apt }: ApartmentDetailProps) {
                 </div>
                 <h2 className={styles.successTitle}>{t('booking.successTitle')}</h2>
                 <p className={styles.successDesc}>{t('booking.successDesc')}</p>
-                <Button variant="ghost" as="a" href="/apartments" iconRight="arrow">
+                <Button variant="ghost" as="a" href={listingHref} iconRight="arrow">
                   {t('apartments.backToAll')}
                 </Button>
+
+                {/*
+                  Only for Israel — that is where the fleet and the shop are, and
+                  offering a Cyprus guest a car from Bat Yam would be a broken
+                  promise dressed as a service.
+                */}
+                {countryOf(apt) === 'IL' && (
+                  <BookingUpsell checkIn={checkIn} checkOut={checkOut} />
+                )}
               </div>
             ) : (
               <>
@@ -379,11 +394,6 @@ export default function ApartmentDetail({ apt }: ApartmentDetailProps) {
                 <DateRangeCalendar
                   locale={locale}
                   hint={calendarHint}
-                  labels={{
-                    prev: t('booking.prevMonth'),
-                    next: t('booking.nextMonth'),
-                    weekdays: [],
-                  }}
                   blocked={blocked}
                   checkIn={checkIn}
                   checkOut={checkOut}
@@ -407,7 +417,7 @@ export default function ApartmentDetail({ apt }: ApartmentDetailProps) {
                             : t('booking.rateFrom').replace('{nights}', String(tier.minNights))}
                         </span>
                         <span>
-                          ₪{tier.price} {t('apartments.perNight')}
+                          {money(tier.price)} {t('apartments.perNight')}
                         </span>
                       </div>
                     ))}
@@ -432,7 +442,7 @@ export default function ApartmentDetail({ apt }: ApartmentDetailProps) {
                         />
                         <span className={styles.extraName}>{service.name}</span>
                         <span className={styles.extraPrice}>
-                          ₪{service.price} {t(SERVICE_UNIT_KEYS[service.unit])}
+                          {money(service.price)} {t(SERVICE_UNIT_KEYS[service.unit])}
                         </span>
                       </label>
                     ))}
@@ -485,13 +495,9 @@ export default function ApartmentDetail({ apt }: ApartmentDetailProps) {
                     autoComplete="tel"
                     value={guestContact}
                     aria-invalid={contactError ? true : undefined}
-                    maxLength={
-                      looksLikeEmailInput(guestContact)
-                        ? EMAIL_INPUT_MAX_LENGTH
-                        : PHONE_INPUT_MAX_LENGTH
-                    }
+                    maxLength={PHONE_INPUT_MAX_LENGTH}
                     onChange={(e) => {
-                      const next = sanitizeContactInput(e.target.value);
+                      const next = sanitizePhoneInput(e.target.value);
                       setGuestContact(next);
                       setContactError(contactMessage(next, true));
                       setError(null);
@@ -511,9 +517,9 @@ export default function ApartmentDetail({ apt }: ApartmentDetailProps) {
                       <span>
                         {t('booking.nightsLine')
                           .replace('{nights}', String(nights))
-                          .replace('{rate}', String(quote.rate))}
+                          .replace('{price}', money(quote.rate))}
                       </span>
-                      <span>₪{quote.nightsTotal}</span>
+                      <span>{money(quote.nightsTotal)}</span>
                     </div>
                     {quote.charges.map(({ service, amount }) => (
                       <div className={styles.summaryRow} key={service.id}>
@@ -521,12 +527,12 @@ export default function ApartmentDetail({ apt }: ApartmentDetailProps) {
                           {service.name}
                           {service.required && ` · ${t('booking.extraRequired')}`}
                         </span>
-                        <span>₪{amount}</span>
+                        <span>{money(amount)}</span>
                       </div>
                     ))}
                     <div className={styles.summaryTotal}>
                       <span>{t('booking.total')}</span>
-                      <strong>₪{total}</strong>
+                      <strong>{money(total)}</strong>
                     </div>
                   </div>
                 )}
@@ -578,7 +584,7 @@ export default function ApartmentDetail({ apt }: ApartmentDetailProps) {
           <div className={styles.reservePrice}>
             {nightsValid ? (
               <>
-                <span className={styles.reserveAmount}>₪{total}</span>
+                <span className={styles.reserveAmount}>{money(total)}</span>
                 <span className={styles.reserveNote}>
                   {t('booking.total')} · {formatDateRange(checkIn!, checkOut!, locale)}
                 </span>
@@ -588,7 +594,7 @@ export default function ApartmentDetail({ apt }: ApartmentDetailProps) {
                 {hasPriceTiers(apt) && (
                   <span className={styles.reserveFrom}>{t('apartments.from')}</span>
                 )}
-                <span className={styles.reserveAmount}>₪{priceFrom(apt)}</span>
+                <span className={styles.reserveAmount}>{money(priceFrom(apt))}</span>
                 <span className={styles.reserveNote}>{t('apartments.perNight')}</span>
               </>
             )}

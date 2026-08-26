@@ -1,0 +1,259 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.bar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.title {
+  font-size: 18px;
+  margin: 0;
+  margin-right: auto;
+}
+
+.count {
+  display: inline-block;
+  margin-inline-start: 8px;
+  padding: 2px 9px;
+  border-radius: 999px;
+  background: var(--mist);
+  color: var(--ink-soft);
+  font-size: 13px;
+  font-weight: 700;
+  vertical-align: middle;
+}
+
+/* Says plainly why nothing can be saved yet, and what to run. */
+.notice {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: var(--r-md);
+  background: var(--warn-bg);
+  color: var(--warn-fg);
+  font-size: var(--fs-sm);
+
+  svg { flex: none; }
+
+  code {
+    font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+    background: rgba(0, 0, 0, 0.06);
+    border-radius: 5px;
+    padding: 1px 5px;
+  }
+}
+
+.muted {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: var(--fs-sm);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.car {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+}
+
+.carHead {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 16px;
+}
+
+.carName {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  margin-right: auto;
+
+  b { font-size: var(--fs-base); letter-spacing: -0.01em; }
+  span { font-size: var(--fs-xs); color: var(--ink-soft); }
+}
+
+.carPrice {
+  flex: none;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+
+  span { font-weight: 500; color: var(--ink-soft); font-size: var(--fs-xs); }
+}
+
+.carActions {
+  display: flex;
+  gap: 6px;
+  flex: none;
+}
+
+.iconBtn {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--line-2);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: 0.15s;
+
+  &:hover:not(:disabled) {
+    background: var(--mist);
+    border-color: var(--navy);
+    color: var(--navy);
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  &.danger:hover {
+    background: var(--busy-bg);
+    border-color: var(--busy-line);
+    color: var(--busy-fg);
+  }
+}
+
+.badge {
+  position: absolute;
+  top: -6px;
+  inset-inline-end: -6px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  display: grid;
+  place-items: center;
+}
+
+.calendar {
+  display: grid;
+  grid-template-columns: minmax(0, 320px) minmax(0, 1fr);
+  gap: 20px;
+  padding: 16px;
+  border-top: 1px solid var(--line);
+  background: var(--bg);
+}
+
+.calendarPicker {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.blockForm {
+  display: flex;
+  gap: 8px;
+
+  input { flex: 1; min-width: 0; }
+}
+
+.blocks {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.blocksTitle {
+  font-size: var(--fs-2xs);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.blockRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  font-size: var(--fs-sm);
+}
+
+/* Modal */
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(12, 22, 34, 0.5);
+  backdrop-filter: blur(3px);
+}
+
+.modal {
+  width: min(680px, 100%);
+  max-height: 88vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+}
+
+.modalHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--line);
+
+  h3 { margin: 0; font-size: var(--fs-lg); }
+}
+
+.modalBody {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  overflow-y: auto;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.modalFoot {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 16px 20px;
+  border-top: 1px solid var(--line);
+}
+
+@media (max-width: 860px) {
+  .calendar { grid-template-columns: 1fr; }
+  .carHead { flex-wrap: wrap; }
+  .grid { grid-template-columns: 1fr; }
+}

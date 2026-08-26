@@ -5,6 +5,8 @@ import Placeholder from '@/components/ui/Placeholder/Placeholder';
 import { getApartmentCopy } from '@/i18n/apartmentLocale';
 import { isApartmentListedOnSite } from '@/lib/apartmentVisibility';
 import styles from './AdminApartmentTable.module.scss';
+import { formatMoney } from '@/lib/money';
+import { currencyOf } from '@/lib/regions';
 
 interface AdminApartmentTableProps {
   apartments: Apartment[];
@@ -48,7 +50,7 @@ export default function AdminApartmentTable({
                 {a.guests}g · {a.bedrooms}br · {a.beds}b · {a.bathrooms}ba
               </td>
               <td className={styles.price}>
-                <b>₪{a.price}</b>
+                <b>{formatMoney(a.price, currencyOf(a), 'en')}</b>
               </td>
               <td>
                 <Badge tone={statusTone(a.status)} dot>

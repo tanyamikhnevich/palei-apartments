@@ -111,7 +111,7 @@ export const reviews = pgTable('reviews', {
   guestName: text('guest_name').notNull(),
   rating: integer('rating').notNull(),
   text: text('text'),
-  /** Private phone/email for moderation — never sent to the public site. */
+  /** Private phone number for moderation — never sent to the public site. */
   contact: text('contact'),
   status: varchar('status', { length: 32 }).notNull().$type<ReviewStatus>(),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),

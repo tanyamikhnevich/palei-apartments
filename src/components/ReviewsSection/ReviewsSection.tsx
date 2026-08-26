@@ -11,7 +11,7 @@ import {
   PERSON_NAME_MAX,
   sanitizePhoneInput,
   validatePersonName,
-  validatePhoneOrEmail,
+  validatePhone,
 } from '@/lib/validation/contact';
 import { REVIEW_TEXT_MAX } from '@/lib/validation/review';
 import { resolveValidationMessage } from '@/lib/validation/resolveMessage';
@@ -88,7 +88,7 @@ export default function ReviewsSection({ apartmentId }: ReviewsSectionProps) {
       return;
     }
     if (contact.trim()) {
-      const contactCheck = validatePhoneOrEmail(contact);
+      const contactCheck = validatePhone(contact);
       if (!contactCheck.ok) {
         setError(resolveValidationMessage(locale, contactCheck.code));
         return;

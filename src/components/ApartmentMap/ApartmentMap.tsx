@@ -10,6 +10,8 @@ import { getApartmentCopy } from '@/i18n/apartmentLocale';
 import { BAT_YAM_CENTER, groupApartmentsForMap } from '@/data/apartmentGeo';
 import 'leaflet/dist/leaflet.css';
 import styles from './ApartmentMap.module.scss';
+import { formatMoney } from '@/lib/money';
+import { currencyOf } from '@/lib/regions';
 
 type ApartmentMapProps = {
   apartments: Apartment[];
@@ -82,7 +84,8 @@ export default function ApartmentMap({ apartments }: ApartmentMapProps) {
                       {getApartmentCopy(apt, locale).title}
                     </Link>
                     <span className={styles.popupPrice}>
-                      ₪{apt.price} {t('apartments.perNight')}
+                      {formatMoney(apt.price, currencyOf(apt), locale)}{' '}
+                      {t('apartments.perNight')}
                     </span>
                   </li>
                 ))}

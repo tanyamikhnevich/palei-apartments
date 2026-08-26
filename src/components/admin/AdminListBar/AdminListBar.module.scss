@@ -10,6 +10,45 @@
   margin: 0;
 }
 
+/* How many listings the current filter leaves — the filter's own feedback. */
+.count {
+  display: inline-block;
+  margin-inline-start: 8px;
+  padding: 2px 9px;
+  border-radius: 999px;
+  background: var(--mist);
+  color: var(--ink-soft);
+  font-size: 13px;
+  font-weight: 700;
+  vertical-align: middle;
+}
+
+.countries {
+  display: inline-flex;
+  background: var(--mist);
+  border-radius: 10px;
+  padding: 3px;
+}
+
+.countryBtn {
+  border: none;
+  background: none;
+  padding: 7px 13px;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: 0.15s;
+
+  &.on {
+    background: #fff;
+    color: var(--navy);
+    box-shadow: var(--shadow-sm);
+  }
+}
+
 .toggle {
   display: inline-flex;
   background: var(--mist);

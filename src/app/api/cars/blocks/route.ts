@@ -8,6 +8,7 @@ import {
   schema,
 } from '@/db/cars';
 import { jsonError } from '@/lib/api/errors';
+import { requireAdmin } from '@/lib/auth/guard';
 
 /** One blocked range on the fleet calendar: a hire, a service, a trip. */
 type BlockBody = { carId?: string; from?: string; to?: string; note?: string };
@@ -15,6 +16,9 @@ type BlockBody = { carId?: string; from?: string; to?: string; note?: string };
 const ISO = /^\d{4}-\d{2}-\d{2}$/;
 
 export async function POST(request: Request) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
+
   if (!isCarsDbConfigured()) return jsonError('Fleet database not configured', 503);
 
   try {
@@ -46,6 +50,9 @@ export async function POST(request: Request) {
 }
 
 export async function DELETE(request: Request) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
+
   if (!isCarsDbConfigured()) return jsonError('Fleet database not configured', 503);
 
   const params = new URL(request.url).searchParams;

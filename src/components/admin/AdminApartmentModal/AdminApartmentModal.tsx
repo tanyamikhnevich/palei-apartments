@@ -6,7 +6,7 @@ import { DEFAULT_AVAILABILITY } from '@/lib/availability';
 import Button from '@/components/ui/Button/Button';
 import Icon from '@/components/ui/Icon/Icon';
 import AdminAvailabilityCalendar from '@/components/admin/AdminAvailabilityCalendar/AdminAvailabilityCalendar';
-// import AdminCalendarSync from '@/components/admin/AdminCalendarSync/AdminCalendarSync';
+import AdminCalendarSync from '@/components/admin/AdminCalendarSync/AdminCalendarSync';
 import AdminTagPicker from '@/components/admin/AdminTagPicker/AdminTagPicker';
 import { photoLabelFromTags } from '@/lib/apartmentTags';
 import PhotoManager from '@/components/admin/ui/PhotoManager';
@@ -351,12 +351,11 @@ export default function AdminApartmentModal({ initial, onClose, onSave }: AdminA
             />
           </AdminField>
 
-          {/* Calendar sync (Airbnb/Booking iCal) is parked until we decide how
-              it should work. The component and its API routes are untouched —
-              drop the comment markers to bring the block back. */}
-          {/* {editing && (
+          {/* Only for a saved apartment: the export link is minted on first save,
+              and a feed has to hang off an id that already exists. */}
+          {editing && (
             <AdminCalendarSync apartmentId={form.id} icalToken={form.icalToken} />
-          )} */}
+          )}
 
           <PhotoManager
             photos={form.photos ?? []}

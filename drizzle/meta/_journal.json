@@ -36,6 +36,13 @@
       "when": 1786500000000,
       "tag": "0004_add_pricing_and_geo",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1788337067592,
+      "tag": "0005_add_admin_auth",
+      "breakpoints": true
     }
   ]
 }

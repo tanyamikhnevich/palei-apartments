@@ -11,6 +11,7 @@ import { carToInsert, rowToCar } from '@/db/cars/map';
 import { cars as mockCars } from '@/data/cars';
 import { jsonError } from '@/lib/api/errors';
 import type { Car } from '@/types/car';
+import { requireAdmin } from '@/lib/auth/guard';
 
 /**
  * The fleet, from its own database — and from `src/data/cars.ts` when that
@@ -52,6 +53,9 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
+
   if (!isCarsDbConfigured()) return jsonError('Fleet database not configured', 503);
 
   try {
@@ -79,6 +83,9 @@ export async function POST(request: Request) {
 }
 
 export async function DELETE(request: Request) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
+
   if (!isCarsDbConfigured()) return jsonError('Fleet database not configured', 503);
 
   const id = new URL(request.url).searchParams.get('id');

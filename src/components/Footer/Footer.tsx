@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useLanguage } from '@/i18n/LanguageProvider';
-import { GROUP_BRAND, SERVICES } from '@/lib/services';
+import { GROUP_BRAND, liveServices } from '@/lib/services';
 import type { Locale } from '@/i18n/types';
 import styles from './Footer.module.scss';
 
@@ -22,7 +22,7 @@ const LANG_LINKS: { locale: Locale; key: string }[] = [
 ];
 
 export default function Footer() {
-  const { t, setLocale } = useLanguage();
+  const { t, setLocale, href: localeHref } = useLanguage();
 
   return (
     <footer className={styles.footer}>
@@ -39,7 +39,7 @@ export default function Footer() {
             <ul>
               {NAV.map(({ key, href }) => (
                 <li key={key}>
-                  <Link href={href}>{t(key)}</Link>
+                  <Link href={localeHref(href)}>{t(key)}</Link>
                 </li>
               ))}
             </ul>
@@ -67,9 +67,9 @@ export default function Footer() {
           <div className={styles.col}>
             <h5>{t('footer.group')}</h5>
             <ul>
-              {SERVICES.map((service) => (
+              {liveServices().map((service) => (
                 <li key={service.href}>
-                  <Link href={service.href}>{t(`group.services.${service.key}.label`)}</Link>
+                  <Link href={localeHref(service.href)}>{t(`group.services.${service.key}.label`)}</Link>
                 </li>
               ))}
             </ul>
@@ -89,13 +89,10 @@ export default function Footer() {
           </div>
         </div>
 
+        {/* Privacy and terms will come back here once the pages behind them
+            exist; links to "#" only teach visitors that ours do not work. */}
         <div className={styles.bottom}>
           <span>{t('footer.copyright')}</span>
-          <div className={styles.bottomLinks}>
-            <a href="#">{t('footer.privacy')}</a>
-            <a href="#">{t('footer.terms')}</a>
-            <a href="/admin">{t('footer.admin')}</a>
-          </div>
         </div>
       </div>
     </footer>

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import Icon from '@/components/ui/Icon/Icon';
 import { useLanguage } from '@/i18n/LanguageProvider';
+import { splitLocale } from '@/i18n/routing';
 import { scrollToHash } from '@/lib/scrollToHash';
 import styles from './BookCta.module.scss';
 
@@ -20,7 +21,7 @@ const SHOW_AFTER = 200;
  * goes to the contact form.
  */
 export default function BookCta() {
-  const { t } = useLanguage();
+  const { t, href: localeHref } = useLanguage();
   const pathname = usePathname();
   const [shown, setShown] = useState(false);
 
@@ -34,8 +35,12 @@ export default function BookCta() {
   // The admin panel is a different product — no guest CTA there.
   if (pathname.startsWith('/admin')) return null;
 
-  const onApartmentPage = /^\/apartments\/[^/]+$/.test(pathname);
-  const href = onApartmentPage ? '#book' : pathname === '/contact' ? '#contact' : '/contact';
+  // Match against the path without its language prefix, or `/ru/apartments/x`
+  // reads as an ordinary page and the button points at the wrong thing.
+  const { pathname: bare } = splitLocale(pathname);
+  const onApartmentPage = /^\/apartments\/[^/]+$/.test(bare);
+  const href =
+    onApartmentPage ? '#book' : bare === '/contact' ? '#contact' : localeHref('/contact');
 
   return (
     <Link

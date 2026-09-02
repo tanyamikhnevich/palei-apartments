@@ -1,13 +1,19 @@
 import { NextResponse } from 'next/server';
+import { revalidateTag } from 'next/cache';
 import { eq } from 'drizzle-orm';
 import { getDb, schema } from '@/db/index';
 import { apartmentToInsert, rowToApartment } from '@/db/map';
 import type { Apartment } from '@/types/apartment';
 import { dbUnavailableResponse, isDbConfigured, jsonError } from '@/lib/api/errors';
+import { requireAdmin } from '@/lib/auth/guard';
+import { APARTMENTS_TAG } from '@/lib/cacheTags';
 
 type RouteContext = { params: { id: string } };
 
 export async function PATCH(request: Request, { params }: RouteContext) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
+
   if (!isDbConfigured()) return dbUnavailableResponse();
 
   try {
@@ -30,6 +36,7 @@ export async function PATCH(request: Request, { params }: RouteContext) {
       return jsonError('Apartment not found', 404);
     }
 
+    revalidateTag(APARTMENTS_TAG);
     return NextResponse.json({ apartment: rowToApartment(updated[0]) });
   } catch (e) {
     console.error('PATCH /api/apartments/[id]', e);
@@ -38,6 +45,9 @@ export async function PATCH(request: Request, { params }: RouteContext) {
 }
 
 export async function DELETE(_request: Request, { params }: RouteContext) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
+
   if (!isDbConfigured()) return dbUnavailableResponse();
 
   try {
@@ -51,6 +61,7 @@ export async function DELETE(_request: Request, { params }: RouteContext) {
       return jsonError('Apartment not found', 404);
     }
 
+    revalidateTag(APARTMENTS_TAG);
     return NextResponse.json({ ok: true });
   } catch (e) {
     console.error('DELETE /api/apartments/[id]', e);

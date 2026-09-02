@@ -4,11 +4,13 @@ import Header from '@/components/Header/Header';
 import Footer from '@/components/Footer/Footer';
 import CarDetail from '@/components/CarDetail/CarDetail';
 import { cars } from '@/data/cars';
+import { isSectionLive } from '@/lib/services';
 
 type CarPageProps = { params: { id: string } };
 
 export function generateStaticParams() {
-  return cars.map((car) => ({ id: car.id }));
+  // Nothing to pre-render while the section is parked.
+  return isSectionLive('/cars') ? cars.map((car) => ({ id: car.id })) : [];
 }
 
 export function generateMetadata({ params }: CarPageProps): Metadata {
@@ -21,6 +23,8 @@ export function generateMetadata({ params }: CarPageProps): Metadata {
 }
 
 export default function CarPage({ params }: CarPageProps) {
+  if (!isSectionLive('/cars')) notFound();
+
   const car = cars.find((c) => c.id === params.id);
   if (!car) notFound();
 

@@ -9,6 +9,7 @@ import {
   CALENDAR_SOURCE_LABELS,
   type CalendarFeedInput,
 } from '@/types/calendar';
+import { requireAdmin } from '@/lib/auth/guard';
 
 function validateFeedUrl(raw: string): string | null {
   let url: URL;
@@ -24,6 +25,9 @@ function validateFeedUrl(raw: string): string | null {
 }
 
 export async function GET(request: Request) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
+
   if (!isDbConfigured()) return dbUnavailableResponse();
 
   const apartmentId = new URL(request.url).searchParams.get('apartmentId');
@@ -45,6 +49,9 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
+
   if (!isDbConfigured()) return dbUnavailableResponse();
 
   try {

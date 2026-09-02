@@ -57,7 +57,9 @@ export async function GET(_request: Request, { params }: RouteContext) {
       .where(
         and(
           eq(schema.bookings.apartmentId, apt.id),
-          inArray(schema.bookings.status, ['New request', 'Confirmed'])
+          // Same rule as the site: an unconfirmed request is not a booking,
+          // and exporting it would block the dates on Airbnb as well.
+          inArray(schema.bookings.status, ['Confirmed'])
         )
       );
 
@@ -65,7 +67,7 @@ export async function GET(_request: Request, { params }: RouteContext) {
       uid: `booking-${row.id}@palei-apartments`,
       checkIn: isoFromDate(row.checkIn),
       checkOut: isoFromDate(row.checkOut),
-      summary: row.status === 'Confirmed' ? 'Booked (Palei site)' : 'Held (Palei site request)',
+      summary: 'Booked (Palei site)',
     }));
 
     const availability = apt.availability ?? DEFAULT_AVAILABILITY;

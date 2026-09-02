@@ -1,12 +1,24 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Button from '@/components/ui/Button/Button';
 import { GROUP_BRAND } from '@/lib/services';
 import styles from './AdminLogin.module.scss';
+
+/**
+ * Where to land after signing in. Only a path back into the panel is honoured —
+ * `?next=https://elsewhere` would turn the login screen into an open redirect.
+ */
+function safeNext(next: string | null): string {
+  if (!next) return '/admin';
+  if (!next.startsWith('/admin')) return '/admin';
+  // `//host` and `/\host` are protocol-relative, not local paths.
+  if (next.startsWith('//') || next.startsWith('/\\')) return '/admin';
+  return next;
+}
 
 export default function AdminLogin() {
   const router = useRouter();
@@ -16,6 +28,30 @@ export default function AdminLogin() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  /** Held until the silent renewal below has had its turn. */
+  const [checking, setChecking] = useState(true);
+  const tried = useRef(false);
+
+  /**
+   * Landing here after an access token quietly expired is the common case, not
+   * a sign-out: the refresh token in the cookie is usually still good. Spend it
+   * before showing the form, and most of the time the panel simply reappears.
+   */
+  useEffect(() => {
+    if (tried.current) return;
+    tried.current = true;
+
+    fetch('/api/admin/session/refresh', { method: 'POST', cache: 'no-store' })
+      .then((res) => {
+        if (!res.ok) {
+          setChecking(false);
+          return;
+        }
+        router.replace(safeNext(searchParams.get('next')));
+        router.refresh();
+      })
+      .catch(() => setChecking(false));
+  }, [router, searchParams]);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,8 +71,8 @@ export default function AdminLogin() {
         return;
       }
 
-      // The cookie is set by the response; the server has to re-evaluate the route.
-      router.replace(searchParams.get('next') || '/admin');
+      // The cookies are set by the response; the server has to re-evaluate the route.
+      router.replace(safeNext(searchParams.get('next')));
       router.refresh();
     } catch {
       setError('Could not reach the server');
@@ -44,6 +80,8 @@ export default function AdminLogin() {
       setBusy(false);
     }
   };
+
+  if (checking) return <div className={styles.screen} aria-busy="true" />;
 
   return (
     <div className={styles.screen}>

@@ -10,6 +10,7 @@ import {
 import { bouquetToInsert, rowToBouquet } from '@/db/flowers/schema';
 import { jsonError } from '@/lib/api/errors';
 import type { Bouquet } from '@/types/flower';
+import { requireAdmin } from '@/lib/auth/guard';
 
 /**
  * The window — whatever is actually in it. There is no built-in sample: an
@@ -39,6 +40,9 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
+
   if (!isFlowersDbConfigured()) return jsonError('Shop database not configured', 503);
 
   try {
@@ -69,6 +73,9 @@ export async function POST(request: Request) {
 }
 
 export async function DELETE(request: Request) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
+
   if (!isFlowersDbConfigured()) return jsonError('Shop database not configured', 503);
 
   const id = new URL(request.url).searchParams.get('id');

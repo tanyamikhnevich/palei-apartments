@@ -231,6 +231,51 @@
   outline-offset: -3px;
 }
 
+/**
+ * Imported from a platform. Striped so it reads as "somebody else's booking"
+ * even where the colour is the same as one of our own channels.
+ */
+.imported {
+  background-image: repeating-linear-gradient(
+    45deg,
+    rgba(255, 255, 255, 0.22) 0 5px,
+    transparent 5px 10px
+  );
+}
+
+/**
+ * With imported feeds connected a row carries two kinds of bar, and stacking
+ * them would hide a double booking behind whichever drew last. Two lanes only
+ * appear on months that actually have imported dates.
+ */
+.dual {
+  .track {
+    height: 60px;
+  }
+
+  .bar {
+    top: 6px;
+    height: 26px;
+  }
+
+  .bar.imported {
+    top: 35px;
+    height: 20px;
+
+    .barText {
+      font-size: 11.5px;
+    }
+  }
+}
+
+.swatchImported {
+  background-image: repeating-linear-gradient(
+    45deg,
+    rgba(255, 255, 255, 0.35) 0 3px,
+    transparent 3px 6px
+  );
+}
+
 .clipStart {
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;

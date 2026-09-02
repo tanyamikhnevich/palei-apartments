@@ -8,8 +8,14 @@ import type {
   FlowerOrderDraft,
   FlowerOrderStatus,
 } from '@/types/flower';
-import type { CalendarFeed, CalendarFeedInput, CalendarSyncOutcome } from '@/types/calendar';
+import type {
+  CalendarFeed,
+  CalendarFeedInput,
+  CalendarFeedSource,
+  CalendarSyncOutcome,
+} from '@/types/calendar';
 import { apartments as fallbackApartments } from '@/data/apartments';
+import { apiFetch } from '@/lib/api/adminFetch';
 
 export class ApiError extends Error {
   constructor(
@@ -43,7 +49,7 @@ export async function fetchApartments(
 ): Promise<ApartmentsLoadResult> {
   const qs = options.publicOnly ? '?public=1' : '';
   try {
-    const res = await fetch(`/api/apartments${qs}`, { cache: 'no-store' });
+    const res = await apiFetch(`/api/apartments${qs}`, { cache: 'no-store' });
     const data = await parseJson<{ apartments: Apartment[]; source?: 'database' | 'mock' }>(res);
     return {
       apartments: data.apartments,
@@ -58,7 +64,7 @@ export async function fetchApartments(
 }
 
 export async function createApartment(apt: Apartment): Promise<Apartment> {
-  const res = await fetch('/api/apartments', {
+  const res = await apiFetch('/api/apartments', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(apt),
@@ -68,7 +74,7 @@ export async function createApartment(apt: Apartment): Promise<Apartment> {
 }
 
 export async function updateApartment(apt: Apartment): Promise<Apartment> {
-  const res = await fetch(`/api/apartments/${apt.id}`, {
+  const res = await apiFetch(`/api/apartments/${apt.id}`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(apt),
@@ -78,7 +84,7 @@ export async function updateApartment(apt: Apartment): Promise<Apartment> {
 }
 
 export async function deleteApartment(id: string): Promise<void> {
-  const res = await fetch(`/api/apartments/${id}`, { method: 'DELETE' });
+  const res = await apiFetch(`/api/apartments/${id}`, { method: 'DELETE' });
   await parseJson<{ ok: boolean }>(res);
 }
 
@@ -88,7 +94,7 @@ export type SettingsLoadResult = {
 };
 
 export async function fetchSettings(): Promise<SettingsLoadResult> {
-  const res = await fetch('/api/settings', { cache: 'no-store' });
+  const res = await apiFetch('/api/settings', { cache: 'no-store' });
   const data = await parseJson<{ settings: BusinessSettings; source?: 'database' | 'mock' }>(res);
   return {
     settings: data.settings,
@@ -97,7 +103,7 @@ export async function fetchSettings(): Promise<SettingsLoadResult> {
 }
 
 export async function saveSettings(settings: BusinessSettings): Promise<BusinessSettings> {
-  const res = await fetch('/api/settings', {
+  const res = await apiFetch('/api/settings', {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(settings),
@@ -119,7 +125,7 @@ export async function uploadApartmentPhotos(files: File[]): Promise<{ urls: stri
     formData.append('files', file);
   }
 
-  const res = await fetch('/api/upload', { method: 'POST', body: formData });
+  const res = await apiFetch('/api/upload', { method: 'POST', body: formData });
   const data = await parseJson<{ url?: string; urls: string[] }>(res);
   return { urls: data.urls ?? (data.url ? [data.url] : []) };
 }
@@ -127,7 +133,7 @@ export async function uploadApartmentPhotos(files: File[]): Promise<{ urls: stri
 export async function fetchBookingAvailability(
   apartmentId: string
 ): Promise<{ checkIn: string; checkOut: string }[]> {
-  const res = await fetch(`/api/bookings/availability?apartmentId=${apartmentId}`, {
+  const res = await apiFetch(`/api/bookings/availability?apartmentId=${apartmentId}`, {
     cache: 'no-store',
   });
   const data = await parseJson<{ blocked: { checkIn: string; checkOut: string }[] }>(res);
@@ -137,7 +143,7 @@ export async function fetchBookingAvailability(
 export async function fetchAllBookingAvailability(): Promise<
   Record<string, { checkIn: string; checkOut: string }[]>
 > {
-  const res = await fetch('/api/bookings/availability?all=1', { cache: 'no-store' });
+  const res = await apiFetch('/api/bookings/availability?all=1', { cache: 'no-store' });
   const data = await parseJson<{
     byApartment: Record<string, { checkIn: string; checkOut: string }[]>;
   }>(res);
@@ -145,26 +151,26 @@ export async function fetchAllBookingAvailability(): Promise<
 }
 
 export async function fetchBookings(admin = false): Promise<Booking[]> {
-  const res = await fetch(`/api/bookings?admin=${admin ? '1' : '0'}`, { cache: 'no-store' });
+  const res = await apiFetch(`/api/bookings?admin=${admin ? '1' : '0'}`, { cache: 'no-store' });
   const data = await parseJson<{ bookings: Booking[] }>(res);
   return data.bookings;
 }
 
-export async function saveBookingDraft(booking: Booking): Promise<Booking> {
-  const res = await fetch('/api/bookings', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ ...booking, status: 'Draft' as const }),
-  });
-  const data = await parseJson<{ booking: Booking }>(res);
-  return data.booking;
-}
+/** What a guest may state. The id, the status and the channel are the server's. */
+export type BookingRequest = {
+  apartmentId: string;
+  guest: string;
+  guestContact?: string;
+  checkIn: string;
+  checkOut: string;
+  guests: number;
+};
 
-export async function submitBookingRequest(booking: Booking): Promise<Booking> {
-  const res = await fetch('/api/bookings', {
+export async function submitBookingRequest(booking: BookingRequest): Promise<Booking> {
+  const res = await apiFetch('/api/bookings', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ ...booking, status: 'New request' as const }),
+    body: JSON.stringify(booking),
   });
   const data = await parseJson<{ booking: Booking }>(res);
   return data.booking;
@@ -180,7 +186,7 @@ export type CarsLoadResult = {
 
 export async function fetchCars(): Promise<CarsLoadResult> {
   try {
-    const res = await fetch('/api/cars', { cache: 'no-store' });
+    const res = await apiFetch('/api/cars', { cache: 'no-store' });
     const data = await parseJson<{
       cars: Car[];
       source?: 'database' | 'mock';
@@ -199,7 +205,7 @@ export async function fetchCars(): Promise<CarsLoadResult> {
 }
 
 export async function saveCar(car: Car): Promise<Car> {
-  const res = await fetch('/api/cars', {
+  const res = await apiFetch('/api/cars', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(car),
@@ -209,7 +215,7 @@ export async function saveCar(car: Car): Promise<Car> {
 }
 
 export async function deleteCar(id: string): Promise<void> {
-  const res = await fetch(`/api/cars?id=${encodeURIComponent(id)}`, { method: 'DELETE' });
+  const res = await apiFetch(`/api/cars?id=${encodeURIComponent(id)}`, { method: 'DELETE' });
   await parseJson<{ ok: true }>(res);
 }
 
@@ -219,7 +225,7 @@ export async function blockCarDates(payload: {
   to: string;
   note?: string;
 }): Promise<void> {
-  const res = await fetch('/api/cars/blocks', {
+  const res = await apiFetch('/api/cars/blocks', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
@@ -228,7 +234,7 @@ export async function blockCarDates(payload: {
 }
 
 export async function freeCarDates(carId: string, id: string): Promise<void> {
-  const res = await fetch(
+  const res = await apiFetch(
     `/api/cars/blocks?carId=${encodeURIComponent(carId)}&id=${encodeURIComponent(id)}`,
     { method: 'DELETE' }
   );
@@ -239,7 +245,7 @@ export type BouquetsLoadResult = { bouquets: Bouquet[]; fromDb: boolean; writabl
 
 export async function fetchBouquets(): Promise<BouquetsLoadResult> {
   try {
-    const res = await fetch('/api/flowers', { cache: 'no-store' });
+    const res = await apiFetch('/api/flowers', { cache: 'no-store' });
     const data = await parseJson<{
       bouquets: Bouquet[];
       source?: 'database' | 'mock';
@@ -257,7 +263,7 @@ export async function fetchBouquets(): Promise<BouquetsLoadResult> {
 }
 
 export async function fetchFlowerOrders(): Promise<FlowerOrder[]> {
-  const res = await fetch('/api/flowers/orders', { cache: 'no-store' });
+  const res = await apiFetch('/api/flowers/orders', { cache: 'no-store' });
   const data = await parseJson<{ orders: FlowerOrder[] }>(res);
   return data.orders;
 }
@@ -266,7 +272,7 @@ export async function updateFlowerOrderStatus(
   id: string,
   status: FlowerOrderStatus
 ): Promise<FlowerOrder> {
-  const res = await fetch('/api/flowers/orders', {
+  const res = await apiFetch('/api/flowers/orders', {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ id, status }),
@@ -276,7 +282,7 @@ export async function updateFlowerOrderStatus(
 }
 
 export async function saveBouquet(bouquet: Bouquet): Promise<Bouquet> {
-  const res = await fetch('/api/flowers', {
+  const res = await apiFetch('/api/flowers', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(bouquet),
@@ -286,13 +292,13 @@ export async function saveBouquet(bouquet: Bouquet): Promise<Bouquet> {
 }
 
 export async function deleteBouquet(id: string): Promise<void> {
-  const res = await fetch(`/api/flowers?id=${encodeURIComponent(id)}`, { method: 'DELETE' });
+  const res = await apiFetch(`/api/flowers?id=${encodeURIComponent(id)}`, { method: 'DELETE' });
   await parseJson<{ ok: true }>(res);
 }
 
 /** Sends a flower delivery order to the team's Telegram chat. */
 export async function submitFlowerOrder(payload: FlowerOrderDraft & { honeypot?: string }) {
-  const res = await fetch('/api/flowers/request', {
+  const res = await apiFetch('/api/flowers/request', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
@@ -313,7 +319,7 @@ export type CarRequest = {
 
 /** Sends a car hire request to the team's Telegram chat. */
 export async function submitCarRequest(payload: CarRequest): Promise<void> {
-  const res = await fetch('/api/cars/request', {
+  const res = await apiFetch('/api/cars/request', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
@@ -333,7 +339,7 @@ export type ContactRequest = {
 
 /** Sends a contact-form message to the team's Telegram chat. */
 export async function submitContactRequest(payload: ContactRequest): Promise<void> {
-  const res = await fetch('/api/contact', {
+  const res = await apiFetch('/api/contact', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
@@ -342,7 +348,7 @@ export async function submitContactRequest(payload: ContactRequest): Promise<voi
 }
 
 export async function updateBookingStatus(id: string, status: BookingStatus): Promise<Booking> {
-  const res = await fetch(`/api/bookings/${id}`, {
+  const res = await apiFetch(`/api/bookings/${id}`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ status }),
@@ -352,7 +358,7 @@ export async function updateBookingStatus(id: string, status: BookingStatus): Pr
 }
 
 export async function fetchCalendarFeeds(apartmentId: string): Promise<CalendarFeed[]> {
-  const res = await fetch(`/api/calendar/feeds?apartmentId=${encodeURIComponent(apartmentId)}`, {
+  const res = await apiFetch(`/api/calendar/feeds?apartmentId=${encodeURIComponent(apartmentId)}`, {
     cache: 'no-store',
   });
   const data = await parseJson<{ feeds: CalendarFeed[] }>(res);
@@ -360,7 +366,7 @@ export async function fetchCalendarFeeds(apartmentId: string): Promise<CalendarF
 }
 
 export async function createCalendarFeed(input: CalendarFeedInput): Promise<CalendarFeed> {
-  const res = await fetch('/api/calendar/feeds', {
+  const res = await apiFetch('/api/calendar/feeds', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(input),
@@ -373,7 +379,7 @@ export async function updateCalendarFeed(
   id: string,
   patch: { url?: string; label?: string }
 ): Promise<CalendarFeed> {
-  const res = await fetch(`/api/calendar/feeds/${id}`, {
+  const res = await apiFetch(`/api/calendar/feeds/${id}`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(patch),
@@ -383,7 +389,7 @@ export async function updateCalendarFeed(
 }
 
 export async function deleteCalendarFeed(id: string): Promise<void> {
-  const res = await fetch(`/api/calendar/feeds/${id}`, { method: 'DELETE' });
+  const res = await apiFetch(`/api/calendar/feeds/${id}`, { method: 'DELETE' });
   await parseJson<{ ok: boolean }>(res);
 }
 
@@ -396,7 +402,7 @@ export type CalendarSyncResponse = {
 export async function syncCalendars(
   target: { apartmentId?: string; feedId?: string } = {}
 ): Promise<CalendarSyncResponse> {
-  const res = await fetch('/api/calendar/sync', {
+  const res = await apiFetch('/api/calendar/sync', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(target),
@@ -416,7 +422,7 @@ export type ReviewSubmission = {
 /** Approved reviews for one apartment (public — no contact details). */
 export async function fetchApartmentReviews(apartmentId: string): Promise<Review[]> {
   try {
-    const res = await fetch(`/api/reviews?apartmentId=${encodeURIComponent(apartmentId)}`, {
+    const res = await apiFetch(`/api/reviews?apartmentId=${encodeURIComponent(apartmentId)}`, {
       cache: 'no-store',
     });
     const data = await parseJson<{ reviews: Review[] }>(res);
@@ -428,7 +434,7 @@ export async function fetchApartmentReviews(apartmentId: string): Promise<Review
 }
 
 export async function submitReview(review: ReviewSubmission): Promise<void> {
-  const res = await fetch('/api/reviews', {
+  const res = await apiFetch('/api/reviews', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(review),
@@ -438,13 +444,13 @@ export async function submitReview(review: ReviewSubmission): Promise<void> {
 
 /** Every review, newest first, with contact — admin moderation only. */
 export async function fetchReviews(): Promise<Review[]> {
-  const res = await fetch('/api/reviews?admin=1', { cache: 'no-store' });
+  const res = await apiFetch('/api/reviews?admin=1', { cache: 'no-store' });
   const data = await parseJson<{ reviews: Review[] }>(res);
   return data.reviews;
 }
 
 export async function updateReviewStatus(id: string, status: ReviewStatus): Promise<Review> {
-  const res = await fetch(`/api/reviews/${id}`, {
+  const res = await apiFetch(`/api/reviews/${id}`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ status }),
@@ -454,6 +460,60 @@ export async function updateReviewStatus(id: string, status: ReviewStatus): Prom
 }
 
 export async function deleteReview(id: string): Promise<void> {
-  const res = await fetch(`/api/reviews/${id}`, { method: 'DELETE' });
+  const res = await apiFetch(`/api/reviews/${id}`, { method: 'DELETE' });
   await parseJson<{ ok: boolean }>(res);
+}
+
+export type AdminSessionInfo = {
+  familyId: string;
+  label: string | null;
+  createdAt: string;
+  lastUsedAt: string;
+  current: boolean;
+};
+
+export type AdminAccount = {
+  login: string;
+  passwordChangedAt: string;
+  sessions: AdminSessionInfo[];
+};
+
+export async function fetchAdminAccount(): Promise<AdminAccount> {
+  const res = await apiFetch('/api/admin/account', { cache: 'no-store' });
+  return parseJson<AdminAccount>(res);
+}
+
+export async function changeAdminPassword(
+  currentPassword: string,
+  newPassword: string
+): Promise<void> {
+  const res = await apiFetch('/api/admin/account/password', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ currentPassword, newPassword }),
+  });
+  await parseJson<{ ok: true }>(res);
+}
+
+/** Sign out every other browser, keeping this one. */
+export async function revokeOtherAdminSessions(): Promise<void> {
+  const res = await apiFetch('/api/admin/account', { method: 'DELETE' });
+  await parseJson<{ ok: true }>(res);
+}
+
+export type ImportedBlock = {
+  id: string;
+  apartmentId: string;
+  checkIn: string;
+  checkOut: string;
+  source: CalendarFeedSource;
+  feedLabel: string;
+  summary: string | null;
+};
+
+/** Reservations pulled in from Airbnb and the other platforms — admin only. */
+export async function fetchImportedBlocks(): Promise<ImportedBlock[]> {
+  const res = await apiFetch('/api/calendar/blocks', { cache: 'no-store' });
+  const data = await parseJson<{ blocks: ImportedBlock[] }>(res);
+  return data.blocks;
 }

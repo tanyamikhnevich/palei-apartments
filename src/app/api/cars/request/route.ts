@@ -7,6 +7,7 @@ import { quoteHire } from '@/lib/cars';
 import { formatMoney } from '@/lib/money';
 import { currencyOf } from '@/lib/regions';
 import { formatDateRange } from '@/lib/dates';
+import { publicSubmitThrottle } from '@/lib/auth/throttle';
 
 type CarRequestBody = {
   carId?: string;
@@ -20,6 +21,16 @@ type CarRequestBody = {
 };
 
 export async function POST(request: Request) {
+  // A honeypot stops a bot filling a form; it does nothing against a loop.
+  const gate = publicSubmitThrottle.check(request);
+  if (!gate.allowed) {
+    return NextResponse.json(
+      { error: 'Too many requests. Please try again in a few minutes.' },
+      { status: 429, headers: { 'Retry-After': String(gate.retryAfterSeconds) } }
+    );
+  }
+  publicSubmitThrottle.consume(request);
+
   if (!isTelegramConfigured()) {
     return NextResponse.json(
       { error: 'Telegram not configured. Set TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID.' },

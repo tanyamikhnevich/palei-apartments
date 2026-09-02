@@ -6,7 +6,7 @@ import Button from '@/components/ui/Button/Button';
 import { useLanguage } from '@/i18n/LanguageProvider';
 
 export default function ApartmentNotFound() {
-  const { t } = useLanguage();
+  const { t, href } = useLanguage();
 
   return (
     <>
@@ -17,7 +17,7 @@ export default function ApartmentNotFound() {
           <p className="section-sub" style={{ margin: '16px auto 28px' }}>
             {t('apartments.notFoundDesc')}
           </p>
-          <Button variant="primary" as="a" href="/apartments" iconRight="arrow">
+          <Button variant="primary" as="a" href={href('/apartments')} iconRight="arrow">
             {t('apartments.backToAll')}
           </Button>
         </div>

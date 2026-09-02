@@ -33,7 +33,7 @@ const SLIDES = [
 const SLIDE_MS = 3800;
 
 export default function Hero() {
-  const { t } = useLanguage();
+  const { t, href } = useLanguage();
   const [active, setActive] = useState(0);
   /* Bumped when a dot is tapped, to restart the cycle from that slide. */
   const [cycle, setCycle] = useState(0);
@@ -93,13 +93,13 @@ export default function Hero() {
             <ApartmentSearch variant="hero" />
 
             <div className={styles.cta}>
-              <Button variant="light" as="a" href="/apartments" iconRight="arrow">
+              <Button variant="light" as="a" href={href('/apartments')} iconRight="arrow">
                 {t('hero.viewApartments')}
               </Button>
               <Button
                 variant="ghost"
                 as="a"
-                href="/contact"
+                href={href('/contact')}
                 style={{
                   background: 'rgba(255,255,255,.12)',
                   color: '#fff',

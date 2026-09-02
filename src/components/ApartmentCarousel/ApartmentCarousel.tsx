@@ -15,7 +15,7 @@ const CAROUSEL_LIMIT = 8;
 const SKELETON_COUNT = 3;
 
 export default function ApartmentCarousel() {
-  const { t } = useLanguage();
+  const { t, href } = useLanguage();
   const [apartments, setApartments] = useState<Apartment[]>([]);
   const [loading, setLoading] = useState(true);
   const [index, setIndex] = useState(0);
@@ -101,7 +101,7 @@ export default function ApartmentCarousel() {
                 <Icon name="chevron" size={18} />
               </button>
             </div>
-            <Button variant="ghost" iconRight="arrow" as="a" href="/apartments">
+            <Button variant="ghost" iconRight="arrow" as="a" href={href('/apartments')}>
               {t('apartments.seeAll')} {loading ? '' : apartments.length}
             </Button>
           </div>

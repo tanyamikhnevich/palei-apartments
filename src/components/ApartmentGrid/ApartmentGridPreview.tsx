@@ -14,7 +14,7 @@ const HOME_PREVIEW_LIMIT = 6;
 const SKELETON_COUNT = 3;
 
 export default function ApartmentGridPreview() {
-  const { t } = useLanguage();
+  const { t, href } = useLanguage();
   const [apartments, setApartments] = useState<Apartment[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -35,7 +35,7 @@ export default function ApartmentGridPreview() {
             <h2 className="section-title">{t('apartments.title')}</h2>
             <p className="section-sub">{t('apartments.sub')}</p>
           </div>
-          <Button variant="ghost" iconRight="arrow" as="a" href="/apartments">
+          <Button variant="ghost" iconRight="arrow" as="a" href={href('/apartments')}>
             {t('apartments.seeAll')} {loading ? '' : apartments.length}
           </Button>
         </div>
@@ -52,7 +52,7 @@ export default function ApartmentGridPreview() {
 
         {apartments.length > HOME_PREVIEW_LIMIT && (
           <div className={styles.more}>
-            <Link href="/apartments" className={styles.moreLink}>
+            <Link href={href('/apartments')} className={styles.moreLink}>
               {t('apartments.viewAll')} ({apartments.length})
             </Link>
           </div>

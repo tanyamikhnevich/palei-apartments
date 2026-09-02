@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import Icon from '@/components/ui/Icon/Icon';
 import { useLanguage } from '@/i18n/LanguageProvider';
-import { serviceFor } from '@/lib/services';
+import { isSectionLive, serviceFor } from '@/lib/services';
 import styles from './BookingUpsell.module.scss';
 
 /**
@@ -24,7 +24,7 @@ export default function BookingUpsell({
   checkIn: string | null;
   checkOut: string | null;
 }) {
-  const { t } = useLanguage();
+  const { t, href } = useLanguage();
 
   const cars = serviceFor('/cars');
   const flowers = serviceFor('/flowers');
@@ -33,22 +33,26 @@ export default function BookingUpsell({
   /* Flowers are for the day you arrive, so check-in is the delivery date. */
   const flowersHref = checkIn ? `/flowers?date=${checkIn}` : '/flowers';
 
+  // A parked section is not offered here either — the card would lead to a 404
+  // straight after the guest has just trusted us with a booking.
   const cards = [
-    {
+    isSectionLive('/cars') && {
       href: carsHref,
       accent: cars.accent,
       icon: 'car' as const,
       title: t('group.services.cars.label'),
       note: t('booking.upsellCars'),
     },
-    {
+    isSectionLive('/flowers') && {
       href: flowersHref,
       accent: flowers.accent,
       icon: 'flower' as const,
       title: t('group.services.flowers.label'),
       note: t('booking.upsellFlowers'),
     },
-  ];
+  ].filter((card): card is Exclude<typeof card, false> => card !== false);
+
+  if (!cards.length) return null;
 
   return (
     <section className={styles.upsell}>
@@ -59,7 +63,7 @@ export default function BookingUpsell({
         {cards.map((card) => (
           <Link
             key={card.href}
-            href={card.href}
+            href={href(card.href)}
             className={styles.card}
             style={{ ['--svc' as string]: card.accent }}
           >

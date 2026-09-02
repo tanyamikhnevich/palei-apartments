@@ -10,9 +10,13 @@ import {
 import { rowToOrder } from '@/db/flowers/schema';
 import { jsonError } from '@/lib/api/errors';
 import { FLOWER_ORDER_STATUSES, type FlowerOrderStatus } from '@/types/flower';
+import { requireAdmin } from '@/lib/auth/guard';
 
 /** Placed orders, newest first — the shop's own inbox. */
 export async function GET() {
+  const denied = await requireAdmin();
+  if (denied) return denied;
+
   if (!isFlowersDbConfigured()) return NextResponse.json({ orders: [] });
 
   try {
@@ -29,6 +33,9 @@ export async function GET() {
 }
 
 export async function PATCH(request: Request) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
+
   if (!isFlowersDbConfigured()) return jsonError('Shop database not configured', 503);
 
   try {

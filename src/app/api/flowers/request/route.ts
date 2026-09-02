@@ -9,6 +9,7 @@ import { earliestDelivery } from '@/lib/flowers';
 import { formatMoney } from '@/lib/money';
 import { currencyOf } from '@/lib/regions';
 import { DELIVERY_SLOTS, type Bouquet, type DeliverySlot } from '@/types/flower';
+import { publicSubmitThrottle } from '@/lib/auth/throttle';
 
 const ISO = /^\d{4}-\d{2}-\d{2}$/;
 const CARD_MAX = 300;
@@ -39,6 +40,16 @@ async function loadBouquets(): Promise<Bouquet[]> {
 }
 
 export async function POST(request: Request) {
+  // A honeypot stops a bot filling a form; it does nothing against a loop.
+  const gate = publicSubmitThrottle.check(request);
+  if (!gate.allowed) {
+    return NextResponse.json(
+      { error: 'Too many requests. Please try again in a few minutes.' },
+      { status: 429, headers: { 'Retry-After': String(gate.retryAfterSeconds) } }
+    );
+  }
+  publicSubmitThrottle.consume(request);
+
   if (!isTelegramConfigured()) {
     return NextResponse.json(
       { error: 'Telegram not configured. Set TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID.' },

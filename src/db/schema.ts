@@ -118,11 +118,54 @@ export const reviews = pgTable('reviews', {
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 });
 
+/**
+ * The people who can open the panel. The password is only ever here as a
+ * PBKDF2 hash — nothing in the system can read it back.
+ */
+export const adminUsers = pgTable('admin_users', {
+  id: varchar('id', { length: 64 }).primaryKey(),
+  /** Matched case-insensitively at sign-in; stored as typed. */
+  login: text('login').notNull().unique(),
+  passwordHash: text('password_hash').notNull(),
+  /** Bumped on every password change, which retires the whole session family. */
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  passwordChangedAt: timestamp('password_changed_at', { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  lastLoginAt: timestamp('last_login_at', { withTimezone: true }),
+});
+
+/**
+ * One row per signed-in browser. The refresh token itself is never stored —
+ * only its SHA-256 — so a copy of this table does not let anyone in.
+ *
+ * Rows are kept after they are spent rather than deleted: a refresh token that
+ * comes back a second time is evidence the cookie was copied, and that is only
+ * visible if the spent row is still here to recognise.
+ */
+export const adminSessions = pgTable('admin_sessions', {
+  id: varchar('id', { length: 64 }).primaryKey(),
+  userId: varchar('user_id', { length: 64 }).notNull(),
+  tokenHash: text('token_hash').notNull().unique(),
+  /** Groups every rotation of one sign-in, so theft can retire all of them. */
+  familyId: varchar('family_id', { length: 64 }).notNull(),
+  /** Set when this token is rotated away; the replacement's id. */
+  replacedBy: varchar('replaced_by', { length: 64 }),
+  revokedAt: timestamp('revoked_at', { withTimezone: true }),
+  /** Free-text note for the sessions list — browser and platform, no more. */
+  label: text('label'),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  lastUsedAt: timestamp('last_used_at', { withTimezone: true }).defaultNow().notNull(),
+  expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+});
+
 export type ApartmentRow = typeof apartments.$inferSelect;
 export type ApartmentInsert = typeof apartments.$inferInsert;
 export type BookingRow = typeof bookings.$inferSelect;
 export type CalendarFeedRow = typeof calendarFeeds.$inferSelect;
 export type CalendarFeedInsert = typeof calendarFeeds.$inferInsert;
+export type AdminUserRow = typeof adminUsers.$inferSelect;
+export type AdminSessionRow = typeof adminSessions.$inferSelect;
 export type ExternalBlockRow = typeof externalBlocks.$inferSelect;
 export type ExternalBlockInsert = typeof externalBlocks.$inferInsert;
 export type BookingInsert = typeof bookings.$inferInsert;

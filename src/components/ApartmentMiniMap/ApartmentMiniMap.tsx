@@ -1,13 +1,13 @@
 'use client';
 
 import { useMemo } from 'react';
-import L from 'leaflet';
-import { MapContainer, Marker, TileLayer } from 'react-leaflet';
+import { Circle, MapContainer, TileLayer } from 'react-leaflet';
 import type { Apartment } from '@/types/apartment';
 import Icon from '@/components/ui/Icon/Icon';
 import { useLanguage } from '@/i18n/LanguageProvider';
 import { getApartmentCopy } from '@/i18n/apartmentLocale';
 import { coordsForApartment } from '@/data/apartmentGeo';
+import { APPROX_RADIUS_M } from '@/lib/geoPrivacy';
 import 'leaflet/dist/leaflet.css';
 import styles from './ApartmentMiniMap.module.scss';
 
@@ -15,19 +15,12 @@ type ApartmentMiniMapProps = {
   apt: Apartment;
 };
 
-/** Same div-icon trick as the full map: Leaflet's bundled marker image 404s. */
-const PIN = L.divIcon({
-  className: '',
-  html: `<span class="${styles.pin}"></span>`,
-  iconSize: [26, 26],
-  iconAnchor: [13, 13],
-});
-
 /**
- * Where this one apartment actually is — a small, calm map next to the
- * description. Interaction is deliberately limited (no scroll zoom, no drag)
- * so it never traps a finger scrolling the page on a phone; "open in maps"
- * hands the guest over to their own app for anything more.
+ * Roughly where this apartment is — a small, calm map next to the description.
+ * An area rather than a pin: the exact building is not published, so drawing a
+ * point on one would be a lie as well as a leak. Interaction is deliberately
+ * limited (no scroll zoom, no drag) so it never traps a finger scrolling the
+ * page on a phone.
  */
 export default function ApartmentMiniMap({ apt }: ApartmentMiniMapProps) {
   const { locale, t } = useLanguage();
@@ -55,7 +48,12 @@ export default function ApartmentMiniMap({ apt }: ApartmentMiniMapProps) {
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
           maxZoom={19}
         />
-        <Marker position={[point.lat, point.lng]} icon={PIN} />
+        <Circle
+          center={[point.lat, point.lng]}
+          radius={APPROX_RADIUS_M}
+          pathOptions={{ color: '#1b6ca8', weight: 1, opacity: 0.5, fillOpacity: 0.12 }}
+          interactive={false}
+        />
       </MapContainer>
 
       <div className={styles.bar}>
@@ -68,6 +66,7 @@ export default function ApartmentMiniMap({ apt }: ApartmentMiniMapProps) {
           <Icon name="arrow" size={15} />
         </a>
       </div>
+      <p className={styles.approx}>{t('apartments.mapApprox')}</p>
     </section>
   );
 }

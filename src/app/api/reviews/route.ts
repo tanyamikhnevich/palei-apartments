@@ -5,11 +5,19 @@ import { rowToReview } from '@/db/map';
 import type { Review } from '@/types/review';
 import { dbUnavailableResponse, isDbConfigured, jsonError } from '@/lib/api/errors';
 import { reviewValidationMessageEn, validateReview, type ReviewInput } from '@/lib/validation/review';
+import { requireAdmin } from '@/lib/auth/guard';
+import { publicSubmitThrottle } from '@/lib/auth/throttle';
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const admin = searchParams.get('admin') === '1';
   const apartmentId = searchParams.get('apartmentId');
+
+  // The moderation queue carries private contact details.
+  if (admin) {
+    const denied = await requireAdmin();
+    if (denied) return denied;
+  }
 
   if (!isDbConfigured()) {
     return NextResponse.json({ reviews: [] as Review[], source: 'mock' as const });
@@ -52,6 +60,16 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
+  // A honeypot stops a bot filling a form; it does nothing against a loop.
+  const gate = publicSubmitThrottle.check(request);
+  if (!gate.allowed) {
+    return NextResponse.json(
+      { error: 'Too many requests. Please try again in a few minutes.' },
+      { status: 429, headers: { 'Retry-After': String(gate.retryAfterSeconds) } }
+    );
+  }
+  publicSubmitThrottle.consume(request);
+
   if (!isDbConfigured()) return dbUnavailableResponse();
 
   try {

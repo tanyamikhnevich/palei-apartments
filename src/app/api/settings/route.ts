@@ -12,6 +12,7 @@ import {
   validatePhone,
   validationMessageEn,
 } from '@/lib/validation/contact';
+import { requireAdmin } from '@/lib/auth/guard';
 
 const SETTINGS_ID = 'default';
 
@@ -36,6 +37,9 @@ export async function GET() {
 }
 
 export async function PUT(request: Request) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
+
   if (!isDbConfigured()) return dbUnavailableResponse();
 
   try {

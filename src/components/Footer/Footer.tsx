@@ -94,7 +94,6 @@ export default function Footer() {
           <div className={styles.bottomLinks}>
             <a href="#">{t('footer.privacy')}</a>
             <a href="#">{t('footer.terms')}</a>
-            <a href="/admin">{t('footer.admin')}</a>
           </div>
         </div>
       </div>

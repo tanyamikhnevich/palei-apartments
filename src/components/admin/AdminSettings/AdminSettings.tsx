@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Button from '@/components/ui/Button/Button';
 import { AdminInput, AdminSelect } from '@/components/admin/ui/AdminField';
+import AdminAccount from '@/components/admin/AdminAccount/AdminAccount';
 import {
   CURRENCY_OPTIONS,
   DEFAULT_BUSINESS_SETTINGS,
@@ -199,6 +200,8 @@ export default function AdminSettings() {
           {saving ? 'Saving…' : 'Save settings'}
         </Button>
       </div>
+
+      <AdminAccount />
     </div>
   );
 }

@@ -378,7 +378,6 @@ export const en = {
     copyright: '© 2026 Palei Apartments · Vacation in Israel',
     privacy: 'Privacy',
     terms: 'Terms',
-    admin: 'Admin →',
   },
 } as const;
 

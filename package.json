@@ -14,6 +14,7 @@
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
     "db:seed": "tsx src/db/seed.ts",
+    "admin:create": "tsx scripts/adminCreate.ts",
     "db:cars:generate": "drizzle-kit generate --config drizzle.cars.config.ts",
     "db:cars:migrate": "tsx src/db/cars/migrate.ts",
     "db:flowers:generate": "drizzle-kit generate --config drizzle.flowers.config.ts",

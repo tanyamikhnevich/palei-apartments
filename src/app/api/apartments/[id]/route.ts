@@ -4,10 +4,14 @@ import { getDb, schema } from '@/db/index';
 import { apartmentToInsert, rowToApartment } from '@/db/map';
 import type { Apartment } from '@/types/apartment';
 import { dbUnavailableResponse, isDbConfigured, jsonError } from '@/lib/api/errors';
+import { requireAdmin } from '@/lib/auth/guard';
 
 type RouteContext = { params: { id: string } };
 
 export async function PATCH(request: Request, { params }: RouteContext) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
+
   if (!isDbConfigured()) return dbUnavailableResponse();
 
   try {
@@ -38,6 +42,9 @@ export async function PATCH(request: Request, { params }: RouteContext) {
 }
 
 export async function DELETE(_request: Request, { params }: RouteContext) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
+
   if (!isDbConfigured()) return dbUnavailableResponse();
 
   try {

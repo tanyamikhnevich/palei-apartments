@@ -4,12 +4,16 @@ import { getDb, schema } from '@/db/index';
 import { bookingToInsert, rowToBooking } from '@/db/map';
 import type { Booking, BookingStatus } from '@/types/apartment';
 import { dbUnavailableResponse, isDbConfigured, jsonError } from '@/lib/api/errors';
+import { requireAdmin } from '@/lib/auth/guard';
 
 type RouteContext = { params: { id: string } };
 
 const ALLOWED: BookingStatus[] = ['Draft', 'New request', 'Confirmed', 'Declined'];
 
 export async function PATCH(request: Request, { params }: RouteContext) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
+
   if (!isDbConfigured()) return dbUnavailableResponse();
 
   try {

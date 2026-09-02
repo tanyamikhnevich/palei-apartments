@@ -389,6 +389,5 @@ export const fr: Translation<Messages> = {
     copyright: '© 2026 Palei Apartments · Vacances en Israël',
     privacy: 'Confidentialité',
     terms: 'Conditions',
-    admin: 'Admin →',
   },
 };

@@ -379,6 +379,5 @@ export const ru = {
     copyright: '© 2026 Palei Apartments · Отдых в Израиле',
     privacy: 'Конфиденциальность',
     terms: 'Условия',
-    admin: 'Админ →',
   },
 };

@@ -5,11 +5,18 @@ import { rowToReview } from '@/db/map';
 import type { Review } from '@/types/review';
 import { dbUnavailableResponse, isDbConfigured, jsonError } from '@/lib/api/errors';
 import { reviewValidationMessageEn, validateReview, type ReviewInput } from '@/lib/validation/review';
+import { requireAdmin } from '@/lib/auth/guard';
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const admin = searchParams.get('admin') === '1';
   const apartmentId = searchParams.get('apartmentId');
+
+  // The moderation queue carries private contact details.
+  if (admin) {
+    const denied = await requireAdmin();
+    if (denied) return denied;
+  }
 
   if (!isDbConfigured()) {
     return NextResponse.json({ reviews: [] as Review[], source: 'mock' as const });

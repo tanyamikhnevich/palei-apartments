@@ -24,6 +24,24 @@ npm run db:migrate
 | `npm run db:push` | Sync schema without migration files (dev only) |
 | `npm run db:seed` | Reset & seed demo data |
 | `npm run db:studio` | Browse tables in Drizzle Studio |
+| `npm run admin:create -- 'login' 'password'` | Create the admin account, or reset its password |
+
+## Admin sign-in
+
+The login and password live in `admin_users`, not in the environment. After
+`npm run db:migrate`, create the account once:
+
+```bash
+npm run admin:create -- 'your-login' 'your-password'
+```
+
+Running it again for the same login resets that password and signs out every
+open session. Day to day the password is changed from the panel itself, under
+Settings -> Account.
+
+`ADMIN_SECRET` still has to be in the environment: it signs the session tokens.
+It is not a credential — nobody types it — and rotating it signs every browser
+out at once.
 
 ## Empty database (no tables yet)
 

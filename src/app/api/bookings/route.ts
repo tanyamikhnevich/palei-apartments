@@ -8,10 +8,14 @@ import { formatDateRange, nightsBetween, rangesOverlap } from '@/lib/dates';
 import { dbUnavailableResponse, isDbConfigured, jsonError } from '@/lib/api/errors';
 import { validateBookingGuest, validationMessageEn } from '@/lib/validation/contact';
 import { notifyNewBooking } from '@/lib/notify/telegram';
+import { requireAdmin } from '@/lib/auth/guard';
 
 const ADMIN_STATUSES: BookingStatus[] = ['New request', 'Confirmed', 'Declined'];
 
 export async function GET(request: Request) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
+
   const { searchParams } = new URL(request.url);
   const admin = searchParams.get('admin') === '1';
 

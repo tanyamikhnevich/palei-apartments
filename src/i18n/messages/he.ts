@@ -377,6 +377,5 @@ export const he = {
     copyright: '© 2026 Palei Apartments · חופשה בישראל',
     privacy: 'פרטיות',
     terms: 'תנאים',
-    admin: 'ניהול →',
   },
 };

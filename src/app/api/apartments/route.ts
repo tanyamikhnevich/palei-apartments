@@ -4,9 +4,16 @@ import { getDb, schema } from '@/db/index';
 import { apartmentToInsert, rowToApartment } from '@/db/map';
 import type { Apartment } from '@/types/apartment';
 import { dbUnavailableResponse, isDbConfigured, jsonError } from '@/lib/api/errors';
+import { requireAdmin } from '@/lib/auth/guard';
 
 export async function GET(request: Request) {
   const publicOnly = new URL(request.url).searchParams.get('public') === '1';
+
+  // Without ?public=1 the answer also carries unlisted drafts.
+  if (!publicOnly) {
+    const denied = await requireAdmin();
+    if (denied) return denied;
+  }
 
   if (!isDbConfigured()) {
     const { apartments: mock } = await import('@/data/apartments');
@@ -31,6 +38,9 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
+
   if (!isDbConfigured()) return dbUnavailableResponse();
 
   try {

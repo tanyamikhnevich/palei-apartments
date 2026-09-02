@@ -21,7 +21,7 @@ interface ApartmentCardProps {
 }
 
 export default function ApartmentCard({ apt }: ApartmentCardProps) {
-  const { locale, t } = useLanguage();
+  const { locale, t, href } = useLanguage();
   const copy = getApartmentCopy(apt, locale);
   const photos = getApartmentPhotos(apt);
   const tagLine = formatApartmentTags(apt, locale, t);
@@ -99,7 +99,7 @@ export default function ApartmentCard({ apt }: ApartmentCardProps) {
             size="sm"
             iconRight="arrow"
             as="a"
-            href={`/apartments/${apt.id}`}
+            href={href(`/apartments/${apt.id}`)}
             className={styles.detailsBtn}
           >
             {t('apartments.viewDetails')}
@@ -113,7 +113,7 @@ export default function ApartmentCard({ apt }: ApartmentCardProps) {
         "view details" button above is the real link.
       */}
       <Link
-        href={`/apartments/${apt.id}`}
+        href={href(`/apartments/${apt.id}`)}
         className={styles.cardLink}
         aria-hidden="true"
         tabIndex={-1}

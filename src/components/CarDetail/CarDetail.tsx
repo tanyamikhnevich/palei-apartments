@@ -26,7 +26,7 @@ import type { Car } from '@/types/car';
 import styles from './CarDetail.module.scss';
 
 export default function CarDetail({ car }: { car: Car }) {
-  const { locale, t } = useLanguage();
+  const { locale, t, href } = useLanguage();
   const name = `${car.make} ${car.model}`;
   const money = (amount: number) => formatMoney(amount, currencyOf(car), locale);
 
@@ -103,7 +103,7 @@ export default function CarDetail({ car }: { car: Car }) {
 
   return (
     <div className={`wrap ${styles.page}`}>
-      <Link href="/cars" className={styles.back}>
+      <Link href={href('/cars')} className={styles.back}>
         <Icon name="arrow" size={16} className={styles.backIcon} />
         {t('cars.backToAll')}
       </Link>
@@ -181,7 +181,7 @@ export default function CarDetail({ car }: { car: Car }) {
                 </div>
                 <h2 className={styles.successTitle}>{t('booking.successTitle')}</h2>
                 <p className={styles.successDesc}>{t('booking.successDesc')}</p>
-                <Button variant="ghost" as="a" href="/cars" iconRight="arrow">
+                <Button variant="ghost" as="a" href={href('/cars')} iconRight="arrow">
                   {t('cars.backToAll')}
                 </Button>
               </div>

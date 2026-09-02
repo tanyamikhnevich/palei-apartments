@@ -1,14 +1,13 @@
 import type { Metadata } from 'next';
+import { localizedPageMetadata } from '@/lib/seo';
 import Header from '@/components/Header/Header';
 import Footer from '@/components/Footer/Footer';
 import AboutSection from '@/components/AboutSection/AboutSection';
 import BenefitsSection from '@/components/BenefitsSection/BenefitsSection';
 
-export const metadata: Metadata = {
-  title: 'About — Palei Apartments',
-  description:
-    'A small family business renting our own carefully prepared apartments in Bat Yam.',
-};
+export function generateMetadata(): Metadata {
+  return localizedPageMetadata('about', '/about');
+}
 
 export default function AboutPage() {
   return (

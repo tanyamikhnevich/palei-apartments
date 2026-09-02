@@ -1,14 +1,13 @@
 import { Suspense } from 'react';
 import type { Metadata } from 'next';
+import { localizedPageMetadata } from '@/lib/seo';
 import Header from '@/components/Header/Header';
 import Footer from '@/components/Footer/Footer';
 import FlowersShop from '@/components/FlowersShop/FlowersShop';
 
-export const metadata: Metadata = {
-  title: 'Flower delivery — Palei Flowers',
-  description:
-    'Bouquets made up the morning they go out and delivered in Bat Yam — or left in the apartment before you arrive.',
-};
+export function generateMetadata(): Metadata {
+  return localizedPageMetadata('flowers', '/flowers');
+}
 
 export default function FlowersPage() {
   return (

@@ -20,7 +20,7 @@ type ApartmentSearchProps = {
 };
 
 export default function ApartmentSearch({ variant = 'hero', initial }: ApartmentSearchProps) {
-  const { locale, t } = useLanguage();
+  const { locale, t, href } = useLanguage();
   const router = useRouter();
 
   const [checkIn, setCheckIn] = useState<string | null>(initial?.checkIn ?? null);
@@ -82,7 +82,7 @@ export default function ApartmentSearch({ variant = 'hero', initial }: Apartment
     }
 
     const query = buildApartmentSearchQuery({ checkIn, checkOut, guests });
-    router.push(`/apartments${query}`);
+    router.push(href(`/apartments${query}`));
   };
 
   const rootClass = variant === 'hero' ? styles.hero : styles.page;

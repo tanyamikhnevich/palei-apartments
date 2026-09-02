@@ -42,6 +42,7 @@ import {
 import styles from './ApartmentDetail.module.scss';
 import { formatMoney } from '@/lib/money';
 import { countryOf, currencyOf } from '@/lib/regions';
+import { isSectionLive } from '@/lib/services';
 
 /** Leaflet touches `window` on import, so the mini map is client-only. */
 const ApartmentMiniMap = dynamic(
@@ -54,7 +55,7 @@ interface ApartmentDetailProps {
 }
 
 export default function ApartmentDetail({ apt }: ApartmentDetailProps) {
-  const { locale, t } = useLanguage();
+  const { locale, t, href } = useLanguage();
   const copy = getApartmentCopy(apt, locale);
   const photos = useMemo(() => getApartmentPhotos(apt), [apt.photos]);
   const minNights = apt.minNights ?? 1;
@@ -257,7 +258,10 @@ export default function ApartmentDetail({ apt }: ApartmentDetailProps) {
   const money = (amount: number) => formatMoney(amount, currencyOf(apt), locale);
 
   /* Back to the listing this apartment actually belongs to. */
-  const listingHref = countryOf(apt) === 'CY' ? '/cyprus' : '/apartments';
+  // Back to the listing this apartment belongs to — unless that listing is
+  // parked, in which case the Israeli one is the only page there is.
+  const listingHref =
+    countryOf(apt) === 'CY' && isSectionLive('/cyprus') ? '/cyprus' : '/apartments';
 
 
   /**
@@ -276,7 +280,7 @@ export default function ApartmentDetail({ apt }: ApartmentDetailProps) {
 
   return (
     <div className={`wrap ${styles.page}`}>
-      <Link href={listingHref} className={styles.back}>
+      <Link href={href(listingHref)} className={styles.back}>
         <Icon name="arrow" size={16} className={styles.backIcon} />
         {t('apartments.backToAll')}
       </Link>
@@ -370,7 +374,7 @@ export default function ApartmentDetail({ apt }: ApartmentDetailProps) {
                 </div>
                 <h2 className={styles.successTitle}>{t('booking.successTitle')}</h2>
                 <p className={styles.successDesc}>{t('booking.successDesc')}</p>
-                <Button variant="ghost" as="a" href={listingHref} iconRight="arrow">
+                <Button variant="ghost" as="a" href={href(listingHref)} iconRight="arrow">
                   {t('apartments.backToAll')}
                 </Button>
 

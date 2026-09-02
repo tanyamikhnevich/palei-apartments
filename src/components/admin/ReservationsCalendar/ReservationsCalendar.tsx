@@ -1,10 +1,11 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { Apartment, Booking } from '@/types/apartment';
 import Icon from '@/components/ui/Icon/Icon';
 import { getApartmentCopy } from '@/i18n/apartmentLocale';
-import { fetchBookings } from '@/lib/api/client';
+import { fetchBookings, fetchImportedBlocks, type ImportedBlock } from '@/lib/api/client';
+import { CALENDAR_SOURCE_LABELS, type CalendarFeedSource } from '@/types/calendar';
 import {
   addDaysISO,
   addMonths,
@@ -33,28 +34,50 @@ function channelColor(channel: string): string {
   return CHANNEL_COLOR[channel] ?? '#6b7683';
 }
 
+/** Imported feeds are coloured by platform, matching the channel palette. */
+const SOURCE_COLOR: Record<CalendarFeedSource, string> = {
+  airbnb: CHANNEL_COLOR.Airbnb,
+  booking: CHANNEL_COLOR.Booking,
+  vrbo: CHANNEL_COLOR.Vrbo,
+  other: '#6b7683',
+};
+
 // Statuses that occupy the calendar. Declined/Draft never appear.
 const OCCUPYING: Booking['status'][] = ['Confirmed', 'New request'];
 
 interface Bar {
-  booking: Booking;
+  key: string;
+  label: string;
+  title: string;
+  color: string;
   offset: number; // day columns from the 1st
   span: number; // day columns wide
   clippedStart: boolean;
   clippedEnd: boolean;
+  /** A request we have not confirmed yet — drawn with a dashed outline. */
+  tentative: boolean;
+  /** Came from a platform's calendar rather than from our own bookings. */
+  imported: boolean;
 }
 
 export default function ReservationsCalendar({ apartments }: ReservationsCalendarProps) {
   const [month, setMonth] = useState(() => startOfMonth(new Date()));
   const [bookings, setBookings] = useState<Booking[]>([]);
+  const [imported, setImported] = useState<ImportedBlock[]>([]);
   const [loading, setLoading] = useState(true);
   const [aptFilter, setAptFilter] = useState<string>('all');
   const today = todayISO();
 
   useEffect(() => {
-    fetchBookings(true)
-      .then((all) => setBookings(all.filter((b) => OCCUPYING.includes(b.status))))
-      .catch(() => setBookings([]))
+    // The two sides are independent: a broken Airbnb feed must not blank out
+    // the reservations we hold ourselves, and vice versa.
+    Promise.allSettled([fetchBookings(true), fetchImportedBlocks()])
+      .then(([own, external]) => {
+        if (own.status === 'fulfilled') {
+          setBookings(own.value.filter((b) => OCCUPYING.includes(b.status)));
+        }
+        if (external.status === 'fulfilled') setImported(external.value);
+      })
       .finally(() => setLoading(false));
   }, []);
 
@@ -75,35 +98,84 @@ export default function ReservationsCalendar({ apartments }: ReservationsCalenda
     [year, monthIndex, totalDays, today]
   );
 
+  /** Clip a stay to the visible month; null when it falls outside entirely. */
+  const clip = useCallback(
+    (checkIn: string, checkOut: string) => {
+      const start = checkIn > firstISO ? checkIn : firstISO;
+      const endExcl = checkOut < nextMonthISO ? checkOut : nextMonthISO;
+      if (start >= endExcl) return null;
+      return {
+        offset: nightsBetween(firstISO, start),
+        span: nightsBetween(start, endExcl),
+        clippedStart: checkIn < firstISO,
+        clippedEnd: checkOut > nextMonthISO,
+      };
+    },
+    [firstISO, nextMonthISO]
+  );
+
   const rows = useMemo(() => {
     const list = aptFilter === 'all' ? apartments : apartments.filter((a) => a.id === aptFilter);
+
     return list.map((apt) => {
-      const bars: Bar[] = [];
+      const own: Bar[] = [];
       for (const b of bookings) {
         if (b.apartmentId !== apt.id) continue;
-        // Clip the booking to the visible month (checkOut is exclusive).
-        const start = b.checkIn > firstISO ? b.checkIn : firstISO;
-        const endExcl = b.checkOut < nextMonthISO ? b.checkOut : nextMonthISO;
-        if (start >= endExcl) continue;
-        const offset = nightsBetween(firstISO, start);
-        const span = nightsBetween(start, endExcl);
-        bars.push({
-          booking: b,
-          offset,
-          span,
-          clippedStart: b.checkIn < firstISO,
-          clippedEnd: b.checkOut > nextMonthISO,
+        const box = clip(b.checkIn, b.checkOut);
+        if (!box) continue;
+
+        const tentative = b.status === 'New request';
+        own.push({
+          ...box,
+          key: `booking-${b.id}`,
+          label: b.guest,
+          title: `${b.guest} · ${b.channel} · ${b.dates}${tentative ? ' · pending' : ''}`,
+          color: channelColor(b.channel),
+          tentative,
+          imported: false,
         });
       }
-      return { apt, bars };
+
+      const external: Bar[] = [];
+      for (const block of imported) {
+        if (block.apartmentId !== apt.id) continue;
+        const box = clip(block.checkIn, block.checkOut);
+        if (!box) continue;
+
+        const platform = CALENDAR_SOURCE_LABELS[block.source];
+        external.push({
+          ...box,
+          key: `imported-${block.id}`,
+          label: platform,
+          // The platforms mostly send "Reserved"; anything more specific is
+          // worth surfacing, but only in the tooltip.
+          title: `${platform} · ${block.checkIn} → ${block.checkOut}${
+            block.summary ? ` · ${block.summary}` : ''
+          } · imported from ${block.feedLabel}`,
+          color: SOURCE_COLOR[block.source],
+          tentative: false,
+          imported: true,
+        });
+      }
+
+      return { apt, own, external };
     });
-  }, [apartments, bookings, aptFilter, firstISO, nextMonthISO]);
+  }, [apartments, bookings, imported, aptFilter, clip]);
+
+  /** Imported stays get their own lane, but only on months that have any. */
+  const dualLane = useMemo(() => rows.some((r) => r.external.length > 0), [rows]);
 
   const channelsPresent = useMemo(() => {
     const set = new Set<string>();
     for (const b of bookings) set.add(b.channel);
     return [...set];
   }, [bookings]);
+
+  const sourcesPresent = useMemo(() => {
+    const set = new Set<CalendarFeedSource>();
+    for (const b of imported) set.add(b.source);
+    return [...set];
+  }, [imported]);
 
   const pct = (n: number) => `${(n / totalDays) * 100}%`;
 
@@ -148,12 +220,21 @@ export default function ReservationsCalendar({ apartments }: ReservationsCalenda
             ))}
           </select>
 
-          {channelsPresent.length > 0 && (
+          {(channelsPresent.length > 0 || sourcesPresent.length > 0) && (
             <div className={styles.legend}>
               {channelsPresent.map((c) => (
                 <span key={c} className={styles.legendItem}>
                   <span className={styles.swatch} style={{ background: channelColor(c) }} />
                   {c}
+                </span>
+              ))}
+              {sourcesPresent.map((src) => (
+                <span key={`imported-${src}`} className={styles.legendItem}>
+                  <span
+                    className={`${styles.swatch} ${styles.swatchImported}`}
+                    style={{ background: SOURCE_COLOR[src] }}
+                  />
+                  {CALENDAR_SOURCE_LABELS[src]} (imported)
                 </span>
               ))}
             </div>
@@ -166,7 +247,7 @@ export default function ReservationsCalendar({ apartments }: ReservationsCalenda
       ) : rows.length === 0 ? (
         <p className={styles.empty}>No apartments to show.</p>
       ) : (
-        <div className={styles.grid}>
+        <div className={`${styles.grid} ${dualLane ? styles.dual : ''}`}>
           {/* Header row: day numbers */}
           <div className={styles.headRow}>
             <div className={styles.aptHeadCell}>Apartment</div>
@@ -185,7 +266,7 @@ export default function ReservationsCalendar({ apartments }: ReservationsCalenda
           </div>
 
           {/* One row per apartment */}
-          {rows.map(({ apt, bars }) => (
+          {rows.map(({ apt, own, external }) => (
             <div key={apt.id} className={styles.aptRow}>
               <div className={styles.aptCell} title={getApartmentCopy(apt, 'en').title}>
                 {getApartmentCopy(apt, 'en').title}
@@ -200,32 +281,29 @@ export default function ReservationsCalendar({ apartments }: ReservationsCalenda
                       .join(' ')}
                   />
                 ))}
-                {/* booking bars */}
-                {bars.map((bar) => {
-                  const b = bar.booking;
-                  const tentative = b.status === 'New request';
-                  return (
-                    <div
-                      key={b.id}
-                      className={[
-                        styles.bar,
-                        bar.clippedStart ? styles.clipStart : '',
-                        bar.clippedEnd ? styles.clipEnd : '',
-                        tentative ? styles.tentative : '',
-                      ]
-                        .filter(Boolean)
-                        .join(' ')}
-                      style={{
-                        left: `calc(${pct(bar.offset)} + 2px)`,
-                        width: `calc(${pct(bar.span)} - 4px)`,
-                        background: channelColor(b.channel),
-                      }}
-                      title={`${b.guest} · ${b.channel} · ${b.dates}${tentative ? ' · pending' : ''}`}
-                    >
-                      <span className={styles.barText}>{b.guest}</span>
-                    </div>
-                  );
-                })}
+                {/* reservation bars: ours on the upper lane, imported below */}
+                {[...own, ...external].map((bar) => (
+                  <div
+                    key={bar.key}
+                    className={[
+                      styles.bar,
+                      bar.imported ? styles.imported : '',
+                      bar.clippedStart ? styles.clipStart : '',
+                      bar.clippedEnd ? styles.clipEnd : '',
+                      bar.tentative ? styles.tentative : '',
+                    ]
+                      .filter(Boolean)
+                      .join(' ')}
+                    style={{
+                      left: `calc(${pct(bar.offset)} + 2px)`,
+                      width: `calc(${pct(bar.span)} - 4px)`,
+                      background: bar.color,
+                    }}
+                    title={bar.title}
+                  >
+                    <span className={styles.barText}>{bar.label}</span>
+                  </div>
+                ))}
               </div>
             </div>
           ))}
@@ -233,8 +311,9 @@ export default function ReservationsCalendar({ apartments }: ReservationsCalenda
       )}
 
       <p className={styles.note}>
-        Showing confirmed and pending reservations from this website. Bars with a dashed outline are pending
-        requests.
+        Upper bars are reservations taken through this website; a dashed outline means the request is
+        still pending. Striped bars underneath are dates imported from a connected platform calendar —
+        connect one under an apartment&rsquo;s Calendar sync.
       </p>
     </div>
   );

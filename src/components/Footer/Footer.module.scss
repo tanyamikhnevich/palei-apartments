@@ -72,28 +72,15 @@
   }
 }
 
+/* Just the copyright line now that privacy and terms are gone; the rules for
+   spreading it against a second group come back with those links. */
 .bottom {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 20px;
   padding-top: 26px;
   font-size: var(--fs-sm);
   flex-wrap: wrap;
-}
-
-.bottomLinks {
-  display: flex;
-  gap: 22px;
-
-  a {
-    color: rgba(255, 255, 255, 0.72);
-    transition: color 0.15s;
-
-    &:hover {
-      color: #fff;
-    }
-  }
 }
 
 @media (max-width: 1000px) {
@@ -166,10 +153,6 @@
     font-size: var(--fs-xs);
   }
 
-  .bottomLinks {
-    flex-wrap: wrap;
-    gap: 8px 16px;
-  }
 }
 
 @media (max-width: 480px) {

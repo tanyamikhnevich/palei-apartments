@@ -3,7 +3,7 @@ import { getDb, schema } from '@/db/index';
 import { rowToCalendarFeed } from '@/db/map';
 import { parseIcal, type IcalEvent } from '@/lib/ical/parse';
 import { addDaysISO, compareISO, todayISO } from '@/lib/dates';
-import type { CalendarFeed, CalendarSyncOutcome } from '@/types/calendar';
+import type { CalendarFeed, CalendarFeedSource, CalendarSyncOutcome } from '@/types/calendar';
 
 /** Give up on a slow feed rather than hanging the request that triggered the sync. */
 const FETCH_TIMEOUT_MS = 12_000;
@@ -214,4 +214,54 @@ export async function loadExternalBlocks(
     });
   }
   return byApartment;
+}
+
+export type ImportedBlock = {
+  id: string;
+  apartmentId: string;
+  checkIn: string;
+  checkOut: string;
+  /** Which platform it came from, for the colour and the label. */
+  source: CalendarFeedSource;
+  feedLabel: string;
+  /** Whatever the platform called the event — often "Reserved" or a guest name. */
+  summary: string | null;
+};
+
+/**
+ * Imported reservations with the feed they came from attached.
+ *
+ * `loadExternalBlocks` above answers "is this date free?" and merges everything
+ * into flat ranges; the admin calendar needs the opposite — each block kept
+ * separate and labelled, so a night blocked by Airbnb reads as Airbnb.
+ */
+export async function loadImportedBlocks(
+  db: Db,
+  apartmentIds?: string[]
+): Promise<ImportedBlock[]> {
+  const rows = await db
+    .select({
+      id: schema.externalBlocks.id,
+      apartmentId: schema.externalBlocks.apartmentId,
+      checkIn: schema.externalBlocks.checkIn,
+      checkOut: schema.externalBlocks.checkOut,
+      summary: schema.externalBlocks.summary,
+      source: schema.calendarFeeds.source,
+      feedLabel: schema.calendarFeeds.label,
+    })
+    .from(schema.externalBlocks)
+    .innerJoin(schema.calendarFeeds, eq(schema.externalBlocks.feedId, schema.calendarFeeds.id))
+    .where(
+      apartmentIds?.length ? inArray(schema.externalBlocks.apartmentId, apartmentIds) : undefined
+    );
+
+  return rows.map((row) => ({
+    id: row.id,
+    apartmentId: row.apartmentId,
+    checkIn: String(row.checkIn).slice(0, 10),
+    checkOut: String(row.checkOut).slice(0, 10),
+    source: row.source,
+    feedLabel: row.feedLabel,
+    summary: row.summary,
+  }));
 }

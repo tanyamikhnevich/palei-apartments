@@ -9,6 +9,7 @@ import Icon from '@/components/ui/Icon/Icon';
 import { useLanguage } from '@/i18n/LanguageProvider';
 import { LOCALES, LOCALE_LABELS } from '@/i18n/types';
 import { brandForPath } from '@/lib/services';
+import { splitLocale } from '@/i18n/routing';
 import styles from './Header.module.scss';
 
 const NAV = [
@@ -39,7 +40,7 @@ function LangSwitch() {
 }
 
 export default function Header() {
-  const { t } = useLanguage();
+  const { t, href: localeHref } = useLanguage();
   const router = useRouter();
   const pathname = usePathname();
   const [stuck, setStuck] = useState(false);
@@ -47,13 +48,14 @@ export default function Header() {
 
   const goHome = useCallback(() => {
     setMenuOpen(false);
-    if (pathname === '/') {
-      window.history.replaceState(null, '', '/');
+    const home = localeHref('/');
+    if (pathname === home) {
+      window.history.replaceState(null, '', home);
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
-    router.push('/');
-  }, [pathname, router]);
+    router.push(home);
+  }, [pathname, router, localeHref]);
 
   useEffect(() => {
     const handleScroll = () => setStuck(window.scrollY > 8);
@@ -67,11 +69,15 @@ export default function Header() {
     keeps its solid panel from the first pixel. An open drawer drops the overlay
     too: the panel below it is opaque, so a see-through bar above would float.
   */
-  const overlay = pathname === '/' && !menuOpen;
+  // Both checks below are about which page this is, not which language it is
+  // in, so they run on the path with its language prefix removed.
+  const { pathname: bare } = splitLocale(pathname);
+
+  const overlay = bare === '/' && !menuOpen;
   const onPhoto = overlay && !stuck;
 
   /* Inside a section the bar wears that section's logo; elsewhere, the group's. */
-  const brand = brandForPath(pathname);
+  const brand = brandForPath(bare);
 
   return (
     <header
@@ -92,12 +98,13 @@ export default function Header() {
 
         <nav className={styles.nav} aria-label="Main navigation">
           {NAV.map(({ key, href }) => {
-            const active = pathname === href || pathname.startsWith(`${href}/`);
+            const target = localeHref(href);
+            const active = pathname === target || pathname.startsWith(`${target}/`);
             return (
               <Link
                 key={key}
                 className={`${styles.link} ${active ? styles.linkOn : ''}`}
-                href={href}
+                href={target}
                 aria-current={active ? 'page' : undefined}
               >
                 {t(key)}
@@ -113,7 +120,7 @@ export default function Header() {
             variant={onPhoto ? 'light' : 'navy'}
             size="sm"
             as="a"
-            href="/contact"
+            href={localeHref('/contact')}
             className={styles.bookDesktop}
           >
             {t('nav.bookNow')}
@@ -131,7 +138,7 @@ export default function Header() {
       <div className={`${styles.drawer} ${menuOpen ? styles.drawerOpen : ''}`}>
         <div className={styles.drawerPanel}>
           {NAV.map(({ key, href }) => (
-            <Link key={key} href={href} onClick={() => setMenuOpen(false)}>
+            <Link key={key} href={localeHref(href)} onClick={() => setMenuOpen(false)}>
               {t(key)}
             </Link>
           ))}
@@ -140,7 +147,7 @@ export default function Header() {
               variant="primary"
               size="sm"
               as="a"
-              href="/contact"
+              href={localeHref('/contact')}
               onClick={() => setMenuOpen(false)}
             >
               {t('nav.bookNow')}

@@ -4,6 +4,53 @@ export const en = {
     description:
       'Boutique short-term rentals near the Mediterranean — comfortable apartments in Bat Yam.',
   },
+  /**
+   * Page titles and descriptions as a search result shows them. Kept apart
+   * from on-page copy: a heading and a search snippet do different jobs, and
+   * the snippet has about 60 and 160 characters to do it in.
+   */
+  seo: {
+    home: {
+      title: 'Palei Apartments — short-term rentals in Bat Yam',
+      description:
+        'Boutique short-term rentals near the Mediterranean — comfortable apartments in Bat Yam, hosted personally.',
+    },
+    apartments: {
+      title: 'Apartments for rent in Bat Yam',
+      description:
+        'Short-term apartment rentals in Bat Yam, minutes from the Mediterranean — sea views, balconies and family flats, booked directly with the owners.',
+    },
+    about: {
+      title: 'About us',
+      description:
+        'A small family business renting our own carefully prepared apartments in Bat Yam.',
+    },
+    location: {
+      title: 'Location — Bat Yam',
+      description:
+        'Bat Yam — a relaxed seaside town with the beach, cafés and markets minutes away.',
+    },
+    contact: {
+      title: 'Contact',
+      description:
+        'Tell us your dates and we will help you choose the right apartment in Bat Yam.',
+    },
+    flowers: {
+      title: 'Flower delivery in Bat Yam',
+      description:
+        'Bouquets made up the morning they go out and delivered in Bat Yam — or left in the apartment before you arrive.',
+    },
+    cyprus: {
+      title: 'Apartments in Cyprus',
+      description:
+        'Short-term apartment rentals in Limassol, Paphos and Ayia Napa. Hosted personally, priced in euro.',
+    },
+    cars: {
+      title: 'Car rental in Bat Yam',
+      description:
+        'Rent a car for your stay in Israel. Our own fleet, handed over in Bat Yam or at Ben Gurion airport.',
+    },
+  },
   brand: 'Palei Apartments',
   nav: {
     apartments: 'Apartments',
@@ -78,6 +125,7 @@ export const en = {
     filterAll: 'All',
     showMap: 'Show on map',
     hideMap: 'Hide map',
+    mapApprox: 'Approximate area — the exact address is shared once a booking is confirmed.',
     mapUnplaced: '{count} more apartments are not on the map yet — their exact address is missing.',
     tags: {
       seaView: 'Sea view',
@@ -376,8 +424,6 @@ export const en = {
     langHe: 'עברית',
     langFr: 'Français',
     copyright: '© 2026 Palei Apartments · Vacation in Israel',
-    privacy: 'Privacy',
-    terms: 'Terms',
   },
 } as const;
 

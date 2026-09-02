@@ -41,7 +41,7 @@ export default function ApartmentGridFull({
   titleKey = 'apartments.allTitle',
   subKey = 'apartments.allSub',
 }: ApartmentGridFullProps = {}) {
-  const { t } = useLanguage();
+  const { t, href } = useLanguage();
   const searchParams = useSearchParams();
   const search = useMemo(
     () => parseApartmentSearchParams(searchParams),
@@ -84,7 +84,7 @@ export default function ApartmentGridFull({
             <h2 className="section-title">{t(titleKey)}</h2>
             <p className="section-sub">{t(subKey)}</p>
           </div>
-          <Button variant="ghost" iconRight="arrow" as="a" href="/">
+          <Button variant="ghost" iconRight="arrow" as="a" href={href('/')}>
             {t('apartments.backHome')}
           </Button>
         </div>

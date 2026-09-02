@@ -9,6 +9,48 @@ export const fr: Translation<Messages> = {
     description:
       'Locations de courte durée en bord de Méditerranée — appartements confortables à Bat Yam.',
   },
+  seo: {
+    home: {
+      title: 'Palei Apartments — locations courte durée à Bat Yam',
+      description:
+        'Appartements confortables au bord de la Méditerranée à Bat Yam, loués directement par les propriétaires.',
+    },
+    apartments: {
+      title: 'Appartements à louer à Bat Yam',
+      description:
+        'Locations d’appartements courte durée à Bat Yam, à quelques minutes de la mer : vue mer, balcons et logements familiaux, réservés en direct.',
+    },
+    about: {
+      title: 'À propos',
+      description:
+        'Une petite entreprise familiale qui loue ses propres appartements soigneusement préparés à Bat Yam.',
+    },
+    location: {
+      title: 'Emplacement — Bat Yam',
+      description:
+        'Bat Yam — une ville balnéaire paisible : plage, cafés et marchés à quelques minutes.',
+    },
+    contact: {
+      title: 'Contact',
+      description:
+        'Indiquez-nous vos dates et nous vous aiderons à choisir l’appartement qui convient à Bat Yam.',
+    },
+    flowers: {
+      title: 'Livraison de fleurs à Bat Yam',
+      description:
+        'Des bouquets composés le matin même, livrés à Bat Yam ou déposés dans l’appartement avant votre arrivée.',
+    },
+    cyprus: {
+      title: 'Appartements à Chypre',
+      description:
+        'Locations courte durée à Limassol, Paphos et Ayia Napa. Gérées par nos soins, prix en euros.',
+    },
+    cars: {
+      title: 'Location de voiture à Bat Yam',
+      description:
+        'Une voiture pour votre séjour en Israël. Notre propre flotte, remise à Bat Yam ou à l’aéroport Ben Gourion.',
+    },
+  },
   brand: 'Palei Apartments',
   nav: {
     apartments: 'Appartements',
@@ -84,6 +126,7 @@ export const fr: Translation<Messages> = {
     filterAll: 'Tous',
     showMap: 'Afficher sur la carte',
     hideMap: 'Masquer la carte',
+    mapApprox: 'Emplacement approximatif — l’adresse exacte est communiquée après confirmation.',
     mapUnplaced:
       '{count} appartements ne figurent pas encore sur la carte — leur adresse exacte est manquante.',
     tags: {
@@ -387,7 +430,5 @@ export const fr: Translation<Messages> = {
     langHe: 'עברית',
     langFr: 'Français',
     copyright: '© 2026 Palei Apartments · Vacances en Israël',
-    privacy: 'Confidentialité',
-    terms: 'Conditions',
   },
 };

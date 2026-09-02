@@ -11,7 +11,7 @@ import type { Car } from '@/types/car';
 import styles from './CarCard.module.scss';
 
 export default function CarCard({ car }: { car: Car }) {
-  const { locale, t } = useLanguage();
+  const { locale, t, href } = useLanguage();
   const name = `${car.make} ${car.model}`;
   const from = cheapestRate(car);
 
@@ -51,14 +51,14 @@ export default function CarCard({ car }: { car: Car }) {
             <b>{formatMoney(from, carCurrency(car), locale)}</b>{' '}
             <span>{t('cars.perDay')}</span>
           </div>
-          <Button variant="ghost" size="sm" as="a" href={`/cars/${car.id}`} iconRight="arrow">
+          <Button variant="ghost" size="sm" as="a" href={href(`/cars/${car.id}`)} iconRight="arrow">
             {t('cars.details')}
           </Button>
         </div>
       </div>
 
       {/* The whole card is the link; the button above just shows where it goes. */}
-      <Link href={`/cars/${car.id}`} className={styles.cover} aria-label={name} />
+      <Link href={href(`/cars/${car.id}`)} className={styles.cover} aria-label={name} />
     </article>
   );
 }

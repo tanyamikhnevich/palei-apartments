@@ -1,5 +1,8 @@
 import { Suspense } from 'react';
+import { notFound } from 'next/navigation';
+import { isSectionLive } from '@/lib/services';
 import type { Metadata } from 'next';
+import { localizedPageMetadata } from '@/lib/seo';
 import Header from '@/components/Header/Header';
 import ApartmentGridFull from '@/components/ApartmentGrid/ApartmentGridFull';
 import ApartmentGridSkeleton from '@/components/ApartmentGrid/ApartmentGridSkeleton';
@@ -7,11 +10,9 @@ import ApartmentSearchFromUrl from '@/components/ApartmentSearch/ApartmentSearch
 import ApartmentSearchSkeleton from '@/components/ApartmentSearch/ApartmentSearchSkeleton';
 import Footer from '@/components/Footer/Footer';
 
-export const metadata: Metadata = {
-  title: 'Apartments in Cyprus — Palei Apartments',
-  description:
-    'Short-term apartment rentals in Limassol, Paphos and Ayia Napa. Hosted personally, priced in euro.',
-};
+export function generateMetadata(): Metadata {
+  return localizedPageMetadata('cyprus', '/cyprus');
+}
 
 /**
  * The Cyprus listing. Same page as `/apartments`, scoped to one country — the
@@ -19,6 +20,9 @@ export const metadata: Metadata = {
  * grid, the search or the booking flow.
  */
 export default function CyprusPage() {
+  // Parked in `SERVICES`; nothing links here, so nothing should answer either.
+  if (!isSectionLive('/cyprus')) notFound();
+
   return (
     <>
       <Header />

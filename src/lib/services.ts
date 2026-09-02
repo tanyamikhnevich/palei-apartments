@@ -25,7 +25,14 @@ export interface ServiceEntry {
   /** Per-service accent — the palette swap each future site would get. */
   accent: string;
   accentDeep: string;
-  /** False while the section is not open to guests yet. */
+  /**
+   * Whether guests may see the section at all.
+   *
+   * `false` takes it off the public site completely: out of the home-page
+   * strip, out of the footer, out of the post-booking suggestions, and its
+   * routes answer 404. Admin is unaffected — the section keeps its panel and
+   * its data, so it can be switched back on by flipping this one flag.
+   */
   live: boolean;
 }
 
@@ -45,7 +52,8 @@ export const SERVICES: ServiceEntry[] = [
     logo: '/palei-apartments-logo.png',
     accent: '#1b6ca8',
     accentDeep: '#155a8a',
-    live: true,
+    // Parked: no Cyprus apartments are listed yet. Managed in admin as usual.
+    live: false,
   },
   {
     href: '/cars',
@@ -53,7 +61,8 @@ export const SERVICES: ServiceEntry[] = [
     logo: '/palei-cars-logo.png',
     accent: '#26707c',
     accentDeep: '#1f6b76',
-    live: true,
+    // Parked until the fleet is ready to be shown. Managed in admin as usual.
+    live: false,
   },
   {
     href: '/flowers',
@@ -64,6 +73,20 @@ export const SERVICES: ServiceEntry[] = [
     live: true,
   },
 ];
+
+/** The sections a guest may actually reach. */
+export function liveServices(): ServiceEntry[] {
+  return SERVICES.filter((s) => s.live);
+}
+
+/**
+ * Guard for a parked section's own pages. A route that keeps answering while
+ * every link to it is gone is still on the site — search engines and old links
+ * find it perfectly well.
+ */
+export function isSectionLive(href: string): boolean {
+  return SERVICES.some((s) => s.href === href && s.live);
+}
 
 export function serviceFor(href: string): ServiceEntry {
   const found = SERVICES.find((s) => s.href === href);

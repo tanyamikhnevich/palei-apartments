@@ -3,11 +3,12 @@
 import { useMemo } from 'react';
 import Link from 'next/link';
 import L from 'leaflet';
-import { MapContainer, Marker, Popup, TileLayer } from 'react-leaflet';
+import { Circle, MapContainer, Marker, Popup, TileLayer } from 'react-leaflet';
 import type { Apartment } from '@/types/apartment';
 import { useLanguage } from '@/i18n/LanguageProvider';
 import { getApartmentCopy } from '@/i18n/apartmentLocale';
 import { BAT_YAM_CENTER, groupApartmentsForMap } from '@/data/apartmentGeo';
+import { APPROX_RADIUS_M } from '@/lib/geoPrivacy';
 import 'leaflet/dist/leaflet.css';
 import styles from './ApartmentMap.module.scss';
 import { formatMoney } from '@/lib/money';
@@ -33,7 +34,7 @@ function buildPin(count: number): L.DivIcon {
 }
 
 export default function ApartmentMap({ apartments }: ApartmentMapProps) {
-  const { locale, t } = useLanguage();
+  const { locale, t, href } = useLanguage();
 
   const { groups, unplaced } = useMemo(
     () => groupApartmentsForMap(apartments, locale),
@@ -70,6 +71,16 @@ export default function ApartmentMap({ apartments }: ApartmentMapProps) {
         />
 
         {groups.map((group) => (
+          <Circle
+            key={`area-${group.key}`}
+            center={[group.point.lat, group.point.lng]}
+            radius={APPROX_RADIUS_M}
+            pathOptions={{ color: '#1b6ca8', weight: 1, opacity: 0.5, fillOpacity: 0.12 }}
+            interactive={false}
+          />
+        ))}
+
+        {groups.map((group) => (
           <Marker
             key={group.key}
             position={[group.point.lat, group.point.lng]}
@@ -80,7 +91,7 @@ export default function ApartmentMap({ apartments }: ApartmentMapProps) {
               <ul className={styles.popupList}>
                 {group.apartments.map((apt) => (
                   <li key={apt.id} className={styles.popupItem}>
-                    <Link href={`/apartments/${apt.id}`} className={styles.popupLink}>
+                    <Link href={href(`/apartments/${apt.id}`)} className={styles.popupLink}>
                       {getApartmentCopy(apt, locale).title}
                     </Link>
                     <span className={styles.popupPrice}>
@@ -95,11 +106,10 @@ export default function ApartmentMap({ apartments }: ApartmentMapProps) {
         ))}
       </MapContainer>
 
-      {unplaced > 0 && (
-        <p className={styles.note}>
-          {t('apartments.mapUnplaced').replace('{count}', String(unplaced))}
-        </p>
-      )}
+      <p className={styles.note}>
+        {t('apartments.mapApprox')}
+        {unplaced > 0 && ` ${t('apartments.mapUnplaced').replace('{count}', String(unplaced))}`}
+      </p>
     </div>
   );
 }

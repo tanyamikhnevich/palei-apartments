@@ -8,7 +8,12 @@ import type {
   FlowerOrderDraft,
   FlowerOrderStatus,
 } from '@/types/flower';
-import type { CalendarFeed, CalendarFeedInput, CalendarSyncOutcome } from '@/types/calendar';
+import type {
+  CalendarFeed,
+  CalendarFeedInput,
+  CalendarFeedSource,
+  CalendarSyncOutcome,
+} from '@/types/calendar';
 import { apartments as fallbackApartments } from '@/data/apartments';
 import { apiFetch } from '@/lib/api/adminFetch';
 
@@ -494,4 +499,21 @@ export async function changeAdminPassword(
 export async function revokeOtherAdminSessions(): Promise<void> {
   const res = await apiFetch('/api/admin/account', { method: 'DELETE' });
   await parseJson<{ ok: true }>(res);
+}
+
+export type ImportedBlock = {
+  id: string;
+  apartmentId: string;
+  checkIn: string;
+  checkOut: string;
+  source: CalendarFeedSource;
+  feedLabel: string;
+  summary: string | null;
+};
+
+/** Reservations pulled in from Airbnb and the other platforms — admin only. */
+export async function fetchImportedBlocks(): Promise<ImportedBlock[]> {
+  const res = await apiFetch('/api/calendar/blocks', { cache: 'no-store' });
+  const data = await parseJson<{ blocks: ImportedBlock[] }>(res);
+  return data.blocks;
 }

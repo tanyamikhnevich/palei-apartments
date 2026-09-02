@@ -28,7 +28,10 @@ export async function GET(request: Request) {
     let data = rows.map(rowToApartment);
     if (publicOnly) {
       const { filterListedApartments } = await import('@/lib/apartmentVisibility');
-      data = filterListedApartments(data);
+      const { withResolvedCoords } = await import('@/lib/server/apartmentCoords');
+      // Resolve first: the address lookup needs the house number that
+      // filterListedApartments is about to take off.
+      data = filterListedApartments(data.map(withResolvedCoords));
     }
     return NextResponse.json({ apartments: data, source: 'database' as const });
   } catch (e) {

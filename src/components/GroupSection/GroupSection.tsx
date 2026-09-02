@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import Icon from '@/components/ui/Icon/Icon';
 import { useLanguage } from '@/i18n/LanguageProvider';
-import { SERVICES } from '@/lib/services';
+import { liveServices } from '@/lib/services';
 import styles from './GroupSection.module.scss';
 
 /**
@@ -11,12 +11,16 @@ import styles from './GroupSection.module.scss';
  * services actually introduces itself, rather than four more items crammed into
  * a navigation bar that is already full on a phone.
  *
- * Every direction behind it is a working section now, so the strip ships. Its
- * copy goes through the dictionaries like everything else, so the block follows
- * the language switch.
+ * Only the sections that are open to guests appear. A parked one is left out
+ * entirely rather than shown as "coming soon": an empty promise on the home
+ * page is worse than no mention at all. If nothing is left but the apartments
+ * the strip has nothing to introduce, so it does not render.
  */
 export default function GroupSection() {
-  const { t } = useLanguage();
+  const { t, href } = useLanguage();
+  const services = liveServices();
+
+  if (services.length < 2) return null;
 
   return (
     <section className={`section--tight ${styles.section}`} id="group">
@@ -29,12 +33,9 @@ export default function GroupSection() {
         </div>
 
         <div className={styles.grid}>
-          {SERVICES.map((service) => (
-            <Link key={service.href} href={service.href} className={styles.card}>
-              <span className={styles.label}>
-                {t(`group.services.${service.key}.label`)}
-                {!service.live && <span className={styles.soon}>{t('group.soon')}</span>}
-              </span>
+          {services.map((service) => (
+            <Link key={service.href} href={href(service.href)} className={styles.card}>
+              <span className={styles.label}>{t(`group.services.${service.key}.label`)}</span>
               <span className={styles.note}>{t(`group.services.${service.key}.note`)}</span>
               <span className={styles.go} aria-hidden="true">
                 <Icon name="arrow" size={16} />

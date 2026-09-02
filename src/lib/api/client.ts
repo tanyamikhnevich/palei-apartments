@@ -156,21 +156,21 @@ export async function fetchBookings(admin = false): Promise<Booking[]> {
   return data.bookings;
 }
 
-export async function saveBookingDraft(booking: Booking): Promise<Booking> {
-  const res = await apiFetch('/api/bookings', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ ...booking, status: 'Draft' as const }),
-  });
-  const data = await parseJson<{ booking: Booking }>(res);
-  return data.booking;
-}
+/** What a guest may state. The id, the status and the channel are the server's. */
+export type BookingRequest = {
+  apartmentId: string;
+  guest: string;
+  guestContact?: string;
+  checkIn: string;
+  checkOut: string;
+  guests: number;
+};
 
-export async function submitBookingRequest(booking: Booking): Promise<Booking> {
+export async function submitBookingRequest(booking: BookingRequest): Promise<Booking> {
   const res = await apiFetch('/api/bookings', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ ...booking, status: 'New request' as const }),
+    body: JSON.stringify(booking),
   });
   const data = await parseJson<{ booking: Booking }>(res);
   return data.booking;

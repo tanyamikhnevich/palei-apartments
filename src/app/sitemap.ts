@@ -5,11 +5,19 @@ import { isApartmentListedOnSite } from '@/lib/apartmentVisibility';
 import { rowToApartment } from '@/db/map';
 import { isDbConfigured } from '@/lib/api/errors';
 import { isSectionLive } from '@/lib/services';
+import { unstable_cache } from 'next/cache';
 import { SITE_URL } from '@/lib/seo';
 import { localeAlternates, localePath } from '@/i18n/routing';
 import { LOCALES } from '@/i18n/types';
 
-/** Rebuilt hourly: apartments come and go far more slowly than that. */
+/**
+ * Rebuilt hourly: apartments come and go far more slowly than that.
+ *
+ * `export const revalidate` alone does nothing here — Neon's driver runs its
+ * queries with `no-store`, which opts the route out of caching entirely, so
+ * every crawler hit went to the database. Caching the query itself is what
+ * actually holds.
+ */
 export const revalidate = 3600;
 
 type Entry = MetadataRoute.Sitemap[number];
@@ -50,14 +58,17 @@ function entries(
  * a sitemap full of 404s is how a site teaches Google to trust it less. The
  * panel is absent for the same reason it is absent from robots.txt.
  */
+const listApartments = unstable_cache(
+  async () => getDb().select().from(schema.apartments).orderBy(asc(schema.apartments.id)),
+  ['sitemap-apartments'],
+  { revalidate: 3600 }
+);
+
 async function apartmentEntries(): Promise<Entry[]> {
   if (!isDbConfigured()) return [];
 
   try {
-    const rows = await getDb()
-      .select()
-      .from(schema.apartments)
-      .orderBy(asc(schema.apartments.id));
+    const rows = await listApartments();
 
     return rows
       .filter((row) => isApartmentListedOnSite(rowToApartment(row)))

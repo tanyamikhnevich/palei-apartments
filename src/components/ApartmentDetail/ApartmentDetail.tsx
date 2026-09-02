@@ -19,7 +19,6 @@ import { formatDateRange, nightsBetween } from '@/lib/dates';
 import { scrollToHash } from '@/lib/scrollToHash';
 import {
   fetchBookingAvailability,
-  saveBookingDraft,
   submitBookingRequest,
 } from '@/lib/api/client';
 import {
@@ -61,9 +60,6 @@ export default function ApartmentDetail({ apt }: ApartmentDetailProps) {
   const minNights = apt.minNights ?? 1;
   const tagLine = formatApartmentTags(apt, locale, t);
 
-  const [bookingId] = useState(
-    () => `web-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`
-  );
   const [blocked, setBlocked] = useState<{ checkIn: string; checkOut: string }[]>([]);
   const [checkIn, setCheckIn] = useState<string | null>(null);
   const [checkOut, setCheckOut] = useState<string | null>(null);
@@ -71,7 +67,6 @@ export default function ApartmentDetail({ apt }: ApartmentDetailProps) {
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
   const [guestName, setGuestName] = useState('');
   const [guestContact, setGuestContact] = useState('');
-  const [saving, setSaving] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -127,34 +122,14 @@ export default function ApartmentDetail({ apt }: ApartmentDetailProps) {
     return t('booking.selectCheckIn');
   }, [checkIn, checkOut, dateError, locale, t]);
 
-  const persistDraft = useCallback(
-    async (inDate: string, outDate: string) => {
-      if (outDate <= inDate) return;
-      if (nightsBetween(inDate, outDate) < minNights) return;
-      setSaving(true);
-      setError(null);
-      try {
-        await saveBookingDraft({
-          id: bookingId,
-          apartmentId: apt.id,
-          apt: copy.title,
-          guest: guestName.trim() || t('booking.guestPlaceholder'),
-          guestContact: guestContact.trim() || undefined,
-          checkIn: inDate,
-          checkOut: outDate,
-          dates: formatDateRange(inDate, outDate, locale),
-          guests,
-          status: 'Draft',
-          channel: 'Website',
-        });
-      } catch (e) {
-        setError(e instanceof Error ? e.message : t('booking.saveError'));
-      } finally {
-        setSaving(false);
-      }
-    },
-    [apt.id, bookingId, copy.title, guestContact, guestName, guests, locale, minNights, t]
-  );
+  /*
+    Picking dates used to autosave a `Draft` booking to the server on every
+    change. Nothing ever read those rows — the admin list filters them out, and
+    neither the calendar nor availability counts them — while the endpoint that
+    wrote them had to accept a client-chosen id and status to make the upsert
+    work, which is what let anyone overwrite a real booking. The feature was
+    removed with the hole.
+  */
 
   const validateDates = (): boolean => {
     if (!rangeReady) {
@@ -189,7 +164,6 @@ export default function ApartmentDetail({ apt }: ApartmentDetailProps) {
         return;
       }
       setDateError(null);
-      void persistDraft(range.checkIn, range.checkOut);
     } else {
       setDateError(null);
     }
@@ -231,17 +205,12 @@ export default function ApartmentDetail({ apt }: ApartmentDetailProps) {
     setSubmitting(true);
     try {
       await submitBookingRequest({
-        id: bookingId,
         apartmentId: apt.id,
-        apt: copy.title,
         guest: guestFields.guest,
         guestContact: guestFields.contact,
         checkIn: checkIn!,
         checkOut: checkOut!,
-        dates: formatDateRange(checkIn!, checkOut!, locale),
         guests,
-        status: 'New request',
-        channel: 'Website',
       });
       setSubmitted(true);
     } catch (e) {
@@ -403,7 +372,6 @@ export default function ApartmentDetail({ apt }: ApartmentDetailProps) {
                   checkOut={checkOut}
                   onChange={onRangeChange}
                 />
-                {saving && <p className={styles.muted}>{t('booking.savingDates')}</p>}
 
                 {hasPriceTiers(apt) && (
                   <div className={styles.rates}>

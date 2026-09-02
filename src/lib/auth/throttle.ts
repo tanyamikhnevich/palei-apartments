@@ -36,7 +36,8 @@ function createThrottle(max: number, windowMs: number) {
       return { allowed: false, retryAfterSeconds: Math.ceil((entry.resetAt - now) / 1000) };
     },
 
-    fail(request: Request): void {
+    /** Count one attempt against the caller's budget. */
+    consume(request: Request): void {
       const key = clientKey(request);
       const now = Date.now();
       const entry = entries.get(key);
@@ -47,6 +48,14 @@ function createThrottle(max: number, windowMs: number) {
         entry.count += 1;
       }
       sweep(now);
+    },
+
+    /**
+     * Sign-in style: only wrong answers cost anything, so a person who types
+     * their password correctly is never throttled.
+     */
+    fail(request: Request): void {
+      this.consume(request);
     },
 
     succeed(request: Request): void {
@@ -60,3 +69,14 @@ export const throttle = createThrottle(MAX_ATTEMPTS, WINDOW_MS);
 
 /** Password changes — the old password is guessable the same way. */
 export const passwordChangeThrottle = createThrottle(5, WINDOW_MS);
+
+/**
+ * Anything a guest can submit without an account: booking requests, reviews,
+ * hire and delivery orders. A honeypot stops a naive bot; it does nothing
+ * against someone who simply loops a `curl`. Generous enough that a family
+ * comparing dates never meets it.
+ *
+ * Charged with `consume` on every attempt, not only successful ones —
+ * otherwise a malformed payload is free, and an attacker just sends those.
+ */
+export const publicSubmitThrottle = createThrottle(12, WINDOW_MS);

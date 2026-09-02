@@ -14,6 +14,10 @@ import {
 } from '@/lib/validation/contact';
 import { requireAdmin } from '@/lib/auth/guard';
 
+// Reads the database on every call, so there is nothing to prerender. Saying
+// so stops the build attempting it and throwing DYNAMIC_SERVER_USAGE.
+export const dynamic = 'force-dynamic';
+
 const SETTINGS_ID = 'default';
 
 export async function GET() {

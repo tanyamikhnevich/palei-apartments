@@ -7,6 +7,16 @@ import { loadExternalBlocks, syncStaleFeeds } from '@/lib/server/calendarSync';
 
 export const dynamic = 'force-dynamic';
 
+/**
+ * What actually makes a night unavailable to the next guest.
+ *
+ * A `New request` deliberately does not: it is an ask, not a booking, and
+ * nothing stands behind it — no account, no card. Letting requests block the
+ * calendar meant anyone could empty it by submitting a few. Several guests may
+ * now ask for the same nights; the owner confirms one and declines the rest.
+ */
+const OCCUPYING = ['Confirmed'] as const;
+
 function isoFromDate(value: string | Date): string {
   if (typeof value === 'string') return value.slice(0, 10);
   return value.toISOString().slice(0, 10);
@@ -16,7 +26,7 @@ async function blockedForMockApartments(): Promise<Record<string, { checkIn: str
   const { apartments: mockApts, bookings: mockBookings } = await import('@/data/apartments');
   const { DEFAULT_AVAILABILITY, mergeBlockedRanges } = await import('@/lib/availability');
 
-  const activeStatuses = new Set(['New request', 'Confirmed']);
+  const activeStatuses = new Set<string>(OCCUPYING);
   const byApartment: Record<string, { checkIn: string; checkOut: string }[]> = {};
 
   for (const apt of mockApts) {
@@ -51,7 +61,7 @@ export async function GET(request: Request) {
           checkOut: schema.bookings.checkOut,
         })
         .from(schema.bookings)
-        .where(inArray(schema.bookings.status, ['New request', 'Confirmed']));
+        .where(inArray(schema.bookings.status, [...OCCUPYING]));
 
       const aptRows = await db
         .select({ id: schema.apartments.id, availability: schema.apartments.availability })
@@ -112,7 +122,7 @@ export async function GET(request: Request) {
       .where(
         and(
           eq(schema.bookings.apartmentId, apartmentId),
-          inArray(schema.bookings.status, ['New request', 'Confirmed'])
+          inArray(schema.bookings.status, [...OCCUPYING])
         )
       );
 

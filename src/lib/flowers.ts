@@ -36,13 +36,23 @@ export function windowBouquets(list: Bouquet[]): Bouquet[] {
   return list.filter((b) => b.listed).sort((a, b) => a.price - b.price);
 }
 
-export function bouquetsInCategory(list: Bouquet[], category: string | null): Bouquet[] {
-  return category ? list.filter((b) => b.category === category) : list;
+/**
+ * The window's top-level split. Balloons and flowers share a shop, a delivery
+ * and an order form, but nobody browses them together: a wall of birthday foil
+ * between two bouquets helps neither shopper.
+ */
+export type KindFilter = 'all' | 'flowers' | 'balloons';
+export const KIND_FILTERS: KindFilter[] = ['all', 'flowers', 'balloons'];
+
+/** `mixed` is both at once, so it belongs under either heading — never alone. */
+export function bouquetsOfKind(list: Bouquet[], kind: KindFilter): Bouquet[] {
+  if (kind === 'all') return list;
+  return list.filter((b) => b.kind === kind || b.kind === 'mixed');
 }
 
-/** Categories actually present, so the filter never offers an empty one. */
-export function collectCategories(list: Bouquet[]): string[] {
-  return [...new Set(list.map((b) => b.category))];
+/** Whether the split is worth offering at all — one kind needs no switch. */
+export function windowMixesKinds(list: Bouquet[]): boolean {
+  return new Set(list.map((b) => b.kind)).size > 1;
 }
 
 /**

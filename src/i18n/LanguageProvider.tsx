@@ -2,7 +2,7 @@
 
 import { createContext, useCallback, useContext, useMemo, type ReactNode } from 'react';
 import { t as translate } from './getMessage';
-import { DEFAULT_LOCALE, localePath, splitLocale } from './routing';
+import { DEFAULT_LOCALE, LOCALE_CHOICE_COOKIE, localePath, splitLocale } from './routing';
 import type { Locale } from './types';
 
 /**
@@ -25,6 +25,11 @@ import type { Locale } from './types';
  * English, and would be bounced away from the English page it came for.
  * Whether returning visitors should land in their own language is a product
  * decision with that cost attached, not an oversight.
+ *
+ * The cookie dropped below is not that. It never picks a language — it only
+ * tells the middleware that this visitor has picked one by hand, so the
+ * domain's own language stops overriding them. Without it, choosing English on
+ * paleiapartments.co.il would bounce straight back to Hebrew.
  */
 type LanguageContextValue = {
   locale: Locale;
@@ -55,6 +60,9 @@ export function LanguageProvider({
       // this has to work off what is actually in the address bar.
       const { pathname: bare } = splitLocale(window.location.pathname);
       const { search, hash } = window.location;
+
+      const year = 60 * 60 * 24 * 365;
+      document.cookie = `${LOCALE_CHOICE_COOKIE}=${next}; path=/; max-age=${year}; samesite=lax`;
       window.location.assign(`${localePath(bare, next)}${search}${hash}`);
     },
     [locale]

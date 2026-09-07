@@ -4,6 +4,7 @@ import { getDb, schema } from '@/db/index';
 import { isApartmentListedOnSite } from '@/lib/apartmentVisibility';
 import { rowToApartment } from '@/db/map';
 import { isDbConfigured } from '@/lib/api/errors';
+import { getFlowersDb, isFlowersDbConfigured, schema as flowersSchema } from '@/db/flowers';
 import { isSectionLive } from '@/lib/services';
 import { unstable_cache } from 'next/cache';
 import { SITE_URL } from '@/lib/seo';
@@ -83,6 +84,29 @@ async function apartmentEntries(): Promise<Entry[]> {
   }
 }
 
+const listBouquets = unstable_cache(
+  async () =>
+    getFlowersDb().select().from(flowersSchema.bouquets).orderBy(asc(flowersSchema.bouquets.id)),
+  ['sitemap-bouquets'],
+  { revalidate: 3600 }
+);
+
+/** Each bouquet has a page of its own, so each belongs in the sitemap. */
+async function bouquetEntries(): Promise<Entry[]> {
+  if (!isSectionLive('/flowers') || !isFlowersDbConfigured()) return [];
+
+  try {
+    const rows = await listBouquets();
+
+    return rows
+      .filter((row) => row.listed)
+      .flatMap((row) => entries(`/flowers/${row.id}`, 0.6, 'weekly', row.updatedAt ?? new Date()));
+  } catch (e) {
+    console.error('sitemap: could not list bouquets', e);
+    return [];
+  }
+}
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const pages: Entry[] = [
     ...entries('/', 1, 'weekly'),
@@ -96,5 +120,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   if (isSectionLive('/cars')) pages.push(...entries('/cars', 0.6, 'monthly'));
   if (isSectionLive('/cyprus')) pages.push(...entries('/cyprus', 0.7, 'weekly'));
 
-  return [...pages, ...await apartmentEntries()];
+  return [...pages, ...(await apartmentEntries()), ...(await bouquetEntries())];
 }

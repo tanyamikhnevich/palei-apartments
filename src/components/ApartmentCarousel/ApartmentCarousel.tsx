@@ -11,8 +11,9 @@ import { fetchApartments } from '@/lib/api/client';
 import { apartmentsInCountry } from '@/lib/regions';
 import styles from './ApartmentCarousel.module.scss';
 
-const CAROUSEL_LIMIT = 8;
-const SKELETON_COUNT = 3;
+/** The home page shows a taste of the list, not the list itself. */
+const CAROUSEL_LIMIT = 2;
+const SKELETON_COUNT = 2;
 
 export default function ApartmentCarousel() {
   const { t, href } = useLanguage();
@@ -57,6 +58,13 @@ export default function ApartmentCarousel() {
     syncPosition();
   }, [displayed.length, syncPosition]);
 
+  /*
+    Two cards fit on a wide screen with nothing left over: both ends are
+    reached at once and there is nothing to page through. The arrows and dots
+    step aside then rather than sit there permanently disabled.
+  */
+  const scrollable = !(atStart && atEnd);
+
   const scrollBySteps = (direction: 1 | -1) => {
     const track = trackRef.current;
     if (!track) return;
@@ -81,26 +89,28 @@ export default function ApartmentCarousel() {
             <p className="section-sub">{t('apartments.sub')}</p>
           </div>
           <div className={styles.headerSide}>
-            <div className={styles.arrows}>
-              <button
-                type="button"
-                className={styles.arrow}
-                onClick={() => scrollBySteps(-1)}
-                disabled={atStart}
-                aria-label={t('booking.prevMonth')}
-              >
-                <Icon name="chevron" size={18} className={styles.arrowBack} />
-              </button>
-              <button
-                type="button"
-                className={styles.arrow}
-                onClick={() => scrollBySteps(1)}
-                disabled={atEnd}
-                aria-label={t('booking.nextMonth')}
-              >
-                <Icon name="chevron" size={18} />
-              </button>
-            </div>
+            {scrollable && (
+              <div className={styles.arrows}>
+                <button
+                  type="button"
+                  className={styles.arrow}
+                  onClick={() => scrollBySteps(-1)}
+                  disabled={atStart}
+                  aria-label={t('booking.prevMonth')}
+                >
+                  <Icon name="chevron" size={18} className={styles.arrowBack} />
+                </button>
+                <button
+                  type="button"
+                  className={styles.arrow}
+                  onClick={() => scrollBySteps(1)}
+                  disabled={atEnd}
+                  aria-label={t('booking.nextMonth')}
+                >
+                  <Icon name="chevron" size={18} />
+                </button>
+              </div>
+            )}
             <Button variant="ghost" iconRight="arrow" as="a" href={href('/apartments')}>
               {t('apartments.seeAll')} {loading ? '' : apartments.length}
             </Button>
@@ -125,14 +135,15 @@ export default function ApartmentCarousel() {
           ) : (
             displayed.map((apt) => (
               <div className={styles.slide} key={apt.id}>
-                <ApartmentCard apt={apt} />
+                {/* On the home page every card leads to the list, not to its own page. */}
+                <ApartmentCard apt={apt} to="/apartments" />
               </div>
             ))
           )}
         </div>
       </div>
 
-      {displayed.length > 1 && (
+      {scrollable && displayed.length > 1 && (
         <div className={styles.dots}>
           {displayed.map((apt, i) => (
             <button

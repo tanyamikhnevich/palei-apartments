@@ -6,6 +6,8 @@
  * keeps working without Telegram set up.
  */
 
+import { displayPhone, whatsappLink } from '@/lib/phone';
+
 export interface BookingNotification {
   apartmentTitle: string;
   guest: string;
@@ -55,6 +57,20 @@ function escapeHtml(value: string): string {
 }
 
 /**
+ * A phone number in a notification is something the owner is about to answer,
+ * so it arrives as a tap into WhatsApp rather than as text to copy out by hand.
+ *
+ * Every contact field on the site is validated as a phone and stored in E.164,
+ * so there is always something to link — but anything without digits falls back
+ * to plain text rather than linking nowhere.
+ */
+function phoneHtml(number: string): string {
+  const shown = escapeHtml(displayPhone(number));
+  const link = whatsappLink(number);
+  return link ? `<a href="${link}">${shown}</a>` : shown;
+}
+
+/**
  * Send a raw HTML message. Never throws — a failed notify must not break the
  * flow that triggered it. Returns whether Telegram actually accepted it, so a
  * caller with nowhere else to store the message can tell the guest the truth.
@@ -93,7 +109,7 @@ export async function notifyNewBooking(b: BookingNotification): Promise<void> {
     `📅 ${escapeHtml(b.dates)}`,
     `👥 ${b.guests} guest(s)`,
     `👤 ${escapeHtml(b.guest)}`,
-    b.contact ? `📞 ${escapeHtml(b.contact)}` : null,
+    b.contact ? `📞 ${phoneHtml(b.contact)}` : null,
     `🔗 via ${escapeHtml(b.channel)}`,
   ].filter(Boolean) as string[];
 
@@ -113,7 +129,7 @@ export async function notifyCarRequest(c: CarNotification): Promise<boolean> {
     `📍 ${escapeHtml(c.pickup)}`,
     `💰 ${escapeHtml(c.total)}`,
     `👤 ${escapeHtml(c.guest)}`,
-    `📞 ${escapeHtml(c.contact)}`,
+    `📞 ${phoneHtml(c.contact)}`,
   ];
 
   return sendTelegramMessage(lines.join('\n'));
@@ -129,9 +145,9 @@ export async function notifyFlowerOrder(f: FlowerNotification): Promise<boolean>
     `🌸 ${escapeHtml(f.bouquet)} — ${escapeHtml(f.price)}`,
     `📅 ${escapeHtml(f.date)} · ${escapeHtml(f.slot)}`,
     `📍 ${escapeHtml(f.address)}`,
-    `🎁 ${escapeHtml(f.recipient)} · ${escapeHtml(f.recipientPhone)}`,
+    `🎁 ${escapeHtml(f.recipient)} · ${phoneHtml(f.recipientPhone)}`,
     f.card ? `✍️ «${escapeHtml(f.card)}»` : null,
-    `👤 ${escapeHtml(f.guest)} · ${escapeHtml(f.contact)}`,
+    `👤 ${escapeHtml(f.guest)} · ${phoneHtml(f.contact)}`,
   ].filter(Boolean) as string[];
 
   return sendTelegramMessage(lines.join('\n'));
@@ -146,7 +162,7 @@ export async function notifyContactMessage(c: ContactNotification): Promise<bool
   const lines = [
     '✉️ <b>New message from the website</b>',
     `👤 ${escapeHtml(c.name)}`,
-    `📞 ${escapeHtml(c.contact)}`,
+    `📞 ${phoneHtml(c.contact)}`,
     c.message ? `\n💬 ${escapeHtml(c.message)}` : null,
     c.page ? `\n🔗 ${escapeHtml(c.page)}` : null,
   ].filter(Boolean) as string[];

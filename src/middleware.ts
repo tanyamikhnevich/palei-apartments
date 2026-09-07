@@ -5,7 +5,10 @@ import { readAccessToken } from '@/lib/auth/tokens';
 import { requiresAdminAuth } from '@/lib/auth/policy';
 import {
   DEFAULT_LOCALE,
+  LOCALE_CHOICE_COOKIE,
   LOCALE_HEADER,
+  localeForHost,
+  localePath,
   PATHNAME_HEADER,
   splitLocale,
 } from '@/i18n/routing';
@@ -88,6 +91,24 @@ export async function middleware(request: NextRequest) {
     const url = request.nextUrl.clone();
     url.pathname = pathname.slice(`/${DEFAULT_LOCALE}`.length) || '/';
     return NextResponse.redirect(url, 308);
+  }
+
+  /*
+    The domain is the front door: paleiapartments.co.il opens in Hebrew, .com
+    in English. Only unprefixed addresses are sent on — `/ru/about` was asked
+    for in Russian and stays Russian, whichever domain it came through.
+
+    Temporary on purpose. A 308 would be cached by the browser for good, and
+    the visitor who then switches to English would be bounced back to Hebrew
+    by their own cache, with no request reaching us to say otherwise.
+  */
+  const hostLocale = localeForHost(request.headers.get('host'));
+  const chose = request.cookies.get(LOCALE_CHOICE_COOKIE);
+
+  if (!prefixed && hostLocale !== DEFAULT_LOCALE && !chose) {
+    const url = request.nextUrl.clone();
+    url.pathname = localePath(bare, hostLocale);
+    return NextResponse.redirect(url, 307);
   }
 
   const headers = new Headers(request.headers);

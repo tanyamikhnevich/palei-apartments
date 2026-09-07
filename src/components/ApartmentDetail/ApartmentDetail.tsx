@@ -13,6 +13,7 @@ import SpecStat from '@/components/ui/SpecStat/SpecStat';
 import DateRangeCalendar from '@/components/DateRangeCalendar/DateRangeCalendar';
 import ReviewsSection from '@/components/ReviewsSection/ReviewsSection';
 import BookingUpsell from '@/components/BookingUpsell/BookingUpsell';
+import FlowersPromoModal from '@/components/FlowersPromo/FlowersPromoModal';
 import { useLanguage } from '@/i18n/LanguageProvider';
 import { getApartmentCopy } from '@/i18n/apartmentLocale';
 import { formatDateRange, nightsBetween } from '@/lib/dates';
@@ -69,6 +70,7 @@ export default function ApartmentDetail({ apt }: ApartmentDetailProps) {
   const [guestContact, setGuestContact] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [promoOpen, setPromoOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [nameError, setNameError] = useState<string | null>(null);
   const [contactError, setContactError] = useState<string | null>(null);
@@ -213,6 +215,12 @@ export default function ApartmentDetail({ apt }: ApartmentDetailProps) {
         guests,
       });
       setSubmitted(true);
+      /*
+        Same rule as the upsell below the confirmation: only where the shop
+        actually delivers. The confirmation is rendered underneath either way,
+        so closing the promo lands on it rather than on nothing.
+      */
+      if (countryOf(apt) === 'IL' && isSectionLive('/flowers')) setPromoOpen(true);
     } catch (e) {
       setError(e instanceof Error ? e.message : t('booking.submitError'));
     } finally {
@@ -289,22 +297,20 @@ export default function ApartmentDetail({ apt }: ApartmentDetailProps) {
 
       <div className={styles.layout}>
         <section className={styles.about}>
+          {/*
+            Guests and rooms only. Bed and bathroom counts were never verified
+            against the actual flats — the bed figure was derived from the room
+            count rather than observed, and the bathroom figure read 1 almost
+            everywhere — so they claimed precision the owners could not stand
+            behind. The columns stay in the database and in the admin form; put
+            these two back once someone has walked the flats with a notebook.
+          */}
           <div className={styles.specs}>
             <SpecStat icon="guest" value={apt.guests} label={t('apartments.guests')} />
             <SpecStat
               icon="home"
               value={apt.bedrooms}
               label={apt.bedrooms === 1 ? t('apartments.bedroom') : t('apartments.bedrooms')}
-            />
-            <SpecStat
-              icon="bed"
-              value={apt.beds}
-              label={apt.beds === 1 ? t('apartments.bed') : t('apartments.beds')}
-            />
-            <SpecStat
-              icon="bath"
-              value={apt.bathrooms}
-              label={apt.bathrooms === 1 ? t('apartments.bath') : t('apartments.baths')}
             />
           </div>
 
@@ -372,6 +378,13 @@ export default function ApartmentDetail({ apt }: ApartmentDetailProps) {
                   checkOut={checkOut}
                   onChange={onRangeChange}
                 />
+
+                {/*
+                  Utilities are read off the meter at check-out, so they cannot
+                  be quoted in advance and are deliberately kept out of the
+                  total below — said here rather than in every description.
+                */}
+                <p className={styles.utilities}>{t('booking.utilitiesNote')}</p>
 
                 {hasPriceTiers(apt) && (
                   <div className={styles.rates}>
@@ -544,6 +557,10 @@ export default function ApartmentDetail({ apt }: ApartmentDetailProps) {
           <ReviewsSection apartmentId={apt.id} />
         </section>
       </div>
+
+      {promoOpen && (
+        <FlowersPromoModal checkIn={checkIn} onClose={() => setPromoOpen(false)} />
+      )}
 
       {/*
         Phones only: the booking panel is a long scroll away once the columns

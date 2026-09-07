@@ -17,6 +17,7 @@ const NAV = [
   { key: 'nav.about', href: '/about' },
   { key: 'nav.location', href: '/location' },
   { key: 'nav.contact', href: '/contact' },
+  { key: 'nav.flowers', href: '/flowers' },
 ] as const;
 
 function LangSwitch() {

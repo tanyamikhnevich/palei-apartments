@@ -1,0 +1,46 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.text {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.clamp {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: var(--lines, 3);
+  overflow: hidden;
+}
+
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0;
+  border: none;
+  background: none;
+  font-family: inherit;
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  color: var(--accent);
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+/* The chevron points the way the text is about to move. */
+.chevron {
+  transform: rotate(90deg);
+}
+
+.chevronUp {
+  transform: rotate(-90deg);
+}

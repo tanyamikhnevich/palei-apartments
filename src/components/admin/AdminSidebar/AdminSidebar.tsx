@@ -7,14 +7,22 @@ import type { IconName } from '@/components/ui/Icon/Icon';
 import { GROUP_BRAND } from '@/lib/services';
 import styles from './AdminSidebar.module.scss';
 
-export type AdminView =
-  | 'apartments'
-  | 'cars'
-  | 'flowers'
-  | 'bookings'
-  | 'calendar'
-  | 'reviews'
-  | 'settings';
+/**
+ * The dashboard's sections. Listed rather than declared as a union so the URL
+ * can be checked against them: `?section=` is typed by whoever is in the
+ * address bar, and anything unrecognised has to fall back to the default.
+ */
+export const ADMIN_VIEWS = [
+  'apartments',
+  'cars',
+  'flowers',
+  'bookings',
+  'calendar',
+  'reviews',
+  'settings',
+] as const;
+
+export type AdminView = (typeof ADMIN_VIEWS)[number];
 
 interface NavItem {
   id: AdminView;

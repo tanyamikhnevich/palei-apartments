@@ -7,35 +7,40 @@
   margin-bottom: 24px;
 }
 
-.filters {
+/* The window's only filter: which of the two shops in one you are looking at. */
+.kinds {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
   margin-bottom: 28px;
 }
 
-.chip {
-  padding: 0.64em 1.14em;
+.kindBtn {
+  padding: 0.7em 1.4em;
   border-radius: 999px;
   border: 1px solid var(--line-2);
   background: var(--surface);
   font-family: inherit;
-  font-size: var(--fs-sm);
-  font-weight: 600;
-  color: var(--ink-soft);
+  font-size: var(--fs-md);
+  font-weight: 700;
+  color: var(--ink);
   cursor: pointer;
   transition: 0.15s;
 
   &:hover {
-    border-color: var(--accent);
-    color: var(--accent);
+    border-color: var(--navy);
+    color: var(--navy);
   }
 }
 
-.chipOn {
-  background: var(--accent);
-  border-color: var(--accent);
+.kindOn {
+  background: var(--navy);
+  border-color: var(--navy);
   color: #fff;
+
+  &:hover {
+    color: #fff;
+  }
 }
 
 .grid {
@@ -45,6 +50,7 @@
 }
 
 .card {
+  position: relative;
   display: flex;
   flex-direction: column;
   background: var(--surface);
@@ -58,6 +64,18 @@
     box-shadow: var(--shadow-md);
     transform: translateY(-2px);
   }
+}
+
+.cardLink {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+/* Kept above the overlay so it hovers, focuses and clicks like a real button. */
+.orderBtn {
+  position: relative;
+  z-index: 2;
 }
 
 .media {
@@ -79,11 +97,32 @@
   letter-spacing: -0.01em;
 }
 
+/* The name is the way into the bouquet's own page — the one thing that can be
+   copied and sent to someone. */
+.nameLink {
+  /* Above the whole-card overlay, so it hovers and focuses as a real link. */
+  position: relative;
+  z-index: 2;
+  color: inherit;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
 .note {
   margin: 0;
   font-size: var(--fs-sm);
   color: var(--ink-soft);
   line-height: 1.5;
+}
+
+/* Three bars standing in for the three clamped lines of a note. */
+.skeletonNote {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .tags {

@@ -3,6 +3,8 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useLanguage } from '@/i18n/LanguageProvider';
+import { useBusiness } from '@/components/BusinessProvider/BusinessProvider';
+import { displayPhone, telLink } from '@/lib/phone';
 import { GROUP_BRAND, liveServices } from '@/lib/services';
 import type { Locale } from '@/i18n/types';
 import styles from './Footer.module.scss';
@@ -23,6 +25,7 @@ const LANG_LINKS: { locale: Locale; key: string }[] = [
 
 export default function Footer() {
   const { t, setLocale, href: localeHref } = useLanguage();
+  const { contactPhone } = useBusiness();
 
   return (
     <footer className={styles.footer}>
@@ -49,10 +52,13 @@ export default function Footer() {
             <h5>{t('footer.contact')}</h5>
             <ul>
               <li>
-                <a href="tel:+97250000000">+972 50 000 0000</a>
+                {/* The number the owner typed in the panel, not a copy of it. */}
+                <a href={telLink(contactPhone)}>{displayPhone(contactPhone)}</a>
               </li>
               <li>
-                <a href="#">Bat Yam, Israel</a>
+                {/* Was an `href="#"`, which is a link that teaches visitors ours
+                    do not work. It is an address, so it is now text. */}
+                <span className={styles.plain}>Bat Yam, Israel</span>
               </li>
             </ul>
           </div>

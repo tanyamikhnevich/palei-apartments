@@ -1,8 +1,11 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { Apartment } from '@/types/apartment';
-import AdminSidebar, { type AdminView } from '@/components/admin/AdminSidebar/AdminSidebar';
+import AdminSidebar, {
+  ADMIN_VIEWS,
+  type AdminView,
+} from '@/components/admin/AdminSidebar/AdminSidebar';
 import AdminTopbar from '@/components/admin/AdminTopbar/AdminTopbar';
 import AdminStats from '@/components/admin/AdminStats/AdminStats';
 import AdminApartmentTable from '@/components/admin/AdminApartmentTable/AdminApartmentTable';
@@ -31,8 +34,20 @@ import { apartmentsInCountry, countryOf } from '@/lib/regions';
 import type { Region } from '@/types/region';
 import styles from './AdminDashboard.module.scss';
 
+const DEFAULT_VIEW: AdminView = 'apartments';
+
+function viewFromSearch(search: string): AdminView {
+  const section = new URLSearchParams(search).get('section');
+  return ADMIN_VIEWS.find((v) => v === section) ?? DEFAULT_VIEW;
+}
+
+/** The default section owns the bare `/admin`, so the tidy URL stays tidy. */
+function searchForView(view: AdminView): string {
+  return view === DEFAULT_VIEW ? '/admin' : `/admin?section=${view}`;
+}
+
 export default function AdminDashboard() {
-  const [view, setView] = useState<AdminView>('apartments');
+  const [view, setView] = useState<AdminView>(DEFAULT_VIEW);
   const [listMode, setListMode] = useState<AdminListMode>('grid');
   const [query, setQuery] = useState('');
   /** Which country's listings are on screen; null shows every region. */
@@ -44,6 +59,25 @@ export default function AdminDashboard() {
   const [modalApt, setModalApt] = useState<Apartment | null | undefined>(undefined);
   const [requestCount, setRequestCount] = useState(0);
   const [reviewCount, setReviewCount] = useState(0);
+
+  /*
+    Which section is open lives in the URL, so a refresh — or a bookmark, or a
+    link sent to someone — comes back to the same screen instead of the
+    default one. Read after mount rather than during render: the server has no
+    address bar, and seeding state from `window` would not survive hydration.
+  */
+  useEffect(() => {
+    const sync = () => setView(viewFromSearch(window.location.search));
+    sync();
+    window.addEventListener('popstate', sync);
+    return () => window.removeEventListener('popstate', sync);
+  }, []);
+
+  const changeView = useCallback((next: AdminView) => {
+    setView(next);
+    setNavOpen(false);
+    window.history.pushState(null, '', searchForView(next));
+  }, []);
 
   useEffect(() => {
     fetchApartments()
@@ -139,10 +173,7 @@ export default function AdminDashboard() {
       <AdminSidebar
         view={view}
         open={navOpen}
-        onViewChange={(v) => {
-          setView(v);
-          setNavOpen(false);
-        }}
+        onViewChange={changeView}
         requestCount={requestCount}
         reviewCount={reviewCount}
         apartmentCount={list.length}

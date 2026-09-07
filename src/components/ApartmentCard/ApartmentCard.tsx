@@ -18,9 +18,14 @@ import { currencyOf } from '@/lib/regions';
 
 interface ApartmentCardProps {
   apt: Apartment;
+  /**
+   * Where the card leads, as a path without the language prefix. The home page
+   * sends every card to the full list rather than to the apartment's own page.
+   */
+  to?: string;
 }
 
-export default function ApartmentCard({ apt }: ApartmentCardProps) {
+export default function ApartmentCard({ apt, to }: ApartmentCardProps) {
   const { locale, t, href } = useLanguage();
   const copy = getApartmentCopy(apt, locale);
   const photos = getApartmentPhotos(apt);
@@ -29,6 +34,7 @@ export default function ApartmentCard({ apt }: ApartmentCardProps) {
   const fromPrice = priceFrom(apt);
   const showFrom = hasPriceTiers(apt);
   const placeholderCaption = getPrimaryTagLabel(apt, locale, t);
+  const target = href(to ?? `/apartments/${apt.id}`);
 
   return (
     <article className={styles.card}>
@@ -76,16 +82,6 @@ export default function ApartmentCard({ apt }: ApartmentCardProps) {
             value={apt.bedrooms}
             label={apt.bedrooms === 1 ? t('apartments.bedroom') : t('apartments.bedrooms')}
           />
-          <SpecStat
-            icon="bed"
-            value={apt.beds}
-            label={apt.beds === 1 ? t('apartments.bed') : t('apartments.beds')}
-          />
-          <SpecStat
-            icon="bath"
-            value={apt.bathrooms}
-            label={apt.bathrooms === 1 ? t('apartments.bath') : t('apartments.baths')}
-          />
         </div>
 
         <div className={styles.foot}>
@@ -99,7 +95,7 @@ export default function ApartmentCard({ apt }: ApartmentCardProps) {
             size="sm"
             iconRight="arrow"
             as="a"
-            href={href(`/apartments/${apt.id}`)}
+            href={target}
             className={styles.detailsBtn}
           >
             {t('apartments.viewDetails')}
@@ -113,7 +109,7 @@ export default function ApartmentCard({ apt }: ApartmentCardProps) {
         "view details" button above is the real link.
       */}
       <Link
-        href={href(`/apartments/${apt.id}`)}
+        href={target}
         className={styles.cardLink}
         aria-hidden="true"
         tabIndex={-1}

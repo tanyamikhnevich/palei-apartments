@@ -5,6 +5,8 @@ import Button from '@/components/ui/Button/Button';
 import Icon from '@/components/ui/Icon/Icon';
 import type { IconName } from '@/components/ui/Icon/Icon';
 import { useLanguage } from '@/i18n/LanguageProvider';
+import { useBusiness } from '@/components/BusinessProvider/BusinessProvider';
+import { whatsappLink } from '@/lib/phone';
 import {
   PERSON_NAME_MAX,
   PHONE_INPUT_MAX_LENGTH,
@@ -24,6 +26,7 @@ const FEAT_KEYS: { icon: IconName; key: string }[] = [
 
 export default function ContactSection() {
   const { locale, t } = useLanguage();
+  const whatsapp = whatsappLink(useBusiness().whatsappNumber);
   const [sent, setSent] = useState(false);
 
   const [name, setName] = useState('');
@@ -126,17 +129,26 @@ export default function ContactSection() {
               ))}
             </div>
 
-            <div className={styles.whatsapp}>
-              <Button
-                variant="primary"
-                icon="phone"
-                as="a"
-                href="#"
-                style={{ background: '#25D366' }}
-              >
-                {t('contact.whatsapp')}
-              </Button>
-            </div>
+            {/*
+              Was pointing at `#`. It now opens the number set in the panel, and
+              stays off the page entirely when no usable number is saved — a
+              WhatsApp button that goes nowhere is worse than no button.
+            */}
+            {whatsapp && (
+              <div className={styles.whatsapp}>
+                <Button
+                  variant="primary"
+                  icon="phone"
+                  as="a"
+                  href={whatsapp}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ background: '#25D366' }}
+                >
+                  {t('contact.whatsapp')}
+                </Button>
+              </div>
+            )}
           </div>
 
           <div className={styles.formCard}>

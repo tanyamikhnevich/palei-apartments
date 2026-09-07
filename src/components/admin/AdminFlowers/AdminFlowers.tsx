@@ -1,15 +1,37 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
 import Button from '@/components/ui/Button/Button';
 import Icon from '@/components/ui/Icon/Icon';
+import Placeholder from '@/components/ui/Placeholder/Placeholder';
 import AdminBouquetModal from './AdminBouquetModal';
 import AdminFlowerOrders from './AdminFlowerOrders';
+import { isPhotoUrl } from '@/lib/apartmentMedia';
 import { formatMoney } from '@/lib/money';
 import { currencyOf } from '@/lib/regions';
 import { deleteBouquet, fetchBouquets, saveBouquet } from '@/lib/api/client';
 import type { Bouquet } from '@/types/flower';
 import styles from './AdminFlowers.module.scss';
+
+/*
+  One name reads much like another once there are twenty of them, so the cover
+  picture is what actually tells them apart. First photo is the cover, the same
+  rule the shop window follows.
+*/
+function Thumb({ bouquet }: { bouquet: Bouquet }) {
+  const photo = (bouquet.photos ?? []).find(isPhotoUrl);
+
+  return (
+    <div className={styles.thumb}>
+      {photo ? (
+        <Image src={photo} alt="" fill sizes="48px" className={styles.thumbImg} unoptimized />
+      ) : (
+        <Placeholder className={styles.thumbImg} />
+      )}
+    </div>
+  );
+}
 
 /**
  * The shop window. No stock and no orders to manage — by the owner's choice
@@ -94,6 +116,8 @@ export default function AdminFlowers() {
         <div className={styles.list}>
           {list.map((bouquet) => (
             <article className={styles.row} key={bouquet.id}>
+              <Thumb bouquet={bouquet} />
+
               <div className={styles.name}>
                 <b>{bouquet.locales.en.name}</b>
                 <span>

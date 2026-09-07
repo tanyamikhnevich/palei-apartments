@@ -207,6 +207,12 @@
   color: var(--ink-soft);
 }
 
+.utilities {
+  margin: 12px 0 0;
+  font-size: var(--fs-xs);
+  color: var(--ink-soft);
+}
+
 .fields {
   display: grid;
   grid-template-columns: 1fr 1fr;

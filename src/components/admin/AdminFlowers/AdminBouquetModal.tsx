@@ -31,7 +31,7 @@ function blankBouquet(): Bouquet {
     kind: 'flowers',
     category: 'classic',
     price: 200,
-    sameDay: true,
+    sameDay: false,
     listed: true,
     locales: { en: { ...empty }, ru: { ...empty }, he: { ...empty }, fr: { ...empty } },
   };

@@ -1,0 +1,272 @@
+/*
+  The site's own surface — white, navy, one accent — rather than a colour
+  scheme of its own. What carries the pitch here is the stock: three real
+  bouquets from the window, which sell better than a gradient does.
+*/
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(12, 22, 34, 0.55);
+  backdrop-filter: blur(4px);
+  animation: fade 0.2s ease-out;
+  overflow-y: auto;
+}
+
+.card {
+  position: relative;
+  width: min(560px, 100%);
+  padding: 30px 30px 24px;
+  border-radius: var(--r-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-lg);
+  text-align: center;
+  animation: rise 0.3s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+}
+
+.close {
+  position: absolute;
+  inset-block-start: 14px;
+  inset-inline-end: 14px;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 50%;
+  background: var(--mist);
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: 0.15s;
+
+  &:hover {
+    background: var(--line);
+    color: var(--ink);
+  }
+}
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  margin: 0 auto 20px;
+  padding: 7px 15px;
+  border-radius: 999px;
+  background: var(--mist);
+  color: var(--ink-soft);
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  text-align: start;
+}
+
+.spinner {
+  flex: none;
+  width: 13px;
+  height: 13px;
+  border: 2px solid var(--line-2);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
+}
+
+.head {
+  margin-bottom: 20px;
+}
+
+.title {
+  margin: 0 0 10px;
+  font-size: clamp(1.4rem, 3.4vw, 1.9rem);
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: var(--navy);
+}
+
+.sub {
+  margin: 0 auto;
+  max-width: 42ch;
+  font-size: var(--fs-md);
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+/* The window itself, in miniature. One link: any of them means "show me". */
+.picks {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 20px;
+  text-decoration: none;
+}
+
+.pick {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: start;
+}
+
+.pickMedia {
+  position: relative;
+  display: block;
+  aspect-ratio: 3 / 4;
+  border-radius: var(--r-sm);
+  overflow: hidden;
+  background: var(--mist);
+}
+
+.pickImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Both lines are pinned to one line box, so a skeleton and a name are the
+   same height and the row never resizes when the photos land. */
+.pickName {
+  font-size: var(--fs-xs);
+  line-height: 18px;
+  min-height: 18px;
+  font-weight: 700;
+  color: var(--ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pickPrice {
+  font-size: var(--fs-xs);
+  line-height: 18px;
+  min-height: 18px;
+  color: var(--ink-soft);
+}
+
+.points {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 7px;
+  margin: 0 auto 20px;
+  padding: 0;
+  list-style: none;
+  text-align: start;
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  svg {
+    color: var(--accent);
+    flex: none;
+  }
+}
+
+.cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  width: 100%;
+  padding: 14px 24px;
+  border-radius: 999px;
+  background: var(--navy);
+  color: #fff;
+  font-size: var(--fs-md);
+  font-weight: 700;
+  text-decoration: none;
+  transition: background 0.15s, transform 0.15s;
+
+  &:hover {
+    background: var(--ink);
+    transform: translateY(-1px);
+  }
+}
+
+.timer {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin-top: 14px;
+}
+
+.bar {
+  height: 3px;
+  border-radius: 999px;
+  background: var(--mist);
+  overflow: hidden;
+}
+
+.fill {
+  display: block;
+  height: 100%;
+  width: 100%;
+  background: var(--accent);
+  transform-origin: left center;
+  animation: drain linear forwards;
+}
+
+.timerText {
+  font-size: var(--fs-xs);
+  color: var(--ink-soft);
+}
+
+.stay {
+  margin-top: 10px;
+  border: none;
+  background: none;
+  font-family: inherit;
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  color: var(--ink-soft);
+  text-decoration: underline;
+  cursor: pointer;
+
+  &:hover {
+    color: var(--ink);
+  }
+}
+
+/* RTL drains the bar the other way round. */
+:global([dir='rtl']) .fill {
+  transform-origin: right center;
+}
+
+@keyframes drain {
+  from { transform: scaleX(1); }
+  to { transform: scaleX(0); }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes fade {
+  from { opacity: 0; }
+}
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(14px) scale(0.97); }
+}
+
+/*
+  Someone who asked their machine to calm down gets a card that does not move.
+  The countdown still runs — it is information, not decoration.
+*/
+@media (prefers-reduced-motion: reduce) {
+  .card,
+  .overlay,
+  .spinner {
+    animation: none;
+  }
+}
+
+@media (max-width: 520px) {
+  .card { padding: 26px 20px 20px; }
+  .picks { gap: 8px; }
+}

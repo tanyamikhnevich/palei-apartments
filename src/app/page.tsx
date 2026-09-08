@@ -22,7 +22,7 @@ export default function HomePage() {
     <>
       <JsonLd
         data={organizationSchema(
-          'Boutique short-term rentals near the Mediterranean — comfortable apartments in Bat Yam, hosted personally.'
+          'Comfortable apartments by the sea in Bat Yam, Israel — for a few nights or a few months, hosted personally.'
         )}
       />
       <JsonLd data={websiteSchema()} />

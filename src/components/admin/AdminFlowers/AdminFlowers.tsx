@@ -163,11 +163,16 @@ export default function AdminFlowers() {
       {editing !== undefined && (
         <AdminBouquetModal
           bouquet={editing}
+          saving={busy}
           onClose={() => setEditing(undefined)}
+          /* The form stays open until the save actually lands. Closing first
+             looked tidier, but a refused write — a read-only shop, a dropped
+             connection — then took a filled-in costing sheet down with it and
+             left nothing but an alert. */
           onSave={(bouquet) => {
-            setEditing(undefined);
             void persist(async () => {
               await saveBouquet(bouquet);
+              setEditing(undefined);
             });
           }}
         />

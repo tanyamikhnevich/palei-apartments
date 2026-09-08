@@ -16,6 +16,7 @@ import {
   bouquetCopy,
   bouquetCurrency,
   bouquetsInCountry,
+  FLOWER_COUNTRY,
   bouquetsOfKind,
   KIND_FILTERS,
   windowBouquets,
@@ -53,7 +54,7 @@ export default function FlowersShop() {
   }, []);
 
   const shown = useMemo(
-    () => windowBouquets(bouquetsInCountry(list, 'IL')),
+    () => windowBouquets(bouquetsInCountry(list, FLOWER_COUNTRY)),
     [list]
   );
   const splitKinds = useMemo(() => windowMixesKinds(shown), [shown]);

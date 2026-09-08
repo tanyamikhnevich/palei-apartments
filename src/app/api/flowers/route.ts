@@ -10,12 +10,17 @@ import {
 import { bouquetToInsert, rowToBouquet } from '@/db/flowers/schema';
 import { jsonError } from '@/lib/api/errors';
 import type { Bouquet } from '@/types/flower';
-import { requireAdmin } from '@/lib/auth/guard';
+import { currentAdmin, requireAdmin } from '@/lib/auth/guard';
+import { withoutCost } from '@/lib/bouquetCost';
 
 /**
  * The window — whatever is actually in it. There is no built-in sample: an
  * empty shop shows an empty shop, and the page says so rather than advertising
  * bouquets nobody can send.
+ *
+ * This one endpoint feeds both the shop and the admin list, so it answers
+ * differently depending on who asks: the costing sheet — supplier prices, and
+ * the margin they give away — goes out only to a signed-in admin.
  */
 export async function GET() {
   if (!isFlowersDbConfigured()) {
@@ -23,9 +28,13 @@ export async function GET() {
   }
 
   try {
+    const admin = await currentAdmin();
     const rows = await getFlowersDb().select().from(schema.bouquets);
     return NextResponse.json({
-      bouquets: rows.map(rowToBouquet),
+      bouquets: rows.map((row) => {
+        const bouquet = rowToBouquet(row);
+        return admin ? bouquet : withoutCost(bouquet);
+      }),
       source: 'database' as const,
       writable: true,
     });

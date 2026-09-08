@@ -27,6 +27,30 @@ export function formatMoney(
   }
 }
 
+/**
+ * The same, with the small change kept.
+ *
+ * Nothing is *charged* in fractions of a shekel, which is why `formatMoney`
+ * drops them — but costing a bouquet is arithmetic on supplier prices, and a
+ * stem at 4.30 rounded to 4 turns a margin into a guess.
+ */
+export function formatMoneyExact(
+  amount: number,
+  currency: CurrencyCode,
+  locale: Locale
+): string {
+  try {
+    return new Intl.NumberFormat(locale, {
+      style: 'currency',
+      currency,
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(amount);
+  } catch {
+    return `${CURRENCY_SYMBOL[currency] ?? ''}${amount.toFixed(2)}`;
+  }
+}
+
 /** Bare symbol, for form labels like "Price per night (₪)". */
 export const CURRENCY_SYMBOL: Record<CurrencyCode, string> = {
   ILS: '₪',

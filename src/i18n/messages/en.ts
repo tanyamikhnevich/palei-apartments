@@ -2,7 +2,7 @@ export const en = {
   meta: {
     title: 'Palei Apartments — Bat Yam',
     description:
-      'Boutique short-term rentals near the Mediterranean — comfortable apartments in Bat Yam.',
+      'Apartment rentals near the Mediterranean — comfortable apartments in Bat Yam.',
   },
   /**
    * Page titles and descriptions as a search result shows them. Kept apart
@@ -11,14 +11,14 @@ export const en = {
    */
   seo: {
     home: {
-      title: 'Palei Apartments — short-term rentals in Bat Yam',
+      title: 'Palei Apartments — apartment rentals in Bat Yam',
       description:
-        'Boutique short-term rentals near the Mediterranean — comfortable apartments in Bat Yam, hosted personally.',
+        'Comfortable apartments by the sea in Bat Yam, Israel — for a few nights or a few months, hosted personally and booked directly with the owners.',
     },
     apartments: {
       title: 'Apartments for rent in Bat Yam',
       description:
-        'Short-term apartment rentals in Bat Yam, minutes from the Mediterranean — sea views, balconies and family flats, booked directly with the owners.',
+        'Apartment rentals in Bat Yam, minutes from the Mediterranean — sea views, balconies and family flats, for a few nights or several months, direct from the owners.',
     },
     about: {
       title: 'About us',
@@ -69,7 +69,7 @@ export const en = {
   hero: {
     pill: 'Israel · by the Sea',
     title: 'Comfortable apartments near the sea in Israel — Bat Yam',
-    sub: 'Boutique short-term rentals for tourists and families — sunny, fully equipped, and a short walk from the beach.',
+    sub: 'Boutique apartments for tourists and families — sunny, fully equipped, and a short walk from the beach. Short stays or long ones.',
     checkIn: 'Check in',
     guests: 'Guests',
     search: 'Search',
@@ -433,7 +433,7 @@ export const en = {
   },
   footer: {
     tagline:
-      'Boutique short-term apartment rentals by the sea in Bat Yam. Hosted personally, priced transparently.',
+      'Boutique apartment rentals by the sea in Bat Yam, short or long term. Hosted personally, priced transparently.',
     explore: 'Explore',
     group: 'Palei Group',
     contact: 'Contact',

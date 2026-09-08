@@ -5,6 +5,7 @@ import { isApartmentListedOnSite } from '@/lib/apartmentVisibility';
 import { rowToApartment } from '@/db/map';
 import { isDbConfigured } from '@/lib/api/errors';
 import { getFlowersDb, isFlowersDbConfigured, schema as flowersSchema } from '@/db/flowers';
+import { sellsHere } from '@/lib/flowers';
 import { isSectionLive } from '@/lib/services';
 import { unstable_cache } from 'next/cache';
 import { SITE_URL } from '@/lib/seo';
@@ -99,7 +100,7 @@ async function bouquetEntries(): Promise<Entry[]> {
     const rows = await listBouquets();
 
     return rows
-      .filter((row) => row.listed)
+      .filter((row) => row.listed && sellsHere(row))
       .flatMap((row) => entries(`/flowers/${row.id}`, 0.6, 'weekly', row.updatedAt ?? new Date()));
   } catch (e) {
     console.error('sitemap: could not list bouquets', e);

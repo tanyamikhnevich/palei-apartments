@@ -12,6 +12,7 @@ import type {
   Bouquet,
   BouquetCategory,
   BouquetCopy,
+  BouquetCost,
   DeliverySlot,
   FlowerOrder,
   FlowerOrderStatus,
@@ -36,6 +37,8 @@ export const bouquets = pgTable('bouquets', {
   listed: boolean('listed').notNull().default(true),
   photos: jsonb('photos').$type<string[]>(),
   locales: jsonb('locales').notNull().$type<Record<Locale, BouquetCopy>>(),
+  /** The costing sheet. Admin-only — stripped before the window sees a row. */
+  cost: jsonb('cost').$type<BouquetCost>(),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 });
@@ -54,6 +57,7 @@ export function rowToBouquet(row: BouquetRow): Bouquet {
     listed: row.listed,
     photos: row.photos ?? undefined,
     locales: row.locales,
+    cost: row.cost ?? undefined,
   };
 }
 
@@ -69,6 +73,7 @@ export function bouquetToInsert(bouquet: Bouquet) {
     listed: bouquet.listed,
     photos: bouquet.photos ?? null,
     locales: bouquet.locales,
+    cost: bouquet.cost ?? null,
   };
 }
 

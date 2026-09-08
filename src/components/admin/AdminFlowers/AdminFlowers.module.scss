@@ -307,3 +307,165 @@
 
   dd { font-style: italic; color: var(--ink-soft); }
 }
+
+/* Cost sheet — the florist's own arithmetic, never the buyer's. */
+.cost {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--mist);
+}
+
+.costHead {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+
+  h4 { margin: 0; font-size: var(--fs-base); }
+  span { font-size: var(--fs-xs); color: var(--ink-soft); }
+}
+
+.costTable { display: flex; flex-direction: column; gap: 8px; }
+
+/* Quantity, item, unit price, its VAT box, the line total, and the drop button. */
+.costHeadRow,
+.costRow {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr) 110px 44px 92px 30px;
+  align-items: center;
+  gap: 8px;
+}
+
+.costHeadRow {
+  font-size: var(--fs-2xs);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.costRight { text-align: end; }
+.costCentre { text-align: center; }
+
+/* The box sits in its own column, so the whole cell is the target. */
+.costLineVat {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  cursor: pointer;
+
+  input { accent-color: var(--accent); width: 16px; height: 16px; }
+}
+
+.costLineSum { font-variant-numeric: tabular-nums; font-size: var(--fs-sm); }
+
+.costDrop {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: none;
+  border-radius: 8px;
+  background: none;
+  color: var(--ink-faint);
+  cursor: pointer;
+
+  &:hover { background: var(--busy-bg); color: var(--busy-fg); }
+}
+
+.costAdd {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  align-self: flex-start;
+  padding: 7px 12px;
+  border: 1px dashed var(--line-2);
+  border-radius: 9px;
+  background: none;
+  font-family: inherit;
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--ink-soft);
+  cursor: pointer;
+
+  &:hover { border-color: var(--navy); color: var(--navy); }
+}
+
+.costOptions {
+  display: flex;
+  align-items: end;
+  flex-wrap: wrap;
+  gap: 10px 20px;
+}
+
+.costCheck {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--fs-sm);
+  cursor: pointer;
+  padding-bottom: 9px;
+
+  input { accent-color: var(--accent); }
+}
+
+.costRate {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: var(--fs-xs);
+  color: var(--ink-soft);
+
+  input { width: 130px; }
+}
+
+.costSums {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 4px 0 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+
+  div { display: flex; justify-content: space-between; gap: 16px; }
+
+  dt { font-size: var(--fs-sm); color: var(--ink-soft); }
+  dd { margin: 0; font-size: var(--fs-sm); font-variant-numeric: tabular-nums; }
+}
+
+.costTotal {
+  padding-top: 6px;
+  border-top: 1px solid var(--line);
+
+  dt { font-weight: 800; color: var(--ink); }
+  dd { font-weight: 800; font-size: var(--fs-base); }
+}
+
+.costMargin {
+  margin: 0;
+  font-size: var(--fs-sm);
+  color: var(--ink-soft);
+}
+
+.costLoss { color: var(--busy-fg); font-weight: 700; }
+
+@media (max-width: 860px) {
+  .costHeadRow { display: none; }
+
+  .costRow {
+    grid-template-columns: 64px minmax(0, 1fr) 44px 30px;
+    grid-template-areas: 'qty name name drop' 'price price vat sum';
+    row-gap: 6px;
+
+    > *:nth-child(1) { grid-area: qty; }
+    > *:nth-child(2) { grid-area: name; }
+    > *:nth-child(3) { grid-area: price; }
+    > *:nth-child(4) { grid-area: vat; }
+    > *:nth-child(5) { grid-area: sum; }
+    > *:nth-child(6) { grid-area: drop; }
+  }
+}

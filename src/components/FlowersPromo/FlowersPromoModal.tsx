@@ -10,7 +10,13 @@ import Skeleton from '@/components/ui/Skeleton/Skeleton';
 import { useLanguage } from '@/i18n/LanguageProvider';
 import { isPhotoUrl } from '@/lib/apartmentMedia';
 import { fetchBouquets } from '@/lib/api/client';
-import { bouquetCopy, bouquetCurrency, bouquetsInCountry, windowBouquets } from '@/lib/flowers';
+import {
+  bouquetCopy,
+  bouquetCurrency,
+  bouquetsInCountry,
+  FLOWER_COUNTRY,
+  windowBouquets,
+} from '@/lib/flowers';
 import { formatMoney } from '@/lib/money';
 import type { Bouquet } from '@/types/flower';
 import styles from './FlowersPromoModal.module.scss';
@@ -57,7 +63,7 @@ export default function FlowersPromoModal({ checkIn, onClose }: FlowersPromoModa
     let alive = true;
     fetchBouquets()
       .then(({ bouquets }) => {
-        if (alive) setPicks(windowBouquets(bouquetsInCountry(bouquets, 'IL')).slice(0, SHOWCASE));
+        if (alive) setPicks(windowBouquets(bouquetsInCountry(bouquets, FLOWER_COUNTRY)).slice(0, SHOWCASE));
       })
       .catch(() => undefined)
       .finally(() => {

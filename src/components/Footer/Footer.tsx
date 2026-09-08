@@ -6,6 +6,7 @@ import { useLanguage } from '@/i18n/LanguageProvider';
 import { useBusiness } from '@/components/BusinessProvider/BusinessProvider';
 import { displayPhone, telLink } from '@/lib/phone';
 import { GROUP_BRAND, liveServices } from '@/lib/services';
+import { SOCIAL_LINKS } from '@/lib/social';
 import type { Locale } from '@/i18n/types';
 import styles from './Footer.module.scss';
 
@@ -60,6 +61,15 @@ export default function Footer() {
                     do not work. It is an address, so it is now text. */}
                 <span className={styles.plain}>Bat Yam, Israel</span>
               </li>
+              {/* Where the guests who have already stayed left their reviews.
+                  `noopener` because these open in a tab of their own. */}
+              {SOCIAL_LINKS.map(({ key, label, href }) => (
+                <li key={key}>
+                  <a href={href} target="_blank" rel="noopener noreferrer">
+                    {label}
+                  </a>
+                </li>
+              ))}
             </ul>
           </div>
 

@@ -51,6 +51,47 @@ export interface Bouquet {
   listed: boolean;
   photos?: string[];
   locales: Record<Locale, BouquetCopy>;
+  /** What it cost to make. Admin-only — see {@link BouquetCost}. */
+  cost?: BouquetCost;
+}
+
+/** One thing that went into the bouquet: how many, what, and what it cost. */
+export interface CostLine {
+  id: string;
+  qty: number;
+  name: string;
+  /** Price of one, net of VAT — the number the supplier's invoice quotes. */
+  unitNet: number;
+  /**
+   * Whether VAT is added to this line. Per line, not per sheet: the roses come
+   * off an invoice that charges it and the ribbon from a market stall that does
+   * not, and both go into the same bouquet.
+   */
+  vat: boolean;
+}
+
+/**
+ * The costing sheet behind a bouquet: the stems and wrapping that went into it,
+ * plus the time spent making it.
+ *
+ * Private by construction. Supplier prices and the margin they imply are the
+ * florist's business, so this never leaves admin — the public window and the
+ * public bouquet page both strip it before the number reaches a browser.
+ *
+ * Flowers are bought net and sold gross, so the sheet keeps the net prices and
+ * adds VAT on top, line by line, rather than storing two numbers that can drift
+ * apart.
+ */
+export interface BouquetCost {
+  lines: CostLine[];
+  /**
+   * Percent, and shared by every line that is marked as carrying VAT — the rate
+   * is the country's, so only which lines it touches is a per-line question.
+   */
+  vatRate: number;
+  /** Hours spent on it, and what an hour of that time is worth. */
+  hours: number;
+  hourlyRate: number;
 }
 
 /** What the guest fills in. There is no cart: one bouquet, one delivery. */

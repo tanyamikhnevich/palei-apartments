@@ -9,14 +9,14 @@ import { isRtl } from '@/i18n/routing';
 import { readBusinessSettings } from '@/lib/server/businessSettings';
 
 const DESCRIPTION =
-  'Boutique short-term rentals near the Mediterranean — comfortable apartments in Bat Yam, hosted personally.';
+  'Comfortable apartments by the sea in Bat Yam, Israel — for a few nights or a few months, hosted personally.';
 
 export const metadata: Metadata = {
   // Makes every relative URL below — and in each page's own metadata —
   // resolve to a real address instead of being dropped.
   metadataBase: new URL(SITE_URL),
   title: {
-    default: `${SITE_NAME} — short-term rentals in Bat Yam`,
+    default: `${SITE_NAME} — apartment rentals in Bat Yam`,
     /** Pages give their own name; the brand is appended once, here. */
     template: `%s — ${SITE_NAME}`,
   },
@@ -27,13 +27,13 @@ export const metadata: Metadata = {
     type: 'website',
     siteName: SITE_NAME,
     url: SITE_URL,
-    title: `${SITE_NAME} — short-term rentals in Bat Yam`,
+    title: `${SITE_NAME} — apartment rentals in Bat Yam`,
     description: DESCRIPTION,
     images: [{ url: absoluteUrl(DEFAULT_OG_IMAGE), width: 1200, height: 630, alt: SITE_NAME }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: `${SITE_NAME} — short-term rentals in Bat Yam`,
+    title: `${SITE_NAME} — apartment rentals in Bat Yam`,
     description: DESCRIPTION,
     images: [absoluteUrl(DEFAULT_OG_IMAGE)],
   },

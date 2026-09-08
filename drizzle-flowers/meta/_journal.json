@@ -15,6 +15,13 @@
       "when": 1787737200490,
       "tag": "0001_moaning_lionheart",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1788867678144,
+      "tag": "0002_tan_unicorn",
+      "breakpoints": true
     }
   ]
 }

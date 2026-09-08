@@ -1,5 +1,6 @@
 import type { Apartment } from '@/types/apartment';
 import { SITE_NAME, SITE_URL, absoluteUrl, DEFAULT_OG_IMAGE } from '@/lib/seo';
+import { SOCIAL_URLS } from '@/lib/social';
 import { getApartmentPhotos } from '@/lib/apartmentMedia';
 import { currencyOf } from '@/lib/regions';
 import { localePath } from '@/i18n/routing';
@@ -32,6 +33,9 @@ export function organizationSchema(description: string): Record<string, unknown>
       { '@type': 'City', name: 'Bat Yam' },
       { '@type': 'City', name: 'Tel Aviv' },
     ],
+    // The profiles Google already knows about, claimed as ours. Without this
+    // the new domain and the years-old accounts are three unrelated things.
+    sameAs: SOCIAL_URLS,
   };
 }
 

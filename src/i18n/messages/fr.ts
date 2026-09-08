@@ -7,18 +7,18 @@ export const fr: Translation<Messages> = {
   meta: {
     title: 'Palei Apartments — Bat Yam',
     description:
-      'Locations de courte durée en bord de Méditerranée — appartements confortables à Bat Yam.',
+      'Locations d’appartements en bord de Méditerranée — appartements confortables à Bat Yam.',
   },
   seo: {
     home: {
-      title: 'Palei Apartments — locations courte durée à Bat Yam',
+      title: 'Palei Apartments — appartements à louer à Bat Yam',
       description:
-        'Appartements confortables au bord de la Méditerranée à Bat Yam, loués directement par les propriétaires.',
+        'Appartements confortables au bord de la Méditerranée à Bat Yam — courte ou longue durée, loués directement par les propriétaires.',
     },
     apartments: {
       title: 'Appartements à louer à Bat Yam',
       description:
-        'Locations d’appartements courte durée à Bat Yam, à quelques minutes de la mer : vue mer, balcons et logements familiaux, réservés en direct.',
+        'Locations d’appartements à Bat Yam, à quelques minutes de la mer : vue mer, balcons et logements familiaux, courte ou longue durée, réservés en direct.',
     },
     about: {
       title: 'À propos',

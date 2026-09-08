@@ -2,7 +2,30 @@ import type { Bouquet, BouquetCopy } from '@/types/flower';
 import type { Locale } from '@/i18n/types';
 import type { CurrencyCode } from '@/types/settings';
 import type { Region } from '@/types/region';
-import { countryOf, currencyOf } from '@/lib/regions';
+import { REGIONS } from '@/types/region';
+import { countryOf, currencyOf, regionForArea } from '@/lib/regions';
+
+/**
+ * Where the shop sells. Israel only, and not by oversight: flowers are cut,
+ * driven and handed over the same day, so a bouquet cannot be sold anywhere the
+ * florist cannot reach that morning. The Cyprus apartments have no florist
+ * behind them, so Cyprus is not offered — in the window, on the bouquet pages,
+ * or in the admin picker that creates them.
+ */
+export const FLOWER_COUNTRY: Region['country'] = 'IL';
+
+/** The regions a bouquet may belong to — what admin is allowed to choose. */
+export const FLOWER_REGIONS = REGIONS.filter((r) => r.country === FLOWER_COUNTRY);
+
+export const DEFAULT_FLOWER_AREA = FLOWER_REGIONS[0].area;
+
+/**
+ * Whether the shop reaches it at all. Takes a plain area because the callers
+ * that need it most are holding a database row, not a typed bouquet.
+ */
+export function sellsHere(item: { area: string }): boolean {
+  return regionForArea(item.area).country === FLOWER_COUNTRY;
+}
 
 export function bouquetCurrency(bouquet: Bouquet): CurrencyCode {
   return currencyOf(bouquet);

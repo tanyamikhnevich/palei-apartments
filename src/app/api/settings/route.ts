@@ -12,7 +12,7 @@ import {
   validatePhone,
   validationMessageEn,
 } from '@/lib/validation/contact';
-import { requireAdmin } from '@/lib/auth/guard';
+import { requireAdminAccess } from '@/lib/auth/guard';
 
 // Reads the database on every call, so there is nothing to prerender. Saying
 // so stops the build attempting it and throwing DYNAMIC_SERVER_USAGE.
@@ -20,7 +20,7 @@ export const dynamic = 'force-dynamic';
 
 const SETTINGS_ID = 'default';
 
-export async function GET() {
+export async function GET(request: Request) {
   if (!isDbConfigured()) {
     return NextResponse.json({ settings: DEFAULT_BUSINESS_SETTINGS, source: 'mock' as const });
   }
@@ -41,7 +41,7 @@ export async function GET() {
 }
 
 export async function PUT(request: Request) {
-  const denied = await requireAdmin();
+  const denied = await requireAdminAccess(request);
   if (denied) return denied;
 
   if (!isDbConfigured()) return dbUnavailableResponse();

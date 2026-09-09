@@ -7,6 +7,8 @@ import Badge from '@/components/ui/Badge/Badge';
 import type { BadgeTone } from '@/components/ui/Badge/Badge';
 import Button from '@/components/ui/Button/Button';
 import StarRating from '@/components/ui/StarRating/StarRating';
+import AdminPager from '@/components/admin/ui/AdminPager';
+import { pageCountFor, pageSlice } from '@/lib/adminPaging';
 import { getApartmentCopy } from '@/i18n/apartmentLocale';
 import { deleteReview, fetchReviews, updateReviewStatus } from '@/lib/api/client';
 import styles from './ReviewsTable.module.scss';
@@ -24,6 +26,7 @@ function reviewTone(status: ReviewStatus): BadgeTone {
 export default function ReviewsTable({ apartments }: ReviewsTableProps) {
   const [rows, setRows] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(0);
 
   const titles = useMemo(() => {
     const map: Record<string, string> = {};
@@ -55,7 +58,13 @@ export default function ReviewsTable({ apartments }: ReviewsTableProps) {
     if (!confirm('Delete this review permanently? This cannot be undone.')) return;
     try {
       await deleteReview(id);
-      setRows((prev) => prev.filter((r) => r.id !== id));
+      setRows((prev) => {
+        const next = prev.filter((r) => r.id !== id);
+        /* Removing the last row of the last page would otherwise leave the
+           table looking empty until something else moved. */
+        setPage((p) => Math.min(p, pageCountFor(next.length) - 1));
+        return next;
+      });
     } catch {
       alert('Could not delete review. Is DATABASE_URL configured?');
     }
@@ -68,6 +77,8 @@ export default function ReviewsTable({ apartments }: ReviewsTableProps) {
   if (rows.length === 0) {
     return <p className={styles.loading}>No reviews yet.</p>;
   }
+
+  const visible = pageSlice(rows, page);
 
   return (
     <div className={styles.wrap}>
@@ -84,11 +95,13 @@ export default function ReviewsTable({ apartments }: ReviewsTableProps) {
           </tr>
         </thead>
         <tbody className={styles.tbody}>
-          {rows.map((r) => (
+          {visible.map((r) => (
             <tr key={r.id}>
-              <td className={styles.guestName}>
-                {r.guestName}
-                {r.contact && <span className={styles.contact}>{r.contact}</span>}
+              <td>
+                <div className={styles.guestName}>
+                  {r.guestName}
+                  {r.contact && <span className={styles.contact}>{r.contact}</span>}
+                </div>
               </td>
               <td className={styles.muted}>{titles[r.apartmentId] ?? r.apartmentId}</td>
               <td>
@@ -130,6 +143,8 @@ export default function ReviewsTable({ apartments }: ReviewsTableProps) {
           ))}
         </tbody>
       </table>
+
+      <AdminPager page={page} total={rows.length} onPage={setPage} noun="reviews" />
     </div>
   );
 }

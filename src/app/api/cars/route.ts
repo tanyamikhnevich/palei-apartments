@@ -11,14 +11,14 @@ import { carToInsert, rowToCar } from '@/db/cars/map';
 import { cars as mockCars } from '@/data/cars';
 import { jsonError } from '@/lib/api/errors';
 import type { Car } from '@/types/car';
-import { requireAdmin } from '@/lib/auth/guard';
+import { requireAdminAccess } from '@/lib/auth/guard';
 
 /**
  * The fleet, from its own database — and from `src/data/cars.ts` when that
  * database is not configured, so the site works on a fresh checkout with no
  * connection string.
  */
-export async function GET() {
+export async function GET(request: Request) {
   if (!isCarsDbConfigured()) {
     return NextResponse.json({ cars: mockCars, source: 'mock' as const, writable: false });
   }
@@ -53,7 +53,7 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const denied = await requireAdmin();
+  const denied = await requireAdminAccess(request);
   if (denied) return denied;
 
   if (!isCarsDbConfigured()) return jsonError('Fleet database not configured', 503);
@@ -83,7 +83,7 @@ export async function POST(request: Request) {
 }
 
 export async function DELETE(request: Request) {
-  const denied = await requireAdmin();
+  const denied = await requireAdminAccess(request);
   if (denied) return denied;
 
   if (!isCarsDbConfigured()) return jsonError('Fleet database not configured', 503);

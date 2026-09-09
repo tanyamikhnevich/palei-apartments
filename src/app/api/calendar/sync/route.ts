@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { dbUnavailableResponse, isDbConfigured, jsonError } from '@/lib/api/errors';
 import { syncAllFeeds, syncApartmentFeeds, syncFeedById } from '@/lib/server/calendarSync';
-import { requireAdmin } from '@/lib/auth/guard';
+import { requireAdminAccess } from '@/lib/auth/guard';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
@@ -37,7 +37,7 @@ export async function GET(request: Request) {
 
 /** Manual "Sync now" from admin: whole site, one apartment, or one feed. */
 export async function POST(request: Request) {
-  const denied = await requireAdmin();
+  const denied = await requireAdminAccess(request);
   if (denied) return denied;
 
   if (!isDbConfigured()) return dbUnavailableResponse();

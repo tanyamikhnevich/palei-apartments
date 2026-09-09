@@ -10,7 +10,7 @@ import {
 import { bouquetToInsert, rowToBouquet } from '@/db/flowers/schema';
 import { jsonError } from '@/lib/api/errors';
 import type { Bouquet } from '@/types/flower';
-import { currentAdmin, requireAdmin } from '@/lib/auth/guard';
+import { currentAdmin, requireAdminAccess } from '@/lib/auth/guard';
 import { withoutCost } from '@/lib/bouquetCost';
 
 /**
@@ -22,7 +22,7 @@ import { withoutCost } from '@/lib/bouquetCost';
  * differently depending on who asks: the costing sheet — supplier prices, and
  * the margin they give away — goes out only to a signed-in admin.
  */
-export async function GET() {
+export async function GET(request: Request) {
   if (!isFlowersDbConfigured()) {
     return NextResponse.json({ bouquets: [], source: 'database' as const, writable: false });
   }
@@ -49,7 +49,7 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const denied = await requireAdmin();
+  const denied = await requireAdminAccess(request);
   if (denied) return denied;
 
   if (!isFlowersDbConfigured()) return jsonError('Shop database not configured', 503);
@@ -82,7 +82,7 @@ export async function POST(request: Request) {
 }
 
 export async function DELETE(request: Request) {
-  const denied = await requireAdmin();
+  const denied = await requireAdminAccess(request);
   if (denied) return denied;
 
   if (!isFlowersDbConfigured()) return jsonError('Shop database not configured', 503);

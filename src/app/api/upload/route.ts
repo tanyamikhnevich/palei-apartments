@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { jsonError } from '@/lib/api/errors';
 import { IMAGE_UPLOAD_MAX_FILES, validateImageFile } from '@/lib/imageUpload';
 import { storeApartmentPhoto } from '@/lib/server/photoStorage';
-import { requireAdmin } from '@/lib/auth/guard';
+import { requireAdminAccess } from '@/lib/auth/guard';
 
 function collectFiles(formData: FormData): File[] {
   const fromFiles = formData.getAll('files').filter((f): f is File => f instanceof File);
@@ -19,7 +19,7 @@ async function saveImage(file: File): Promise<string> {
 }
 
 export async function POST(request: Request) {
-  const denied = await requireAdmin();
+  const denied = await requireAdminAccess(request);
   if (denied) return denied;
 
   try {

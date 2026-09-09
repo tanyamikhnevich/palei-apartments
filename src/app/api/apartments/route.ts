@@ -5,7 +5,7 @@ import { getDb, schema } from '@/db/index';
 import { apartmentToInsert, rowToApartment } from '@/db/map';
 import type { Apartment } from '@/types/apartment';
 import { dbUnavailableResponse, isDbConfigured, jsonError } from '@/lib/api/errors';
-import { requireAdmin } from '@/lib/auth/guard';
+import { requireAdminAccess } from '@/lib/auth/guard';
 import { APARTMENTS_TAG } from '@/lib/cacheTags';
 
 /**
@@ -35,7 +35,7 @@ export async function GET(request: Request) {
 
   // Without ?public=1 the answer also carries unlisted drafts.
   if (!publicOnly) {
-    const denied = await requireAdmin();
+    const denied = await requireAdminAccess(request);
     if (denied) return denied;
   }
 
@@ -67,7 +67,7 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  const denied = await requireAdmin();
+  const denied = await requireAdminAccess(request);
   if (denied) return denied;
 
   if (!isDbConfigured()) return dbUnavailableResponse();

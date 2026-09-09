@@ -4,12 +4,12 @@ import { getDb, schema } from '@/db/index';
 import { rowToCalendarFeed } from '@/db/map';
 import { dbUnavailableResponse, isDbConfigured, jsonError } from '@/lib/api/errors';
 import { syncFeedById } from '@/lib/server/calendarSync';
-import { requireAdmin } from '@/lib/auth/guard';
+import { requireAdminAccess } from '@/lib/auth/guard';
 
 type RouteContext = { params: { id: string } };
 
 export async function PATCH(request: Request, { params }: RouteContext) {
-  const denied = await requireAdmin();
+  const denied = await requireAdminAccess(request);
   if (denied) return denied;
 
   if (!isDbConfigured()) return dbUnavailableResponse();
@@ -57,8 +57,8 @@ export async function PATCH(request: Request, { params }: RouteContext) {
   }
 }
 
-export async function DELETE(_request: Request, { params }: RouteContext) {
-  const denied = await requireAdmin();
+export async function DELETE(request: Request, { params }: RouteContext) {
+  const denied = await requireAdminAccess(request);
   if (denied) return denied;
 
   if (!isDbConfigured()) return dbUnavailableResponse();

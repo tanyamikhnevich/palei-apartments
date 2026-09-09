@@ -522,6 +522,26 @@ export default function ApartmentDetail({ apt }: ApartmentDetailProps) {
                   </div>
                 )}
 
+                {/*
+                  The one thing that silently stops the button working, said
+                  where the button is. Under the calendar it is a footnote on a
+                  decision already made; here it is the answer to "why will this
+                  not submit?" — which is the question actually being asked by
+                  the time a guest has scrolled past the rates and typed a phone
+                  number. Both places keep it: the calendar explains the dates,
+                  this explains the button.
+                */}
+                {rangeReady && !nightsValid && (
+                  <div className={styles.blocker}>
+                    <Icon name="calendar" size={17} />
+                    <span>
+                      {t('booking.minNightsError')
+                        .replace('{min}', String(minNights))
+                        .replace('{nights}', String(nights))}
+                    </span>
+                  </div>
+                )}
+
                 {error && (
                   <div className={styles.errorBox}>
                     <p className={styles.error}>{error}</p>

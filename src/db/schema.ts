@@ -20,6 +20,7 @@ import type {
   BookingStatus,
 } from '@/types/apartment';
 import type { CalendarFeedSource, CalendarSyncStatus } from '@/types/calendar';
+import type { AdminRole } from '@/lib/auth/roles';
 import type { Locale } from '@/i18n/types';
 import type { CurrencyCode } from '@/types/settings';
 import type { ReviewStatus } from '@/types/review';
@@ -127,6 +128,14 @@ export const adminUsers = pgTable('admin_users', {
   /** Matched case-insensitively at sign-in; stored as typed. */
   login: text('login').notNull().unique(),
   passwordHash: text('password_hash').notNull(),
+  /**
+   * Which panel this account may open — see {@link AdminRole}.
+   *
+   * Defaulted to `owner` so that the accounts already in the table keep every
+   * door they had before the column existed. A migration is not the place to
+   * take away access; that is a decision for whoever owns the shop.
+   */
+  role: text('role').$type<AdminRole>().notNull().default('owner'),
   /** Bumped on every password change, which retires the whole session family. */
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   passwordChangedAt: timestamp('password_changed_at', { withTimezone: true })

@@ -11,16 +11,47 @@ import styles from './AdminLogin.module.scss';
 /**
  * Where to land after signing in. Only a path back into the panel is honoured —
  * `?next=https://elsewhere` would turn the login screen into an open redirect.
+ *
+ * `home` is the fallback, and the server picks it from the account's role: a
+ * florist who signs in here goes to the shop, not to a dashboard that would
+ * only bounce them back.
  */
-function safeNext(next: string | null): string {
-  if (!next) return '/admin';
-  if (!next.startsWith('/admin')) return '/admin';
+function safeNext(next: string | null, home: string): string {
+  if (!next) return home;
+  if (!next.startsWith('/admin')) return home;
   // `//host` and `/\host` are protocol-relative, not local paths.
-  if (next.startsWith('//') || next.startsWith('/\\')) return '/admin';
+  if (next.startsWith('//') || next.startsWith('/\\')) return home;
   return next;
 }
 
-export default function AdminLogin() {
+interface AdminLoginProps {
+  /**
+   * Where to go when the URL does not say — and, until the server answers,
+   * which panel this screen is the door to.
+   */
+  home?: string;
+  title?: string;
+  sub?: string;
+  /**
+   * The mark above the form. Width and height travel with it because the logos
+   * are not the same shape — the group's is taller than it is wide, the shop's
+   * is square — and one ratio applied to both squashes whichever it was not
+   * measured from.
+   */
+  logo?: { src: string; alt: string; width: number; height: number };
+  /** Where "back" goes. A florist should land in the shop, not on the group. */
+  back?: { href: string; label: string };
+}
+
+const GROUP_LOGO = { src: GROUP_BRAND.logo, alt: GROUP_BRAND.alt, width: 200, height: 210 };
+
+export default function AdminLogin({
+  home = '/admin',
+  title = 'Admin panel',
+  sub = 'Sign in to manage apartments and bookings.',
+  logo = GROUP_LOGO,
+  back = { href: '/', label: 'Back to website' },
+}: AdminLoginProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -42,16 +73,19 @@ export default function AdminLogin() {
     tried.current = true;
 
     fetch('/api/admin/session/refresh', { method: 'POST', cache: 'no-store' })
-      .then((res) => {
+      .then(async (res) => {
         if (!res.ok) {
           setChecking(false);
           return;
         }
-        router.replace(safeNext(searchParams.get('next')));
+        // The renewed session says which panel it belongs to; trust that over
+        // the screen the browser happened to be looking at.
+        const data = (await res.json().catch(() => ({}))) as { home?: string };
+        router.replace(safeNext(searchParams.get('next'), data.home ?? home));
         router.refresh();
       })
       .catch(() => setChecking(false));
-  }, [router, searchParams]);
+  }, [router, searchParams, home]);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -65,14 +99,15 @@ export default function AdminLogin() {
         body: JSON.stringify({ login, password }),
       });
 
+      const data = (await res.json().catch(() => ({}))) as { error?: string; home?: string };
+
       if (!res.ok) {
-        const data = (await res.json().catch(() => ({}))) as { error?: string };
         setError(data.error ?? 'Could not sign in');
         return;
       }
 
       // The cookies are set by the response; the server has to re-evaluate the route.
-      router.replace(safeNext(searchParams.get('next')));
+      router.replace(safeNext(searchParams.get('next'), data.home ?? home));
       router.refresh();
     } catch {
       setError('Could not reach the server');
@@ -87,15 +122,15 @@ export default function AdminLogin() {
     <div className={styles.screen}>
       <form className={styles.card} onSubmit={submit}>
         <Image
-          src={GROUP_BRAND.logo}
-          alt={GROUP_BRAND.alt}
-          width={200}
-          height={210}
+          src={logo.src}
+          alt={logo.alt}
+          width={logo.width}
+          height={logo.height}
           className={styles.logo}
           priority
         />
-        <h1 className={styles.title}>Admin panel</h1>
-        <p className={styles.sub}>Sign in to manage apartments and bookings.</p>
+        <h1 className={styles.title}>{title}</h1>
+        <p className={styles.sub}>{sub}</p>
 
         {error && <p className={styles.alert}>{error}</p>}
 
@@ -125,8 +160,8 @@ export default function AdminLogin() {
           {busy ? 'Signing in…' : 'Sign in'}
         </Button>
 
-        <Link href="/" className={styles.back}>
-          Back to website
+        <Link href={back.href} className={styles.back}>
+          {back.label}
         </Link>
       </form>
     </div>

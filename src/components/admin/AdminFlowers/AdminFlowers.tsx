@@ -33,18 +33,35 @@ function Thumb({ bouquet }: { bouquet: Bouquet }) {
   );
 }
 
+export type FlowersTab = 'window' | 'orders';
+
+interface AdminFlowersProps {
+  /**
+   * Which half to show, when something outside is doing the choosing — the
+   * shop panel puts these in its own sidebar and the tab strip below would
+   * then be a second set of controls for one decision. Left out, the screen
+   * keeps its own strip and works standalone.
+   */
+  tab?: FlowersTab;
+  onTabChange?: (tab: FlowersTab) => void;
+}
+
 /**
  * The shop window. No stock and no orders to manage — by the owner's choice
  * flowers are a showcase, so this screen is only about what is on offer and
  * what it costs. Orders arrive in Telegram like every other request.
  */
-export default function AdminFlowers() {
+export default function AdminFlowers({ tab: outerTab, onTabChange }: AdminFlowersProps = {}) {
   const [list, setList] = useState<Bouquet[]>([]);
   const [loading, setLoading] = useState(true);
   const [writable, setWritable] = useState(false);
   const [editing, setEditing] = useState<Bouquet | null | undefined>(undefined);
   const [busy, setBusy] = useState(false);
-  const [tab, setTab] = useState<'window' | 'orders'>('window');
+  const [ownTab, setOwnTab] = useState<FlowersTab>('window');
+  /* Controlled when the panel around it says so, self-driving otherwise. */
+  const driven = outerTab !== undefined;
+  const tab = outerTab ?? ownTab;
+  const setTab = (next: FlowersTab) => (onTabChange ? onTabChange(next) : setOwnTab(next));
 
   const reload = () =>
     fetchBouquets()
@@ -77,22 +94,26 @@ export default function AdminFlowers() {
   return (
     <div className={styles.wrap}>
       <div className={styles.bar}>
-        <div className={styles.tabsTop} role="group" aria-label="Section">
-          <button
-            type="button"
-            className={`${styles.topTab} ${tab === 'window' ? styles.topTabOn : ''}`}
-            onClick={() => setTab('window')}
-          >
-            Window <span className={styles.count}>{list.length}</span>
-          </button>
-          <button
-            type="button"
-            className={`${styles.topTab} ${tab === 'orders' ? styles.topTabOn : ''}`}
-            onClick={() => setTab('orders')}
-          >
-            Orders
-          </button>
-        </div>
+        {driven ? (
+          <div className={styles.barSpacer} />
+        ) : (
+          <div className={styles.tabsTop} role="group" aria-label="Section">
+            <button
+              type="button"
+              className={`${styles.topTab} ${tab === 'window' ? styles.topTabOn : ''}`}
+              onClick={() => setTab('window')}
+            >
+              Window <span className={styles.count}>{list.length}</span>
+            </button>
+            <button
+              type="button"
+              className={`${styles.topTab} ${tab === 'orders' ? styles.topTabOn : ''}`}
+              onClick={() => setTab('orders')}
+            >
+              Orders
+            </button>
+          </div>
+        )}
         {tab === 'window' && (
           <Button variant="primary" size="sm" icon="plus" onClick={() => setEditing(null)}>
             Add item
@@ -163,6 +184,7 @@ export default function AdminFlowers() {
       {editing !== undefined && (
         <AdminBouquetModal
           bouquet={editing}
+          library={list}
           saving={busy}
           onClose={() => setEditing(undefined)}
           /* The form stays open until the save actually lands. Closing first

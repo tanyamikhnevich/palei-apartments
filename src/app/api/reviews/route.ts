@@ -5,7 +5,7 @@ import { rowToReview } from '@/db/map';
 import type { Review } from '@/types/review';
 import { dbUnavailableResponse, isDbConfigured, jsonError } from '@/lib/api/errors';
 import { reviewValidationMessageEn, validateReview, type ReviewInput } from '@/lib/validation/review';
-import { requireAdmin } from '@/lib/auth/guard';
+import { requireAdminAccess } from '@/lib/auth/guard';
 import { publicSubmitThrottle } from '@/lib/auth/throttle';
 
 export async function GET(request: Request) {
@@ -15,7 +15,7 @@ export async function GET(request: Request) {
 
   // The moderation queue carries private contact details.
   if (admin) {
-    const denied = await requireAdmin();
+    const denied = await requireAdminAccess(request);
     if (denied) return denied;
   }
 

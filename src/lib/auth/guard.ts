@@ -3,6 +3,8 @@ import type { NextResponse } from 'next/server';
 import { ACCESS_COOKIE } from '@/lib/auth/cookies';
 import { readAccessToken, type AccessClaims } from '@/lib/auth/tokens';
 import { jsonError } from '@/lib/api/errors';
+import { roleMayReach } from '@/lib/auth/policy';
+import type { AdminRole } from '@/lib/auth/roles';
 
 /**
  * The same check the middleware runs, repeated inside the handler.
@@ -16,9 +18,31 @@ export async function currentAdmin(): Promise<AccessClaims | null> {
   return readAccessToken(cookies().get(ACCESS_COOKIE)?.value);
 }
 
-/** `null` when the caller is signed in, otherwise the 401 to return. */
-export async function requireAdmin(): Promise<NextResponse | null> {
-  return (await currentAdmin()) ? null : jsonError('Unauthorized', 401);
+/**
+ * `null` when the caller is signed in **and** their role reaches this exact
+ * request. The lock to the middleware's gate, and the same policy read twice.
+ *
+ * Handlers pass their own request rather than naming a role, so the answer
+ * comes from one table instead of from a judgement repeated in twenty files —
+ * and a route that later moves keeps whatever the policy says about its new
+ * address.
+ */
+export async function requireAdminAccess(request: Request): Promise<NextResponse | null> {
+  const claims = await currentAdmin();
+  if (!claims) return jsonError('Unauthorized', 401);
+
+  const { pathname } = new URL(request.url);
+  if (!roleMayReach(claims.rol, pathname, request.method)) {
+    return jsonError('Not allowed for this account', 403);
+  }
+  return null;
+}
+
+/** `null` only for the owner. For the handful of routes that say so outright. */
+export async function requireRole(role: AdminRole): Promise<NextResponse | null> {
+  const claims = await currentAdmin();
+  if (!claims) return jsonError('Unauthorized', 401);
+  return claims.rol === role ? null : jsonError('Not allowed for this account', 403);
 }
 
 /**

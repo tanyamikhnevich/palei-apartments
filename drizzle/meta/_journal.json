@@ -43,6 +43,13 @@
       "when": 1788337067592,
       "tag": "0005_add_admin_auth",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1788898221697,
+      "tag": "0006_closed_bastion",
+      "breakpoints": true
     }
   ]
 }

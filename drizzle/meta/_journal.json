@@ -50,6 +50,13 @@
       "when": 1788898221697,
       "tag": "0006_closed_bastion",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1788957043344,
+      "tag": "0007_confused_redwing",
+      "breakpoints": true
     }
   ]
 }

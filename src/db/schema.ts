@@ -23,7 +23,7 @@ import type { CalendarFeedSource, CalendarSyncStatus } from '@/types/calendar';
 import type { AdminRole } from '@/lib/auth/roles';
 import type { Locale } from '@/i18n/types';
 import type { CurrencyCode } from '@/types/settings';
-import type { ReviewStatus } from '@/types/review';
+import type { ReviewSource, ReviewStatus } from '@/types/review';
 
 export type ApartmentLocales = Record<Locale, ApartmentLocaleCopy>;
 
@@ -115,6 +115,14 @@ export const reviews = pgTable('reviews', {
   /** Private phone number for moderation — never sent to the public site. */
   contact: text('contact'),
   status: varchar('status', { length: 32 }).notNull().$type<ReviewStatus>(),
+  /**
+   * Defaulted to `site`, which is what every row predating this column is: the
+   * guest form was the only way in. Imported rows say where they came from.
+   */
+  source: varchar('source', { length: 32 })
+    .notNull()
+    .default('site')
+    .$type<ReviewSource>(),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 });

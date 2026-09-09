@@ -203,6 +203,7 @@ export const fr: Translation<Messages> = {
     sectionTitle: 'Avis des voyageurs',
     reviewsWord: 'avis',
     newBadge: 'Nouveau',
+    fromAirbnb: 'depuis Airbnb',
     noneYet: 'Pas encore d’avis — soyez le premier à en laisser un.',
     leaveReview: 'Laisser un avis',
     yourRating: 'Votre note',

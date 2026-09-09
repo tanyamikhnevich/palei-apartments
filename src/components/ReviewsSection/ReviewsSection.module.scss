@@ -67,9 +67,28 @@
   gap: 10px;
 }
 
+.itemWho {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 7px;
+  min-width: 0;
+}
+
 .itemName {
   font-weight: 600;
   font-size: var(--fs-sm);
+}
+
+/* Says the review was written on Airbnb, not collected by us. */
+.itemSource {
+  padding: 1px 7px;
+  border: 1px solid var(--line-2);
+  border-radius: 999px;
+  color: var(--ink-faint);
+  font-size: var(--fs-2xs);
+  font-weight: 500;
+  white-space: nowrap;
 }
 
 .itemDate {

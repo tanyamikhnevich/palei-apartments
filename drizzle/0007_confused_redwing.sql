@@ -1,0 +1,1 @@
+ALTER TABLE "reviews" ADD COLUMN "source" varchar(32) DEFAULT 'site' NOT NULL;

@@ -200,6 +200,7 @@ export const en = {
     sectionTitle: 'Guest reviews',
     reviewsWord: 'reviews',
     newBadge: 'New',
+    fromAirbnb: 'from Airbnb',
     noneYet: 'No reviews yet — be the first to leave one.',
     leaveReview: 'Leave a review',
     yourRating: 'Your rating',

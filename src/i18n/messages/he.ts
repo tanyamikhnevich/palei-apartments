@@ -189,6 +189,7 @@ export const he = {
     sectionTitle: 'ביקורות אורחים',
     reviewsWord: 'ביקורות',
     newBadge: 'חדש',
+    fromAirbnb: 'מ‑Airbnb',
     noneYet: 'עדיין אין ביקורות — היו הראשונים להשאיר ביקורת.',
     leaveReview: 'השאירו ביקורת',
     yourRating: 'הדירוג שלכם',

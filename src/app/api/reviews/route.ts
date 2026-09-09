@@ -108,6 +108,7 @@ export async function POST(request: Request) {
       text: check.text,
       contact: check.contact,
       status: 'pending',
+      source: 'site',
       createdAt: now.toISOString(),
     };
 
@@ -119,6 +120,7 @@ export async function POST(request: Request) {
       text: review.text ?? null,
       contact: review.contact ?? null,
       status: review.status,
+      source: review.source,
       createdAt: now,
       updatedAt: now,
     });

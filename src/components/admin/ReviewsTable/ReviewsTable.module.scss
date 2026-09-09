@@ -8,9 +8,22 @@
 
 .table {
   width: 100%;
-  min-width: 820px;
+  min-width: 1020px;
+  table-layout: fixed;
   border-collapse: collapse;
 }
+
+/*
+ * Every column but the review is sized here, so the review keeps whatever is
+ * left instead of losing the auto-layout argument to the columns that refuse
+ * to wrap.
+ */
+.colGuest { width: 132px; }
+.colApartment { width: 172px; }
+.colRating { width: 112px; }
+.colDate { width: 104px; }
+.colStatus { width: 100px; }
+.colAction { width: 150px; }
 
 .thead th {
   text-align: left;
@@ -58,11 +71,43 @@
   color: var(--ink-soft);
 }
 
+/* Says the review was imported rather than left through the form on the site. */
+.sourceTag {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--ink-faint);
+}
+
 .text {
-  max-width: 320px;
   color: var(--ink-soft);
   font-size: 14px;
   line-height: 1.5;
+}
+
+.textBody,
+.textClamped {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+/* Long reviews would otherwise stretch a row past the height of the screen. */
+.textClamped {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+  line-clamp: 4;
+  overflow: hidden;
+}
+
+.textToggle {
+  margin-top: 4px;
+  border: none;
+  background: none;
+  padding: 0;
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
 }
 
 .loading {
@@ -73,6 +118,9 @@
 
 .muted {
   color: var(--ink-soft);
+}
+
+.nowrap {
   white-space: nowrap;
 }
 
@@ -82,6 +130,7 @@
   justify-content: flex-end;
   align-items: center;
   flex-wrap: wrap;
+  row-gap: 6px;
 }
 
 .right {

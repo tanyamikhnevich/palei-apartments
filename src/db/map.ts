@@ -148,6 +148,7 @@ export function rowToReview(row: ReviewRow, options: { includeContact?: boolean 
     text: row.text ?? undefined,
     contact: options.includeContact ? row.contact ?? undefined : undefined,
     status: row.status,
+    source: row.source,
     createdAt: (row.createdAt instanceof Date ? row.createdAt : new Date(row.createdAt)).toISOString(),
   };
 }
@@ -161,6 +162,7 @@ export function reviewToInsert(review: Review): Omit<ReviewRow, 'createdAt' | 'u
     text: review.text?.trim() || null,
     contact: review.contact?.trim() || null,
     status: review.status,
+    source: review.source,
   };
 }
 

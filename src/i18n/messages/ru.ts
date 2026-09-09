@@ -197,6 +197,7 @@ export const ru = {
     sectionTitle: 'Отзывы гостей',
     reviewsWord: 'отзывов',
     newBadge: 'Новое',
+    fromAirbnb: 'с Airbnb',
     noneYet: 'Пока нет отзывов — оставьте первый.',
     leaveReview: 'Оставить отзыв',
     yourRating: 'Ваша оценка',

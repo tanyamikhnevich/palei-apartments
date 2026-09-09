@@ -27,6 +27,15 @@ export default function ReviewsTable({ apartments }: ReviewsTableProps) {
   const [rows, setRows] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
+  /** Reviews whose full text is open — the rest are clamped to keep rows even. */
+  const [openText, setOpenText] = useState<Set<string>>(new Set());
+
+  const toggleText = (id: string) =>
+    setOpenText((prev) => {
+      const next = new Set(prev);
+      if (!next.delete(id)) next.add(id);
+      return next;
+    });
 
   const titles = useMemo(() => {
     const map: Record<string, string> = {};
@@ -83,6 +92,16 @@ export default function ReviewsTable({ apartments }: ReviewsTableProps) {
   return (
     <div className={styles.wrap}>
       <table className={styles.table}>
+        {/* Fixed layout, or the nowrap columns squeeze the review into a ribbon. */}
+        <colgroup>
+          <col className={styles.colGuest} />
+          <col className={styles.colApartment} />
+          <col className={styles.colRating} />
+          <col />
+          <col className={styles.colDate} />
+          <col className={styles.colStatus} />
+          <col className={styles.colAction} />
+        </colgroup>
         <thead className={styles.thead}>
           <tr>
             <th>Guest</th>
@@ -101,6 +120,7 @@ export default function ReviewsTable({ apartments }: ReviewsTableProps) {
                 <div className={styles.guestName}>
                   {r.guestName}
                   {r.contact && <span className={styles.contact}>{r.contact}</span>}
+                  {r.source === 'airbnb' && <span className={styles.sourceTag}>from Airbnb</span>}
                 </div>
               </td>
               <td className={styles.muted}>{titles[r.apartmentId] ?? r.apartmentId}</td>
@@ -108,9 +128,26 @@ export default function ReviewsTable({ apartments }: ReviewsTableProps) {
                 <StarRating value={r.rating} size={14} />
               </td>
               <td className={styles.text}>
-                {r.text ? r.text : <span className={styles.dash}>— stars only</span>}
+                {r.text ? (
+                  <>
+                    <p className={openText.has(r.id) ? styles.textBody : styles.textClamped}>
+                      {r.text}
+                    </p>
+                    {r.text.length > 160 && (
+                      <button
+                        type="button"
+                        className={styles.textToggle}
+                        onClick={() => toggleText(r.id)}
+                      >
+                        {openText.has(r.id) ? 'Show less' : 'Show more'}
+                      </button>
+                    )}
+                  </>
+                ) : (
+                  <span className={styles.dash}>— stars only</span>
+                )}
               </td>
-              <td className={styles.muted}>
+              <td className={`${styles.muted} ${styles.nowrap}`}>
                 {new Date(r.createdAt).toLocaleDateString('en', {
                   day: 'numeric',
                   month: 'short',
@@ -134,9 +171,15 @@ export default function ReviewsTable({ apartments }: ReviewsTableProps) {
                       Reject
                     </Button>
                   )}
-                  <Button size="sm" variant="ghost" icon="trash" onClick={() => remove(r.id)}>
-                    Delete
-                  </Button>
+                  {/* Icon only — the row is tight, and deleting still asks first. */}
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    icon="trash"
+                    title="Delete review"
+                    aria-label="Delete review"
+                    onClick={() => remove(r.id)}
+                  />
                 </div>
               </td>
             </tr>

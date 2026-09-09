@@ -149,7 +149,12 @@ export default function ReviewsSection({ apartmentId }: ReviewsSectionProps) {
           {visible.map((r) => (
             <li key={r.id} className={styles.item}>
               <div className={styles.itemHead}>
-                <span className={styles.itemName}>{r.guestName}</span>
+                <span className={styles.itemWho}>
+                  <span className={styles.itemName}>{r.guestName}</span>
+                  {r.source === 'airbnb' && (
+                    <span className={styles.itemSource}>{t('reviews.fromAirbnb')}</span>
+                  )}
+                </span>
                 <span className={styles.itemDate}>{formatDate(r.createdAt, locale)}</span>
               </div>
               <StarRating value={r.rating} size={14} />

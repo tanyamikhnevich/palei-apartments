@@ -18,7 +18,7 @@ export async function attachSession<T>(
   session: IssuedSession
 ): Promise<NextResponse> {
   const response = NextResponse.json(body);
-  const accessToken = await createAccessToken(session.userId, session.familyId);
+  const accessToken = await createAccessToken(session.userId, session.familyId, session.role);
 
   response.cookies.set(ACCESS_COOKIE, accessToken, accessCookieOptions());
   response.cookies.set(REFRESH_COOKIE, session.refreshToken, refreshCookieOptions());

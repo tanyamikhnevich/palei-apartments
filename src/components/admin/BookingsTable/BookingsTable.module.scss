@@ -44,6 +44,12 @@
   }
 }
 
+/*
+  The stack lives in a div, not in the cell.
+  `display: flex` on a <td> stops it being a table cell at all: it drops out of
+  the column that sizes it and takes its own borders with it, which is why this
+  column's rule used to sit adrift of every other one in the row.
+*/
 .guestName {
   font-weight: 600;
   display: flex;
@@ -81,4 +87,63 @@
 .dash {
   color: var(--ink-soft);
   font-size: 13px;
+}
+
+/* Arrived at from the calendar — held until the eye finds it. */
+.focused td {
+  background: var(--warn-bg);
+}
+
+.calendarLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border: 1px solid var(--line-2);
+  border-radius: 8px;
+  background: none;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  white-space: nowrap;
+  cursor: pointer;
+
+  &:hover { border-color: var(--navy); color: var(--navy); }
+}
+
+/* A refusal belongs under the row it refused, spanning the whole width. */
+.errorRow td {
+  padding: 0 18px 14px;
+  border-bottom: 1px solid var(--line);
+}
+
+.errorBox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--r-sm);
+  background: rgb(180 35 24 / 6%);
+  border: 1px solid rgb(180 35 24 / 20%);
+  color: #b42318;
+  font-size: 13.5px;
+  font-weight: 600;
+
+  svg { flex-shrink: 0; }
+}
+
+.errorClose {
+  margin-inline-start: auto;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border: none;
+  border-radius: 6px;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+
+  &:hover { background: rgb(180 35 24 / 12%); }
 }

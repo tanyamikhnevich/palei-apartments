@@ -114,3 +114,82 @@ export function withoutCost(bouquet: Bouquet): Bouquet {
   const { cost: _cost, ...rest } = bouquet;
   return rest;
 }
+
+/**
+ * One thing the florist has bought before, as the costing sheet offers it back.
+ *
+ * There is no catalogue of stems anywhere and there should not be one: a shop
+ * that has to maintain a price list alongside its bouquets ends up with two
+ * versions of the truth. The sheets themselves are the list — roses typed into
+ * six bouquets are simply a thing bought six times, and the sixth spelling and
+ * price are as good a suggestion as any register could give.
+ */
+export interface CostSuggestion {
+  /** As it was last spelled — that spelling is what the list offers. */
+  name: string;
+  unitNet: number;
+  vat: boolean;
+  /** How many sheets it appears on, so the everyday things sort to the top. */
+  uses: number;
+}
+
+/**
+ * The price to offer for a thing bought at several prices: the one paid most
+ * often, and the dearer of two paid equally often.
+ *
+ * The tie-break leans high on purpose. A suggestion is a starting point that
+ * gets corrected when it is wrong, and of the two ways to be wrong, quoting a
+ * bouquet too cheaply is the one that costs money.
+ */
+function usualPrice(prices: Map<number, number>): number {
+  let best = 0;
+  let bestCount = 0;
+  for (const [price, count] of prices) {
+    if (count > bestCount || (count === bestCount && price > best)) {
+      best = price;
+      bestCount = count;
+    }
+  }
+  return best;
+}
+
+/**
+ * Everything the sheets have ever been charged for, gathered into one list.
+ *
+ * Names are matched case-insensitively, because "Roses" and "roses" are the
+ * same flower and offering both would defeat the point of offering anything.
+ */
+export function costSuggestions(bouquets: Bouquet[]): CostSuggestion[] {
+  const seen = new Map<
+    string,
+    { name: string; uses: number; withVat: number; prices: Map<number, number> }
+  >();
+
+  for (const bouquet of bouquets) {
+    for (const line of bouquet.cost?.lines ?? []) {
+      const name = line.name.trim();
+      if (!name) continue;
+
+      const key = name.toLowerCase();
+      const entry = seen.get(key) ?? { name, uses: 0, withVat: 0, prices: new Map() };
+      entry.name = name;
+      entry.uses += 1;
+      if (line.vat) entry.withVat += 1;
+      /* A line typed but not yet priced says nothing about what it costs. */
+      if (line.unitNet > 0) {
+        entry.prices.set(line.unitNet, (entry.prices.get(line.unitNet) ?? 0) + 1);
+      }
+      seen.set(key, entry);
+    }
+  }
+
+  return [...seen.values()]
+    .map((entry) => ({
+      name: entry.name,
+      unitNet: usualPrice(entry.prices),
+      /* However it is usually bought — the market stall or the invoice. */
+      vat: entry.withVat * 2 >= entry.uses,
+      uses: entry.uses,
+    }))
+    .sort((a, b) => b.uses - a.uses || a.name.localeCompare(b.name));
+}

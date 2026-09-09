@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getDb } from '@/db/index';
-import { requireAdmin } from '@/lib/auth/guard';
+import { requireAdminAccess } from '@/lib/auth/guard';
 import { isDbConfigured, jsonError } from '@/lib/api/errors';
 import { loadImportedBlocks, syncStaleFeeds } from '@/lib/server/calendarSync';
 
@@ -14,8 +14,8 @@ export const dynamic = 'force-dynamic';
  * current without waiting for the nightly cron — the same trick the public
  * availability endpoint uses.
  */
-export async function GET() {
-  const denied = await requireAdmin();
+export async function GET(request: Request) {
+  const denied = await requireAdminAccess(request);
   if (denied) return denied;
 
   if (!isDbConfigured()) return NextResponse.json({ blocks: [] });

@@ -11,6 +11,7 @@ import type { AdminUserRow } from '@/db/schema';
 import { randomId } from './crypto';
 import { hashPassword, verifyPassword } from './password';
 import { normaliseLogin } from './passwordRules';
+import { isAdminRole, type AdminRole } from './roles';
 
 /**
  * A PBKDF2 verification that is thrown away. A sign-in for a login that does
@@ -36,16 +37,32 @@ export async function findAdminById(id: string): Promise<AdminUserRow | null> {
   return row ?? null;
 }
 
-export async function createAdmin(login: string, password: string): Promise<AdminUserRow> {
+export async function createAdmin(
+  login: string,
+  password: string,
+  role: AdminRole = 'owner'
+): Promise<AdminUserRow> {
   const [row] = await getDb()
     .insert(schema.adminUsers)
     .values({
       id: randomId(),
       login: normaliseLogin(login),
       passwordHash: await hashPassword(password),
+      role,
     })
     .returning();
   return row;
+}
+
+/**
+ * The role on a row, read defensively.
+ *
+ * A column that somehow holds something else is treated as the narrower role,
+ * not the wider one: the failure mode of this function should be a florist who
+ * has to ask for access, never a stranger who is handed the bookings.
+ */
+export function roleOf(row: { role: string }): AdminRole {
+  return isAdminRole(row.role) ? row.role : 'florist';
 }
 
 /** The account when the credentials check out, otherwise null. */

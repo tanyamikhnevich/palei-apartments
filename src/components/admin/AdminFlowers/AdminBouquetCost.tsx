@@ -1,7 +1,14 @@
 'use client';
 
 import Icon from '@/components/ui/Icon/Icon';
-import { blankCostLine, costMargin, costTotals, lineGross } from '@/lib/bouquetCost';
+import AdminCostItemField from './AdminCostItemField';
+import {
+  blankCostLine,
+  costMargin,
+  costTotals,
+  lineGross,
+  type CostSuggestion,
+} from '@/lib/bouquetCost';
 import { CURRENCY_SYMBOL, formatMoneyExact } from '@/lib/money';
 import type { CurrencyCode } from '@/types/settings';
 import type { BouquetCost, CostLine } from '@/types/flower';
@@ -36,6 +43,8 @@ interface AdminBouquetCostProps {
   currency: CurrencyCode;
   /** The asking price, so the sheet can say what is left of it. */
   price: number;
+  /** Things bought before, offered back as you type. May be empty. */
+  suggestions: CostSuggestion[];
   onChange: (cost: BouquetCost) => void;
 }
 
@@ -43,6 +52,7 @@ export default function AdminBouquetCost({
   cost,
   currency,
   price,
+  suggestions,
   onChange,
 }: AdminBouquetCostProps) {
   const symbol = CURRENCY_SYMBOL[currency];
@@ -97,12 +107,13 @@ export default function AdminBouquetCost({
               onWheel={(e) => e.currentTarget.blur()}
               onChange={(e) => setLine(line.id, { qty: toNumber(e.target.value) })}
             />
-            <input
-              className="input"
-              placeholder="Roses, 50 cm"
-              aria-label="Item"
+            <AdminCostItemField
               value={line.name}
-              onChange={(e) => setLine(line.id, { name: e.target.value })}
+              suggestions={suggestions}
+              money={money}
+              onType={(name) => setLine(line.id, { name })}
+              /* An outright choice, so it carries the whole row with it. */
+              onPick={(s) => setLine(line.id, { name: s.name, unitNet: s.unitNet, vat: s.vat })}
             />
             <input
               className="input"
@@ -141,6 +152,20 @@ export default function AdminBouquetCost({
       <button type="button" className={styles.costAdd} onClick={addLine}>
         <Icon name="plus" size={14} /> Add line
       </button>
+
+      <p className={styles.costHint}>
+        {suggestions.length > 0 ? (
+          <>
+            Under <b>Item</b>, the arrow opens everything the shop has bought before, commonest
+            first. Pick one and its price and VAT come with it — both still yours to change.
+          </>
+        ) : (
+          <>
+            Nothing to suggest yet: this list builds itself out of the sheets you save, so the
+            next bouquet will offer back whatever you type here.
+          </>
+        )}
+      </p>
 
       <div className={styles.costOptions}>
         <label className={styles.costRate}>

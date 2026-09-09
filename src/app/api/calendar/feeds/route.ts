@@ -9,7 +9,7 @@ import {
   CALENDAR_SOURCE_LABELS,
   type CalendarFeedInput,
 } from '@/types/calendar';
-import { requireAdmin } from '@/lib/auth/guard';
+import { requireAdminAccess } from '@/lib/auth/guard';
 
 function validateFeedUrl(raw: string): string | null {
   let url: URL;
@@ -25,7 +25,7 @@ function validateFeedUrl(raw: string): string | null {
 }
 
 export async function GET(request: Request) {
-  const denied = await requireAdmin();
+  const denied = await requireAdminAccess(request);
   if (denied) return denied;
 
   if (!isDbConfigured()) return dbUnavailableResponse();
@@ -49,7 +49,7 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  const denied = await requireAdmin();
+  const denied = await requireAdminAccess(request);
   if (denied) return denied;
 
   if (!isDbConfigured()) return dbUnavailableResponse();

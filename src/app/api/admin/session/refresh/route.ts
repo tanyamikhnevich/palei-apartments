@@ -4,6 +4,7 @@ import { REFRESH_COOKIE } from '@/lib/auth/cookies';
 import { attachSession, clearSession } from '@/lib/auth/issue';
 import { rotateSession } from '@/lib/auth/sessions';
 import { isDbConfigured } from '@/lib/api/errors';
+import { ROLE_HOME } from '@/lib/auth/roles';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -49,7 +50,10 @@ export async function POST() {
       );
     }
 
-    return attachSession({ ok: true }, outcome.session);
+    /* The role is re-read from the account during rotation, so this is also
+       where a session finds out its home has changed under it. */
+    const { role } = outcome.session;
+    return attachSession({ ok: true, role, home: ROLE_HOME[role] }, outcome.session);
   } catch (e) {
     console.error('POST /api/admin/session/refresh', e);
     return NextResponse.json({ error: 'Could not refresh the session' }, { status: 500 });

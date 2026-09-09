@@ -239,6 +239,26 @@
   margin: 0;
 }
 
+/*
+  Not the red of the error box below: nothing has gone wrong, the guest has
+  simply not finished. Amber says "this is why the button is asleep" without
+  telling someone mid-booking that they broke something.
+*/
+.blocker {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: var(--r-md);
+  background: var(--warn-bg);
+  color: var(--warn-fg);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  line-height: 1.45;
+
+  svg { flex-shrink: 0; }
+}
+
 .errorBox {
   padding: 12px 14px;
   border-radius: var(--r-md);

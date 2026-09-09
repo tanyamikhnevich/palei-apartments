@@ -12,8 +12,16 @@
  * not days — see ACCESS_TOKEN_TTL_MS.
  */
 import { constantTimeEqual, fromBase64Url, hkdfKey, hmac, toBase64Url, utf8 } from './crypto';
+import { isAdminRole, type AdminRole } from './roles';
 
-const TOKEN_VERSION = 'v3';
+/*
+  Bumped when the claims changed shape. A v3 token carries no role, and there
+  is no safe way to read one — guessing "owner" would hand the whole panel to
+  every session open at deploy time. Refusing them signs those browsers out,
+  which costs one silent refresh: the token they hold is fifteen minutes old at
+  most, and the refresh cookie behind it still works.
+*/
+const TOKEN_VERSION = 'v4';
 
 export const ACCESS_TOKEN_TTL_MS = 15 * 60 * 1000;
 
@@ -22,6 +30,15 @@ export type AccessClaims = {
   sub: string;
   /** admin_sessions.family_id — which sign-in this came from. */
   fam: string;
+  /**
+   * What this session may open. Carried in the token rather than looked up,
+   * because the middleware authorises every request and cannot reach the
+   * database — the same reason the token is stateless at all.
+   *
+   * The cost is the same as the rest of the design: a role changed in the
+   * database takes effect on the next refresh, within fifteen minutes.
+   */
+  rol: AdminRole;
   /** Expiry, epoch milliseconds. */
   exp: number;
 };
@@ -53,8 +70,12 @@ async function signingKey(): Promise<CryptoKey> {
   return key;
 }
 
-export async function createAccessToken(sub: string, fam: string): Promise<string> {
-  const claims: AccessClaims = { sub, fam, exp: Date.now() + ACCESS_TOKEN_TTL_MS };
+export async function createAccessToken(
+  sub: string,
+  fam: string,
+  rol: AdminRole
+): Promise<string> {
+  const claims: AccessClaims = { sub, fam, rol, exp: Date.now() + ACCESS_TOKEN_TTL_MS };
   const payload = toBase64Url(utf8(JSON.stringify(claims)));
   const body = `${TOKEN_VERSION}.${payload}`;
   return `${body}.${await hmac(body, await signingKey())}`;
@@ -92,6 +113,8 @@ export async function readAccessToken(token: string | undefined): Promise<Access
   }
 
   if (typeof claims.sub !== 'string' || typeof claims.fam !== 'string') return null;
+  /* An unreadable role is not a role, and never falls back to the wider one. */
+  if (!isAdminRole(claims.rol)) return null;
   if (typeof claims.exp !== 'number' || claims.exp <= Date.now()) return null;
 
   return claims;

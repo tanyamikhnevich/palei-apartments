@@ -15,11 +15,52 @@ import {
   toISODate,
   todayISO,
 } from '@/lib/dates';
+import { LANE_HEIGHT, laneTop, packIntoLanes, trackHeight } from '@/lib/calendarLanes';
 import styles from './ReservationsCalendar.module.scss';
+
+/** A stay the bookings table asked the calendar to show. */
+export interface CalendarFocus {
+  bookingId: string;
+  apartmentId: string;
+  /** Decides which month opens. */
+  checkIn: string;
+}
 
 interface ReservationsCalendarProps {
   apartments: Apartment[];
+  /** Arrive on a particular stay: its month, its apartment, its bar lit up. */
+  focus?: CalendarFocus;
+  /** Take a booking back to the table that can confirm or decline it. */
+  onOpenBooking?: (bookingId: string) => void;
 }
+
+/**
+ * What a bar looks like, decided by its state rather than by where it came
+ * from.
+ *
+ * The first version of this coloured every bar by channel and left the status
+ * to an outline. It read badly, and the reason is in the data: nearly every
+ * stay arrives through the website, so channel-as-colour painted the whole
+ * month one shade of blue and then asked a dashed border to carry the one
+ * distinction that actually matters — settled, or still waiting on you.
+ *
+ * So state owns the colour now. Confirmed is solid and dark, a request is
+ * light amber with dark text, an imported block is quiet grey. Three fills
+ * that cannot be mistaken for each other at a glance, all of them dark-on-
+ * light or light-on-dark rather than mid-tone-on-mid-tone.
+ *
+ * Channel keeps its palette, in a dot at the head of the bar — and only in
+ * months that actually have more than one channel, because a legend explaining
+ * a single colour is furniture.
+ */
+const BAR_STYLE = {
+  /* Text ≥ 6.5:1 on its own fill, and each fill ≥ 8:1 from the confirmed one.
+     The borders carry ≥ 3:1 against the white grid, which is what actually
+     draws the edge of a light bar sitting on an empty day. */
+  confirmed: { background: '#1e3a52', color: '#ffffff', border: '#1e3a52' },
+  pending: { background: '#fbe9c8', color: '#6f4a17', border: '#a9701c' },
+  imported: { background: '#d8e0e9', color: '#3d4c5c', border: '#7d92a8' },
+} as const;
 
 /** Booking channels shown on the calendar, plus colours. Unknown → grey. */
 const CHANNEL_COLOR: Record<string, string> = {
@@ -49,18 +90,27 @@ interface Bar {
   key: string;
   label: string;
   title: string;
-  color: string;
+  /** The platform's own colour, worn as a dot rather than as the whole bar. */
+  channelColor: string;
   offset: number; // day columns from the 1st
   span: number; // day columns wide
   clippedStart: boolean;
   clippedEnd: boolean;
-  /** A request we have not confirmed yet — drawn with a dashed outline. */
+  /** A request we have not confirmed yet — drawn hollow rather than filled. */
   tentative: boolean;
   /** Came from a platform's calendar rather than from our own bookings. */
   imported: boolean;
+  /** Ours, and therefore something the bookings table can act on. */
+  bookingId?: string;
+  /** Which stacked row within the apartment's track — see packIntoLanes. */
+  lane: number;
 }
 
-export default function ReservationsCalendar({ apartments }: ReservationsCalendarProps) {
+export default function ReservationsCalendar({
+  apartments,
+  focus,
+  onOpenBooking,
+}: ReservationsCalendarProps) {
   const [month, setMonth] = useState(() => startOfMonth(new Date()));
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [imported, setImported] = useState<ImportedBlock[]>([]);
@@ -80,6 +130,14 @@ export default function ReservationsCalendar({ apartments }: ReservationsCalenda
       })
       .finally(() => setLoading(false));
   }, []);
+
+  /* Arriving from a booking: open its month, and narrow to its apartment so
+     the stay is not one stripe among forty rows. */
+  useEffect(() => {
+    if (!focus) return;
+    setMonth(startOfMonth(new Date(`${focus.checkIn}T00:00:00`)));
+    setAptFilter(focus.apartmentId);
+  }, [focus]);
 
   const year = month.getFullYear();
   const monthIndex = month.getMonth();
@@ -129,10 +187,14 @@ export default function ReservationsCalendar({ apartments }: ReservationsCalenda
           ...box,
           key: `booking-${b.id}`,
           label: b.guest,
-          title: `${b.guest} · ${b.channel} · ${b.dates}${tentative ? ' · pending' : ''}`,
-          color: channelColor(b.channel),
+          title: `${b.guest} · ${b.channel} · ${b.dates} · ${
+            tentative ? 'request, not yet confirmed' : 'confirmed'
+          }`,
+          channelColor: channelColor(b.channel),
           tentative,
           imported: false,
+          bookingId: b.id,
+          lane: 0,
         });
       }
 
@@ -152,18 +214,22 @@ export default function ReservationsCalendar({ apartments }: ReservationsCalenda
           title: `${platform} · ${block.checkIn} → ${block.checkOut}${
             block.summary ? ` · ${block.summary}` : ''
           } · imported from ${block.feedLabel}`,
-          color: SOURCE_COLOR[block.source],
+          channelColor: SOURCE_COLOR[block.source],
           tentative: false,
           imported: true,
+          lane: 0,
         });
       }
 
-      return { apt, own, external };
+      /* Ours on top, the platforms' underneath, each packed among its own
+         kind so an imported block never pushes a reservation out of sight. */
+      const ownLanes = packIntoLanes(own);
+      const externalLanes = packIntoLanes(external);
+      for (const bar of external) bar.lane += ownLanes;
+
+      return { apt, own, external, lanes: ownLanes + externalLanes };
     });
   }, [apartments, bookings, imported, aptFilter, clip]);
-
-  /** Imported stays get their own lane, but only on months that have any. */
-  const dualLane = useMemo(() => rows.some((r) => r.external.length > 0), [rows]);
 
   const channelsPresent = useMemo(() => {
     const set = new Set<string>();
@@ -176,6 +242,9 @@ export default function ReservationsCalendar({ apartments }: ReservationsCalenda
     for (const b of imported) set.add(b.source);
     return [...set];
   }, [imported]);
+
+  /* One channel in the whole month explains nothing; two or more do. */
+  const showChannelDots = channelsPresent.length + sourcesPresent.length > 1;
 
   const pct = (n: number) => `${(n / totalDays) * 100}%`;
 
@@ -222,21 +291,60 @@ export default function ReservationsCalendar({ apartments }: ReservationsCalenda
 
           {(channelsPresent.length > 0 || sourcesPresent.length > 0) && (
             <div className={styles.legend}>
-              {channelsPresent.map((c) => (
-                <span key={c} className={styles.legendItem}>
-                  <span className={styles.swatch} style={{ background: channelColor(c) }} />
-                  {c}
-                </span>
-              ))}
-              {sourcesPresent.map((src) => (
-                <span key={`imported-${src}`} className={styles.legendItem}>
+              {/* The fills first: they are what the eye sorts the month by. */}
+              <span className={styles.legendItem}>
+                <span
+                  className={styles.swatch}
+                  style={{
+                    background: BAR_STYLE.confirmed.background,
+                    boxShadow: `inset 0 0 0 1px ${BAR_STYLE.confirmed.border}`,
+                  }}
+                />
+                Confirmed
+              </span>
+              <span className={styles.legendItem}>
+                <span
+                  className={styles.swatch}
+                  style={{
+                    background: BAR_STYLE.pending.background,
+                    boxShadow: `inset 0 0 0 1px ${BAR_STYLE.pending.border}`,
+                  }}
+                />
+                Request
+              </span>
+              {sourcesPresent.length > 0 && (
+                <span className={styles.legendItem}>
                   <span
                     className={`${styles.swatch} ${styles.swatchImported}`}
-                    style={{ background: SOURCE_COLOR[src] }}
+                    style={{
+                      background: BAR_STYLE.imported.background,
+                      boxShadow: `inset 0 0 0 1px ${BAR_STYLE.imported.border}`,
+                    }}
                   />
-                  {CALENDAR_SOURCE_LABELS[src]} (imported)
+                  Imported
                 </span>
-              ))}
+              )}
+
+              {/* Then the dots, and only where they distinguish anything. */}
+              {showChannelDots && (
+                <>
+                  {channelsPresent.map((c) => (
+                    <span key={c} className={styles.legendItem}>
+                      <span className={styles.legendDot} style={{ background: channelColor(c) }} />
+                      {c}
+                    </span>
+                  ))}
+                  {sourcesPresent.map((src) => (
+                    <span key={`imported-${src}`} className={styles.legendItem}>
+                      <span
+                        className={styles.legendDot}
+                        style={{ background: SOURCE_COLOR[src] }}
+                      />
+                      {CALENDAR_SOURCE_LABELS[src]}
+                    </span>
+                  ))}
+                </>
+              )}
             </div>
           )}
         </div>
@@ -247,7 +355,7 @@ export default function ReservationsCalendar({ apartments }: ReservationsCalenda
       ) : rows.length === 0 ? (
         <p className={styles.empty}>No apartments to show.</p>
       ) : (
-        <div className={`${styles.grid} ${dualLane ? styles.dual : ''}`}>
+        <div className={styles.grid}>
           {/* Header row: day numbers */}
           <div className={styles.headRow}>
             <div className={styles.aptHeadCell}>Apartment</div>
@@ -266,12 +374,13 @@ export default function ReservationsCalendar({ apartments }: ReservationsCalenda
           </div>
 
           {/* One row per apartment */}
-          {rows.map(({ apt, own, external }) => (
+          {rows.map(({ apt, own, external, lanes }) => (
             <div key={apt.id} className={styles.aptRow}>
               <div className={styles.aptCell} title={getApartmentCopy(apt, 'en').title}>
                 {getApartmentCopy(apt, 'en').title}
               </div>
-              <div className={styles.track}>
+              {/* As tall as the stays that overlap here, and no taller. */}
+              <div className={styles.track} style={{ height: trackHeight(lanes) }}>
                 {/* background day cells */}
                 {days.map((d) => (
                   <div
@@ -281,29 +390,75 @@ export default function ReservationsCalendar({ apartments }: ReservationsCalenda
                       .join(' ')}
                   />
                 ))}
-                {/* reservation bars: ours on the upper lane, imported below */}
-                {[...own, ...external].map((bar) => (
-                  <div
-                    key={bar.key}
-                    className={[
-                      styles.bar,
-                      bar.imported ? styles.imported : '',
-                      bar.clippedStart ? styles.clipStart : '',
-                      bar.clippedEnd ? styles.clipEnd : '',
-                      bar.tentative ? styles.tentative : '',
-                    ]
-                      .filter(Boolean)
-                      .join(' ')}
-                    style={{
-                      left: `calc(${pct(bar.offset)} + 2px)`,
-                      width: `calc(${pct(bar.span)} - 4px)`,
-                      background: bar.color,
-                    }}
-                    title={bar.title}
-                  >
-                    <span className={styles.barText}>{bar.label}</span>
-                  </div>
-                ))}
+                {/* reservation bars: ours in the upper lanes, imported below */}
+                {[...own, ...external].map((bar) => {
+                  const lit = Boolean(bar.bookingId && bar.bookingId === focus?.bookingId);
+
+                  const look = bar.imported
+                    ? BAR_STYLE.imported
+                    : bar.tentative
+                      ? BAR_STYLE.pending
+                      : BAR_STYLE.confirmed;
+
+                  const shape = {
+                    left: `calc(${pct(bar.offset)} + 2px)`,
+                    width: `calc(${pct(bar.span)} - 4px)`,
+                    top: laneTop(bar.lane),
+                    height: LANE_HEIGHT,
+                    background: look.background,
+                    color: look.color,
+                    boxShadow: `inset 0 0 0 1px ${look.border}`,
+                  };
+
+                  const classes = [
+                    styles.bar,
+                    bar.imported ? styles.imported : '',
+                    bar.clippedStart ? styles.clipStart : '',
+                    bar.clippedEnd ? styles.clipEnd : '',
+                    bar.tentative ? styles.tentative : '',
+                    lit ? styles.lit : '',
+                  ]
+                    .filter(Boolean)
+                    .join(' ');
+
+                  /* Imported dates are somebody else's record: there is nothing
+                     here that can confirm or decline them. */
+                  /* Only worth carrying when there is more than one to tell
+                     apart — otherwise it is a dot that says "website" forty
+                     times over. */
+                  const inside = (
+                    <>
+                      {showChannelDots && (
+                        <span
+                          className={styles.channelDot}
+                          style={{ background: bar.channelColor }}
+                        />
+                      )}
+                      <span className={styles.barText}>{bar.label}</span>
+                    </>
+                  );
+
+                  if (!bar.bookingId || !onOpenBooking) {
+                    return (
+                      <div key={bar.key} className={classes} style={shape} title={bar.title}>
+                        {inside}
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <button
+                      key={bar.key}
+                      type="button"
+                      className={`${classes} ${styles.barButton}`}
+                      style={shape}
+                      title={`${bar.title} — open in bookings`}
+                      onClick={() => onOpenBooking(bar.bookingId!)}
+                    >
+                      {inside}
+                    </button>
+                  );
+                })}
               </div>
             </div>
           ))}
@@ -311,9 +466,10 @@ export default function ReservationsCalendar({ apartments }: ReservationsCalenda
       )}
 
       <p className={styles.note}>
-        Upper bars are reservations taken through this website; a dashed outline means the request is
-        still pending. Striped bars underneath are dates imported from a connected platform calendar —
-        connect one under an apartment&rsquo;s Calendar sync.
+        Dark bars are confirmed stays; amber ones are requests still waiting on an answer. Click
+        either to open it in Bookings. Stays that share a night are stacked, so an overlap shows as
+        two bars rather than one hiding the other. Grey striped bars are dates imported from a
+        connected platform calendar — connect one under an apartment&rsquo;s Calendar sync.
       </p>
     </div>
   );

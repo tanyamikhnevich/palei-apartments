@@ -225,6 +225,9 @@
 }
 
 /* Orders */
+/* Holds the Add button over to the right when the tab strip is not there. */
+.barSpacer { margin-right: auto; }
+
 .tabsTop {
   display: inline-flex;
   background: var(--mist);
@@ -393,6 +396,99 @@
   cursor: pointer;
 
   &:hover { border-color: var(--navy); color: var(--navy); }
+}
+
+/* The Item cell: a field, the arrow that opens the list, and the list. */
+.pick {
+  position: relative;
+  min-width: 0;
+}
+
+.pickInput {
+  width: 100%;
+  /* Room for the arrow, which sits over the end of the field. */
+  padding-inline-end: 28px;
+}
+
+.pickToggle {
+  position: absolute;
+  inset-inline-end: 2px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border: none;
+  border-radius: 6px;
+  background: none;
+  color: var(--ink-faint);
+  cursor: pointer;
+
+  /* The icon points right; the list drops down. */
+  svg { transform: rotate(90deg); }
+
+  &:hover { color: var(--navy); }
+}
+
+.pickMenu {
+  position: absolute;
+  inset-inline: 0;
+  top: calc(100% + 4px);
+  z-index: 5;
+  margin: 0;
+  padding: 4px;
+  list-style: none;
+  max-height: 232px;
+  overflow-y: auto;
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  box-shadow: 0 12px 28px rgb(0 0 0 / 14%);
+}
+
+.pickOption {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  width: 100%;
+  padding: 7px 9px;
+  border: none;
+  border-radius: 7px;
+  background: none;
+  font-family: inherit;
+  font-size: var(--fs-sm);
+  color: var(--ink);
+  text-align: start;
+  cursor: pointer;
+
+  &:hover,
+  &:focus-visible { background: var(--mist); }
+}
+
+/* Long Hebrew names wrap rather than shoving the price off the row. */
+.pickName { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+
+.pickPrice {
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+
+.pickEmpty {
+  padding: 8px 9px;
+  font-size: var(--fs-sm);
+  color: var(--ink-faint);
+}
+
+.costHint {
+  margin: -4px 0 0;
+  font-size: var(--fs-xs);
+  line-height: 1.5;
+  color: var(--ink-faint);
+
+  b { color: var(--ink-soft); }
 }
 
 .costOptions {

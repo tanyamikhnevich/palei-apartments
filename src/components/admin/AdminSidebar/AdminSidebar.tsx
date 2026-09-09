@@ -15,7 +15,6 @@ import styles from './AdminSidebar.module.scss';
 export const ADMIN_VIEWS = [
   'apartments',
   'cars',
-  'flowers',
   'bookings',
   'calendar',
   'reviews',
@@ -59,7 +58,6 @@ export default function AdminSidebar({
   const items: NavItem[] = [
     { id: 'apartments', icon: 'grid', label: 'Apartments', count: apartmentCount },
     { id: 'cars', icon: 'car', label: 'Cars' },
-    { id: 'flowers', icon: 'flower', label: 'Flowers & balloons' },
     { id: 'bookings', icon: 'inbox', label: 'Bookings', count: requestCount },
     { id: 'calendar', icon: 'calendar', label: 'Calendar' },
     { id: 'reviews', icon: 'star', label: 'Reviews', count: reviewCount },

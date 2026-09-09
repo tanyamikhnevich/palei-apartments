@@ -1,12 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import Button from '@/components/ui/Button/Button';
 import Icon from '@/components/ui/Icon/Icon';
 import { AdminField, AdminInput } from '@/components/admin/ui/AdminField';
 import PhotoManager from '@/components/admin/ui/PhotoManager';
 import AdminBouquetCost from './AdminBouquetCost';
-import { blankCost, hasCost } from '@/lib/bouquetCost';
+import { blankCost, costSuggestions, hasCost } from '@/lib/bouquetCost';
 import { DEFAULT_FLOWER_AREA, FLOWER_REGIONS, sellsHere } from '@/lib/flowers';
 import { CURRENCY_SYMBOL } from '@/lib/money';
 import { currencyForArea } from '@/lib/regions';
@@ -47,6 +47,11 @@ function blankBouquet(): Bouquet {
 
 interface AdminBouquetModalProps {
   bouquet: Bouquet | null;
+  /**
+   * Every bouquet in the shop, only so the costing sheet can offer back what
+   * has been bought before. Nothing here is read for anything else.
+   */
+  library: Bouquet[];
   /** The save is in flight — the form waits rather than closing on hope. */
   saving?: boolean;
   onClose: () => void;
@@ -55,6 +60,7 @@ interface AdminBouquetModalProps {
 
 export default function AdminBouquetModal({
   bouquet,
+  library,
   saving = false,
   onClose,
   onSave,
@@ -69,7 +75,17 @@ export default function AdminBouquetModal({
     return { ...base, area, cost: base.cost ?? blankCost() };
   });
   const [tab, setTab] = useState<Locale>('en');
-  const symbol = CURRENCY_SYMBOL[currencyForArea(form.area)];
+  const currency = currencyForArea(form.area);
+  const symbol = CURRENCY_SYMBOL[currency];
+
+  /* Only sheets kept in the same money: a stem at 4.30 is not a stem at €4.30,
+     and suggesting one where the other belongs is worse than suggesting
+     nothing. Today the shop is Israel-only, so this filter costs nothing — it
+     is here for the day that stops being true. */
+  const suggestions = useMemo(
+    () => costSuggestions(library.filter((b) => currencyForArea(b.area) === currency)),
+    [library, currency]
+  );
 
   /* Always present in the form — `save` is what decides whether it is kept. */
   const cost: BouquetCost = form.cost ?? blankCost();
@@ -224,7 +240,8 @@ export default function AdminBouquetModal({
 
           <AdminBouquetCost
             cost={cost}
-            currency={currencyForArea(form.area)}
+            currency={currency}
+            suggestions={suggestions}
             price={form.price}
             onChange={(next) => set('cost', next)}
           />

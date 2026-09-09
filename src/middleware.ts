@@ -2,7 +2,8 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { ACCESS_COOKIE } from '@/lib/auth/cookies';
 import { readAccessToken } from '@/lib/auth/tokens';
-import { requiresAdminAuth } from '@/lib/auth/policy';
+import { requiresAdminAuth, roleMayReach } from '@/lib/auth/policy';
+import { ROLE_HOME } from '@/lib/auth/roles';
 import {
   DEFAULT_LOCALE,
   LOCALE_CHOICE_COOKIE,
@@ -60,8 +61,30 @@ export async function middleware(request: NextRequest) {
     }
 
     if (requiresAdminAuth(bare, request.method, searchParams)) {
-      if (await readAccessToken(request.cookies.get(ACCESS_COOKIE)?.value)) {
-        return markPrivate(NextResponse.next());
+      const claims = await readAccessToken(request.cookies.get(ACCESS_COOKIE)?.value);
+
+      if (claims) {
+        if (roleMayReach(claims.rol, bare, request.method)) {
+          return markPrivate(NextResponse.next());
+        }
+
+        /*
+          Signed in, but not for this. Answering 404 would be tidier against a
+          stranger mapping the panel; it is the wrong answer to a florist who
+          followed a stale bookmark, and the honest 403 is what the API needs
+          in order to say anything useful. A page request is simply walked back
+          to the part of the panel that is theirs.
+        */
+        if (bare.startsWith('/api/')) {
+          return markPrivate(
+            NextResponse.json({ error: 'Not allowed for this account' }, { status: 403 })
+          );
+        }
+
+        const home = request.nextUrl.clone();
+        home.pathname = ROLE_HOME[claims.rol];
+        home.search = '';
+        return markPrivate(NextResponse.redirect(home));
       }
 
       // The client answers this by spending its refresh token and retrying.
@@ -71,11 +94,15 @@ export async function middleware(request: NextRequest) {
         );
       }
 
+      /* Knock on the shop's door and the shop's sign-in answers. */
+      const shop = bare === '/admin/flowers' || bare.startsWith('/admin/flowers/');
+      const home = shop ? '/admin/flowers' : '/admin';
+
       const login = request.nextUrl.clone();
-      login.pathname = '/admin/login';
+      login.pathname = shop ? '/admin/flowers/login' : '/admin/login';
       login.search = '';
       // Come back to whatever was being opened once signed in.
-      if (bare !== '/admin') login.searchParams.set('next', `${bare}${search}`);
+      if (bare !== home) login.searchParams.set('next', `${bare}${search}`);
       return markPrivate(NextResponse.redirect(login));
     }
 

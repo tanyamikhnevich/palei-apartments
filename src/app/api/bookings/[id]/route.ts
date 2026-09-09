@@ -3,16 +3,16 @@ import { and, eq, inArray, ne } from 'drizzle-orm';
 import { getDb, schema } from '@/db/index';
 import { bookingToInsert, rowToBooking } from '@/db/map';
 import type { Booking, BookingStatus } from '@/types/apartment';
-import { rangesOverlap } from '@/lib/dates';
+import { formatDateRange, rangesOverlap } from '@/lib/dates';
 import { dbUnavailableResponse, isDbConfigured, jsonError } from '@/lib/api/errors';
-import { requireAdmin } from '@/lib/auth/guard';
+import { requireAdminAccess } from '@/lib/auth/guard';
 
 type RouteContext = { params: { id: string } };
 
 const ALLOWED: BookingStatus[] = ['Draft', 'New request', 'Confirmed', 'Declined'];
 
 export async function PATCH(request: Request, { params }: RouteContext) {
-  const denied = await requireAdmin();
+  const denied = await requireAdminAccess(request);
   if (denied) return denied;
 
   if (!isDbConfigured()) return dbUnavailableResponse();
@@ -71,8 +71,20 @@ export async function PATCH(request: Request, { params }: RouteContext) {
       );
 
       if (clash) {
+        /*
+          Name the stay that is in the way and say what can be done about it.
+          "Already confirmed on these dates" is true and useless: the owner is
+          looking at a list of similar-looking requests and needs to know which
+          other one to go and deal with.
+        */
+        const clashDates = formatDateRange(
+          String(clash.checkIn).slice(0, 10),
+          String(clash.checkOut).slice(0, 10),
+          'en'
+        );
         return jsonError(
-          `Already confirmed for ${clash.guest} on these dates — decline one of them first.`,
+          `These dates clash with a confirmed stay: ${clash.guest}, ${clashDates}. ` +
+            'Decline that booking first, or change the dates on this one.',
           409
         );
       }

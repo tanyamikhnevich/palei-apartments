@@ -44,6 +44,7 @@
   }
 }
 
+/* On a div inside the cell, never on the <td> — see BookingsTable's copy. */
 .guestName {
   font-weight: 600;
   display: flex;

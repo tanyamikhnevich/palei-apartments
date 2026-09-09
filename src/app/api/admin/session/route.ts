@@ -1,12 +1,13 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
-import { authenticate, countAdmins, markSignedIn } from '@/lib/auth/accounts';
+import { authenticate, countAdmins, markSignedIn, roleOf } from '@/lib/auth/accounts';
 import { attachSession, clearSession } from '@/lib/auth/issue';
 import { REFRESH_COOKIE } from '@/lib/auth/cookies';
 import { revokeByToken, sessionLabel, startSession } from '@/lib/auth/sessions';
 import { adminSecretConfigured } from '@/lib/auth/tokens';
 import { isDbConfigured } from '@/lib/api/errors';
 import { throttle } from '@/lib/auth/throttle';
+import { ROLE_HOME } from '@/lib/auth/roles';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -69,13 +70,22 @@ export async function POST(request: Request) {
 
     throttle.succeed(request);
 
+    const role = roleOf(user);
     const session = await startSession(
       user.id,
-      sessionLabel(request.headers.get('user-agent'))
+      sessionLabel(request.headers.get('user-agent')),
+      role
     );
     await markSignedIn(user.id);
 
-    return attachSession({ ok: true, login: user.login }, session);
+    /*
+      `home` is what the sign-in screen redirects to. It is decided here rather
+      than in the browser because the role is not something the browser should
+      be told to work out for itself — and because a florist who lands on the
+      owner's dashboard only to be bounced back has been shown a door that was
+      never open to them.
+    */
+    return attachSession({ ok: true, login: user.login, role, home: ROLE_HOME[role] }, session);
   } catch (e) {
     console.error('POST /api/admin/session', e);
     return NextResponse.json({ error: 'Could not sign in' }, { status: 500 });

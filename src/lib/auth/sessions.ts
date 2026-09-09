@@ -17,6 +17,7 @@ import { and, desc, eq, isNull, lt, ne } from 'drizzle-orm';
 import { getDb, schema } from '@/db/index';
 import { digestToken, randomId, randomToken } from './crypto';
 import { REFRESH_TOKEN_TTL_MS } from './cookies';
+import { isAdminRole, type AdminRole } from './roles';
 
 /**
  * Two tabs whose access tokens expire together both try to refresh. The loser
@@ -31,6 +32,12 @@ export type IssuedSession = {
   sessionId: string;
   familyId: string;
   userId: string;
+  /**
+   * Read from the account, never from the token being replaced. A role taken
+   * away in the database has to actually take effect, and the refresh is the
+   * one moment in a session's life where the database is consulted.
+   */
+  role: AdminRole;
 };
 
 export type RefreshOutcome =
@@ -64,6 +71,7 @@ async function insertSession(params: {
   userId: string;
   familyId: string;
   label: string | null;
+  role: AdminRole;
 }): Promise<IssuedSession> {
   const refreshToken = randomToken(32);
   const id = randomId();
@@ -79,12 +87,22 @@ async function insertSession(params: {
       expiresAt: new Date(Date.now() + REFRESH_TOKEN_TTL_MS),
     });
 
-  return { refreshToken, sessionId: id, familyId: params.familyId, userId: params.userId };
+  return {
+    refreshToken,
+    sessionId: id,
+    familyId: params.familyId,
+    userId: params.userId,
+    role: params.role,
+  };
 }
 
 /** A fresh sign-in: a new family, unrelated to anything already open. */
-export async function startSession(userId: string, label: string | null): Promise<IssuedSession> {
-  return insertSession({ userId, familyId: randomId(), label });
+export async function startSession(
+  userId: string,
+  label: string | null,
+  role: AdminRole
+): Promise<IssuedSession> {
+  return insertSession({ userId, familyId: randomId(), label, role });
 }
 
 /** Spend a refresh token and hand back its replacement. */
@@ -101,6 +119,21 @@ export async function rotateSession(refreshToken: string): Promise<RefreshOutcom
   if (!row) return { ok: false, reason: 'unknown' };
   if (row.revokedAt) return { ok: false, reason: 'revoked' };
   if (row.expiresAt.getTime() <= Date.now()) return { ok: false, reason: 'expired' };
+
+  /*
+    The account behind the session, as it stands now rather than as it stood at
+    sign-in. A role narrowed in the database takes hold here, and an account
+    deleted outright stops being a session at all — which the old code, reading
+    nothing but the session row, would have let run to its natural expiry.
+  */
+  const [account] = await db
+    .select({ role: schema.adminUsers.role })
+    .from(schema.adminUsers)
+    .where(eq(schema.adminUsers.id, row.userId))
+    .limit(1);
+
+  if (!account) return { ok: false, reason: 'unknown' };
+  const role = isAdminRole(account.role) ? account.role : 'florist';
 
   if (row.replacedBy) {
     // Already spent. Within the grace window this is two tabs racing; after it,
@@ -126,6 +159,7 @@ export async function rotateSession(refreshToken: string): Promise<RefreshOutcom
           userId: row.userId,
           familyId: row.familyId,
           label: row.label,
+          role,
         }),
       };
     }
@@ -136,6 +170,7 @@ export async function rotateSession(refreshToken: string): Promise<RefreshOutcom
     userId: row.userId,
     familyId: row.familyId,
     label: row.label,
+    role,
   });
 
   await db

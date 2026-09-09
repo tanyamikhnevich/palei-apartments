@@ -16,9 +16,10 @@ import AdminListBar, { type AdminListMode } from '@/components/admin/AdminListBa
 import AdminApartmentModal from '@/components/admin/AdminApartmentModal/AdminApartmentModal';
 import AdminSettings from '@/components/admin/AdminSettings/AdminSettings';
 import AdminCars from '@/components/admin/AdminCars/AdminCars';
-import AdminFlowers from '@/components/admin/AdminFlowers/AdminFlowers';
 import BookingsTable from '@/components/admin/BookingsTable/BookingsTable';
-import ReservationsCalendar from '@/components/admin/ReservationsCalendar/ReservationsCalendar';
+import ReservationsCalendar, {
+  type CalendarFocus,
+} from '@/components/admin/ReservationsCalendar/ReservationsCalendar';
 import ReviewsTable from '@/components/admin/ReviewsTable/ReviewsTable';
 import { getApartmentCopy } from '@/i18n/apartmentLocale';
 import {
@@ -59,6 +60,15 @@ export default function AdminDashboard() {
   const [modalApt, setModalApt] = useState<Apartment | null | undefined>(undefined);
   const [requestCount, setRequestCount] = useState(0);
   const [reviewCount, setReviewCount] = useState(0);
+  /*
+    The two screens that talk to each other. A stay is looked at in the table
+    and located on the calendar, or spotted on the calendar and answered in the
+    table — so each hands the other the one booking it is about. Kept in state
+    rather than in the URL: it is a step in a train of thought, not an address
+    worth bookmarking.
+  */
+  const [calendarFocus, setCalendarFocus] = useState<CalendarFocus | undefined>();
+  const [bookingFocus, setBookingFocus] = useState<string | undefined>();
 
   /*
     Which section is open lives in the URL, so a refresh — or a bookmark, or a
@@ -235,11 +245,30 @@ export default function AdminDashboard() {
 
           {view === 'cars' && <AdminCars />}
 
-          {view === 'flowers' && <AdminFlowers />}
+          {view === 'bookings' && (
+            <BookingsTable
+              focusId={bookingFocus}
+              onShowInCalendar={(b) => {
+                setCalendarFocus({
+                  bookingId: b.id,
+                  apartmentId: b.apartmentId,
+                  checkIn: b.checkIn,
+                });
+                changeView('calendar');
+              }}
+            />
+          )}
 
-          {view === 'bookings' && <BookingsTable />}
-
-          {view === 'calendar' && <ReservationsCalendar apartments={list} />}
+          {view === 'calendar' && (
+            <ReservationsCalendar
+              apartments={list}
+              focus={calendarFocus}
+              onOpenBooking={(id) => {
+                setBookingFocus(id);
+                changeView('bookings');
+              }}
+            />
+          )}
 
           {view === 'reviews' && <ReviewsTable apartments={list} />}
 

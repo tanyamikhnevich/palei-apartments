@@ -9,7 +9,7 @@ import { formatDateRange, nightsBetween, rangesOverlap } from '@/lib/dates';
 import { dbUnavailableResponse, isDbConfigured, jsonError } from '@/lib/api/errors';
 import { validateBookingGuest, validationMessageEn } from '@/lib/validation/contact';
 import { notifyNewBooking } from '@/lib/notify/telegram';
-import { requireAdmin } from '@/lib/auth/guard';
+import { requireAdminAccess } from '@/lib/auth/guard';
 import { publicSubmitThrottle } from '@/lib/auth/throttle';
 
 export const runtime = 'nodejs';
@@ -21,7 +21,7 @@ const ADMIN_STATUSES: BookingStatus[] = ['New request', 'Confirmed', 'Declined']
 const OCCUPYING: BookingStatus[] = ['Confirmed'];
 
 export async function GET(request: Request) {
-  const denied = await requireAdmin();
+  const denied = await requireAdminAccess(request);
   if (denied) return denied;
 
   const { searchParams } = new URL(request.url);

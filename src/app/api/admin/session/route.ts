@@ -1,13 +1,14 @@
 import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
+import { cookies, headers } from 'next/headers';
 import { authenticate, countAdmins, markSignedIn, roleOf } from '@/lib/auth/accounts';
 import { attachSession, clearSession } from '@/lib/auth/issue';
-import { REFRESH_COOKIE } from '@/lib/auth/cookies';
+import { refreshCookieName } from '@/lib/auth/cookies';
+import { PANEL_HEADER } from '@/lib/auth/panel';
 import { revokeByToken, sessionLabel, startSession } from '@/lib/auth/sessions';
 import { adminSecretConfigured } from '@/lib/auth/tokens';
 import { isDbConfigured } from '@/lib/api/errors';
 import { throttle } from '@/lib/auth/throttle';
-import { ROLE_HOME } from '@/lib/auth/roles';
+import { isAdminRole, ROLE_HOME, type AdminRole } from '@/lib/auth/roles';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -37,10 +38,13 @@ export async function POST(request: Request) {
 
   let login = '';
   let password = '';
+  /* Which door the form was on. Missing means the owner's — never "any". */
+  let panel: AdminRole = 'owner';
   try {
-    const body = (await request.json()) as { login?: unknown; password?: unknown };
+    const body = (await request.json()) as { login?: unknown; password?: unknown; panel?: unknown };
     login = typeof body.login === 'string' ? body.login : '';
     password = typeof body.password === 'string' ? body.password : '';
+    if (isAdminRole(body.panel)) panel = body.panel;
   } catch {
     return NextResponse.json({ error: 'Invalid request' }, { status: 400 });
   }
@@ -68,9 +72,25 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Wrong login or password' }, { status: 401 });
     }
 
+    const role = roleOf(user);
+
+    /*
+      Each panel has its own account. The right password at the wrong door does
+      not start a session — otherwise the shop's sign-in would be a second way
+      into the apartments, and the other way round.
+    */
+    if (role !== panel) {
+      throttle.fail(request);
+      return NextResponse.json({ error: 'Wrong login or password' }, { status: 401 });
+    }
+
     throttle.succeed(request);
 
-    const role = roleOf(user);
+    // Signing in replaces this panel's previous session in this browser — end
+    // that one properly. The other panel's session is left alone.
+    const previous = cookies().get(refreshCookieName(panel))?.value;
+    if (previous) await revokeByToken(previous).catch(() => undefined);
+
     const session = await startSession(
       user.id,
       sessionLabel(request.headers.get('user-agent')),
@@ -92,9 +112,10 @@ export async function POST(request: Request) {
   }
 }
 
-/** Sign out this browser. The other devices keep their sessions. */
+/** Sign out of one panel in this browser. Other panels and devices stay signed in. */
 export async function DELETE() {
-  const token = cookies().get(REFRESH_COOKIE)?.value;
+  const panel = headers().get(PANEL_HEADER) === 'florist' ? 'florist' : 'owner';
+  const token = cookies().get(refreshCookieName(panel))?.value;
 
   if (token && isDbConfigured()) {
     try {
@@ -105,5 +126,5 @@ export async function DELETE() {
     }
   }
 
-  return clearSession(NextResponse.json({ ok: true }));
+  return clearSession(NextResponse.json({ ok: true }), panel);
 }

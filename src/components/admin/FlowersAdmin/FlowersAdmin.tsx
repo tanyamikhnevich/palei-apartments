@@ -1,5 +1,6 @@
 'use client';
 
+import { PANEL_HEADER } from '@/lib/auth/panel';
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -69,7 +70,8 @@ export default function FlowersAdmin() {
   };
 
   const signOut = async () => {
-    await fetch('/api/admin/session', { method: 'DELETE' });
+    // Signs out of the shop only; the apartments panel stays signed in.
+    await fetch('/api/admin/session', { method: 'DELETE', headers: { [PANEL_HEADER]: 'florist' } });
     router.replace('/admin/flowers/login');
     router.refresh();
   };

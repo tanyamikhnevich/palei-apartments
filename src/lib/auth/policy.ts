@@ -1,4 +1,5 @@
 import { type AdminRole } from './roles';
+import { isShopPath } from './panel';
 
 /**
  * Which requests may be made without a session, and which of them each role
@@ -107,6 +108,8 @@ function floristMayReach(pathname: string, method: string): boolean {
  * gate nobody locks behind is only a suggestion.
  */
 export function roleMayReach(role: AdminRole, pathname: string, method: string): boolean {
-  if (role === 'owner') return true;
+  // The shop is the florist's alone: separate account, separate password, and
+  // being signed in to the apartments must not quietly open it as well.
+  if (role === 'owner') return !isShopPath(pathname);
   return floristMayReach(pathname, method.toUpperCase());
 }

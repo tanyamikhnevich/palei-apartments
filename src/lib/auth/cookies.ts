@@ -1,7 +1,20 @@
 import { ACCESS_TOKEN_TTL_MS } from './tokens';
+import type { AdminRole } from './roles';
 
-export const ACCESS_COOKIE = 'palei_at';
-export const REFRESH_COOKIE = 'palei_rt';
+/*
+  One pair per panel, so signing in to one never replaces the other's session.
+  The owner's pair keeps its original names, and existing sign-ins with it.
+*/
+const ACCESS_COOKIES: Record<AdminRole, string> = { owner: 'palei_at', florist: 'palei_fl_at' };
+const REFRESH_COOKIES: Record<AdminRole, string> = { owner: 'palei_rt', florist: 'palei_fl_rt' };
+
+export function accessCookieName(panel: AdminRole): string {
+  return ACCESS_COOKIES[panel];
+}
+
+export function refreshCookieName(panel: AdminRole): string {
+  return REFRESH_COOKIES[panel];
+}
 
 /** How long a browser may stay signed in without typing the password again. */
 export const REFRESH_TOKEN_TTL_MS = 30 * 24 * 60 * 60 * 1000;

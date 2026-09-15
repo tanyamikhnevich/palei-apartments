@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { ACCESS_COOKIE } from '@/lib/auth/cookies';
+import { accessCookieName } from '@/lib/auth/cookies';
+import { PANEL_HEADER, panelForRequest } from '@/lib/auth/panel';
 import { readAccessToken } from '@/lib/auth/tokens';
 import { requiresAdminAuth, roleMayReach } from '@/lib/auth/policy';
-import { ROLE_HOME } from '@/lib/auth/roles';
+import { panelRoleFor, ROLE_HOME, ROLE_LOGIN } from '@/lib/auth/roles';
 import {
   DEFAULT_LOCALE,
   LOCALE_CHOICE_COOKIE,
@@ -60,20 +61,28 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(url, 308);
     }
 
+    /*
+      Decided once here and handed on, so the handler reads the same panel's
+      cookie the gate did. Whatever the browser sent is overwritten.
+    */
+    const panel = panelForRequest(bare, request.headers.get(PANEL_HEADER));
+    const forwarded = new Headers(request.headers);
+    forwarded.set(PANEL_HEADER, panel);
+    const pass = () => NextResponse.next({ request: { headers: forwarded } });
+
     if (requiresAdminAuth(bare, request.method, searchParams)) {
-      const claims = await readAccessToken(request.cookies.get(ACCESS_COOKIE)?.value);
+      const token = await readAccessToken(request.cookies.get(accessCookieName(panel))?.value);
+      const claims = token && token.rol === panel ? token : null;
 
       if (claims) {
         if (roleMayReach(claims.rol, bare, request.method)) {
-          return markPrivate(NextResponse.next());
+          return markPrivate(pass());
         }
 
         /*
           Signed in, but not for this. Answering 404 would be tidier against a
-          stranger mapping the panel; it is the wrong answer to a florist who
-          followed a stale bookmark, and the honest 403 is what the API needs
-          in order to say anything useful. A page request is simply walked back
-          to the part of the panel that is theirs.
+          stranger mapping the panel; the honest 403 is what the API needs in
+          order to say anything useful.
         */
         if (bare.startsWith('/api/')) {
           return markPrivate(
@@ -81,10 +90,18 @@ export async function middleware(request: NextRequest) {
           );
         }
 
-        const home = request.nextUrl.clone();
-        home.pathname = ROLE_HOME[claims.rol];
-        home.search = '';
-        return markPrivate(NextResponse.redirect(home));
+        /*
+          A page in the other panel asks for the other account. The owner and
+          the florist sign in separately, so the answer is that panel's own
+          sign-in screen — not a quiet walk back home, which read as though
+          the door simply did not exist.
+        */
+        const pagePanel = panelRoleFor(bare);
+        const login = request.nextUrl.clone();
+        login.pathname = ROLE_LOGIN[pagePanel];
+        login.search = '';
+        if (bare !== ROLE_HOME[pagePanel]) login.searchParams.set('next', `${bare}${search}`);
+        return markPrivate(NextResponse.redirect(login));
       }
 
       // The client answers this by spending its refresh token and retrying.
@@ -95,11 +112,11 @@ export async function middleware(request: NextRequest) {
       }
 
       /* Knock on the shop's door and the shop's sign-in answers. */
-      const shop = bare === '/admin/flowers' || bare.startsWith('/admin/flowers/');
-      const home = shop ? '/admin/flowers' : '/admin';
+      const pagePanel = panelRoleFor(bare);
+      const home = ROLE_HOME[pagePanel];
 
       const login = request.nextUrl.clone();
-      login.pathname = shop ? '/admin/flowers/login' : '/admin/login';
+      login.pathname = ROLE_LOGIN[pagePanel];
       login.search = '';
       // Come back to whatever was being opened once signed in.
       if (bare !== home) login.searchParams.set('next', `${bare}${search}`);
@@ -107,8 +124,8 @@ export async function middleware(request: NextRequest) {
     }
 
     // Public API, static file, or the login screen — which stays out of the index.
-    if (bare.startsWith('/admin')) return markPrivate(NextResponse.next());
-    return NextResponse.next();
+    if (bare.startsWith('/admin')) return markPrivate(pass());
+    return pass();
   }
 
   // `/en/...` is a second address for a page that already lives at `/...`.

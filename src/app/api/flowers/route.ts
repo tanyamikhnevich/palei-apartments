@@ -28,7 +28,8 @@ export async function GET(request: Request) {
   }
 
   try {
-    const admin = await currentAdmin();
+    // Only the shop's own session sees the costing sheet.
+    const admin = await currentAdmin('florist');
     const rows = await getFlowersDb().select().from(schema.bouquets);
     return NextResponse.json({
       bouquets: rows.map((row) => {

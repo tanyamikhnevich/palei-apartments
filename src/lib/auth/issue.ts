@@ -1,10 +1,11 @@
 import { NextResponse } from 'next/server';
 import {
-  ACCESS_COOKIE,
-  REFRESH_COOKIE,
+  accessCookieName,
   accessCookieOptions,
+  refreshCookieName,
   refreshCookieOptions,
 } from './cookies';
+import type { AdminRole } from './roles';
 import { createAccessToken } from './tokens';
 import type { IssuedSession } from './sessions';
 
@@ -20,14 +21,15 @@ export async function attachSession<T>(
   const response = NextResponse.json(body);
   const accessToken = await createAccessToken(session.userId, session.familyId, session.role);
 
-  response.cookies.set(ACCESS_COOKIE, accessToken, accessCookieOptions());
-  response.cookies.set(REFRESH_COOKIE, session.refreshToken, refreshCookieOptions());
+  // Into the pair of the panel the account belongs to — never the other one.
+  response.cookies.set(accessCookieName(session.role), accessToken, accessCookieOptions());
+  response.cookies.set(refreshCookieName(session.role), session.refreshToken, refreshCookieOptions());
   return response;
 }
 
-/** Clear both cookies. Used by sign-out and by every failed refresh. */
-export function clearSession(response: NextResponse): NextResponse {
-  response.cookies.set(ACCESS_COOKIE, '', accessCookieOptions(true));
-  response.cookies.set(REFRESH_COOKIE, '', refreshCookieOptions(true));
+/** Clear one panel's cookies. Used by sign-out and by every failed refresh. */
+export function clearSession(response: NextResponse, panel: AdminRole): NextResponse {
+  response.cookies.set(accessCookieName(panel), '', accessCookieOptions(true));
+  response.cookies.set(refreshCookieName(panel), '', refreshCookieOptions(true));
   return response;
 }

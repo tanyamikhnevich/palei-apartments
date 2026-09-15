@@ -5,6 +5,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Button from '@/components/ui/Button/Button';
+import { PANEL_HEADER } from '@/lib/auth/panel';
+import { panelRoleFor } from '@/lib/auth/roles';
 import { GROUP_BRAND } from '@/lib/services';
 import styles from './AdminLogin.module.scss';
 
@@ -12,15 +14,16 @@ import styles from './AdminLogin.module.scss';
  * Where to land after signing in. Only a path back into the panel is honoured —
  * `?next=https://elsewhere` would turn the login screen into an open redirect.
  *
- * `home` is the fallback, and the server picks it from the account's role: a
- * florist who signs in here goes to the shop, not to a dashboard that would
- * only bounce them back.
+ * `home` is the fallback and names the panel this screen is the door to. The
+ * server only signs in the account that belongs to that panel.
  */
 function safeNext(next: string | null, home: string): string {
   if (!next) return home;
   if (!next.startsWith('/admin')) return home;
   // `//host` and `/\host` are protocol-relative, not local paths.
   if (next.startsWith('//') || next.startsWith('/\\')) return home;
+  // Never onward into the other panel — that one has its own sign-in.
+  if (panelRoleFor(next) !== panelRoleFor(home)) return home;
   return next;
 }
 
@@ -72,16 +75,24 @@ export default function AdminLogin({
     if (tried.current) return;
     tried.current = true;
 
-    fetch('/api/admin/session/refresh', { method: 'POST', cache: 'no-store' })
+    fetch('/api/admin/session/refresh', {
+      method: 'POST',
+      cache: 'no-store',
+      headers: { [PANEL_HEADER]: panelRoleFor(home) },
+    })
       .then(async (res) => {
         if (!res.ok) {
           setChecking(false);
           return;
         }
-        // The renewed session says which panel it belongs to; trust that over
-        // the screen the browser happened to be looking at.
+        // A live session for the other panel does not open this one — show the
+        // form and let the right account sign in.
         const data = (await res.json().catch(() => ({}))) as { home?: string };
-        router.replace(safeNext(searchParams.get('next'), data.home ?? home));
+        if (data.home !== home) {
+          setChecking(false);
+          return;
+        }
+        router.replace(safeNext(searchParams.get('next'), home));
         router.refresh();
       })
       .catch(() => setChecking(false));
@@ -96,7 +107,7 @@ export default function AdminLogin({
       const res = await fetch('/api/admin/session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ login, password }),
+        body: JSON.stringify({ login, password, panel: panelRoleFor(home) }),
       });
 
       const data = (await res.json().catch(() => ({}))) as { error?: string; home?: string };
@@ -107,7 +118,7 @@ export default function AdminLogin({
       }
 
       // The cookies are set by the response; the server has to re-evaluate the route.
-      router.replace(safeNext(searchParams.get('next'), data.home ?? home));
+      router.replace(safeNext(searchParams.get('next'), home));
       router.refresh();
     } catch {
       setError('Could not reach the server');

@@ -1,6 +1,7 @@
-import { cookies } from 'next/headers';
+import { cookies, headers } from 'next/headers';
 import type { NextResponse } from 'next/server';
-import { ACCESS_COOKIE } from '@/lib/auth/cookies';
+import { accessCookieName } from '@/lib/auth/cookies';
+import { PANEL_HEADER, panelForRequest } from '@/lib/auth/panel';
 import { readAccessToken, type AccessClaims } from '@/lib/auth/tokens';
 import { jsonError } from '@/lib/api/errors';
 import { roleMayReach } from '@/lib/auth/policy';
@@ -14,8 +15,12 @@ import type { AdminRole } from '@/lib/auth/roles';
  * path, a request that reaches the handler some other way — none of those turn
  * an admin endpoint into a public one.
  */
-export async function currentAdmin(): Promise<AccessClaims | null> {
-  return readAccessToken(cookies().get(ACCESS_COOKIE)?.value);
+export async function currentAdmin(panel?: AdminRole): Promise<AccessClaims | null> {
+  const which = panel ?? (headers().get(PANEL_HEADER) === 'florist' ? 'florist' : 'owner');
+  const claims = await readAccessToken(cookies().get(accessCookieName(which))?.value);
+  // The server only ever writes a role's token into its own panel's cookie;
+  // anything else in there is not a session for this panel.
+  return claims && claims.rol === which ? claims : null;
 }
 
 /**
@@ -28,10 +33,10 @@ export async function currentAdmin(): Promise<AccessClaims | null> {
  * address.
  */
 export async function requireAdminAccess(request: Request): Promise<NextResponse | null> {
-  const claims = await currentAdmin();
+  const { pathname } = new URL(request.url);
+  const claims = await currentAdmin(panelForRequest(pathname, request.headers.get(PANEL_HEADER)));
   if (!claims) return jsonError('Unauthorized', 401);
 
-  const { pathname } = new URL(request.url);
   if (!roleMayReach(claims.rol, pathname, request.method)) {
     return jsonError('Not allowed for this account', 403);
   }

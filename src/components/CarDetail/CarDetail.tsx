@@ -181,7 +181,7 @@ export default function CarDetail({ car }: { car: Car }) {
                 </div>
                 <h2 className={styles.successTitle}>{t('booking.successTitle')}</h2>
                 <p className={styles.successDesc}>{t('booking.successDesc')}</p>
-                <Button variant="ghost" as="a" href={href('/cars')} iconRight="arrow">
+                <Button variant="ghost" as="a" href={href('/cars')} icon="arrowBack">
                   {t('cars.backToAll')}
                 </Button>
               </div>

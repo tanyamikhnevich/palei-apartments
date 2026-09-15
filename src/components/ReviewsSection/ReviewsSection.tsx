@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Button from '@/components/ui/Button/Button';
 import Icon from '@/components/ui/Icon/Icon';
 import Skeleton from '@/components/ui/Skeleton/Skeleton';
@@ -22,7 +22,9 @@ interface ReviewsSectionProps {
   apartmentId: string;
 }
 
-const INITIAL_VISIBLE = 5;
+/** Reviews shown at first, and how many each "show more" adds. */
+const INITIAL_VISIBLE = 3;
+const STEP = 5;
 
 function formatDate(iso: string, locale: string): string {
   const d = new Date(iso);
@@ -35,7 +37,8 @@ export default function ReviewsSection({ apartmentId }: ReviewsSectionProps) {
 
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
-  const [expanded, setExpanded] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE);
+  const sectionRef = useRef<HTMLElement>(null);
   const [formOpen, setFormOpen] = useState(false);
 
   // form state
@@ -69,7 +72,15 @@ export default function ReviewsSection({ apartmentId }: ReviewsSectionProps) {
     return Math.round((sum / reviews.length) * 10) / 10;
   }, [reviews]);
 
-  const visible = expanded ? reviews : reviews.slice(0, INITIAL_VISIBLE);
+  const visible = reviews.slice(0, visibleCount);
+  const remaining = reviews.length - visible.length;
+
+  const collapse = () => {
+    setVisibleCount(INITIAL_VISIBLE);
+    // Folding a long list away would otherwise leave the guest far below it.
+    const top = sectionRef.current?.getBoundingClientRect().top ?? 0;
+    if (top < 0) sectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
 
   const handleSubmit = async () => {
     setError(null);
@@ -114,7 +125,7 @@ export default function ReviewsSection({ apartmentId }: ReviewsSectionProps) {
   };
 
   return (
-    <section className={styles.reviews}>
+    <section className={styles.reviews} ref={sectionRef}>
       <div className={styles.header}>
         <h3 className={styles.title}>{t('reviews.sectionTitle')}</h3>
         {reviews.length > 0 && (
@@ -164,9 +175,17 @@ export default function ReviewsSection({ apartmentId }: ReviewsSectionProps) {
         </ul>
       )}
 
-      {reviews.length > INITIAL_VISIBLE && (
-        <button type="button" className={styles.toggle} onClick={() => setExpanded((v) => !v)}>
-          {expanded ? t('reviews.showLess') : t('reviews.showAll')}
+      {!loading && reviews.length > INITIAL_VISIBLE && (
+        <button
+          type="button"
+          className={styles.toggle}
+          onClick={() =>
+            remaining > 0 ? setVisibleCount((n) => n + STEP) : collapse()
+          }
+        >
+          {remaining > 0
+            ? t('reviews.showMore').replace('{count}', String(Math.min(STEP, remaining)))
+            : t('reviews.showLess')}
         </button>
       )}
 

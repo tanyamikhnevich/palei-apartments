@@ -1,7 +1,7 @@
 import React from 'react';
 
 export type IconName =
-  | 'guest' | 'bed' | 'bath' | 'pin' | 'star' | 'arrow' | 'wave'
+  | 'guest' | 'bed' | 'bath' | 'pin' | 'star' | 'arrow' | 'arrowBack' | 'wave'
   | 'sparkle' | 'heart' | 'home' | 'check' | 'plus' | 'x' | 'edit'
   | 'trash' | 'menu' | 'phone' | 'mail' | 'calendar' | 'grid' | 'inbox'
   | 'gear' | 'chevron' | 'image' | 'shield' | 'search' | 'logout'
@@ -52,6 +52,13 @@ const PATHS: Record<IconName, React.ReactNode> = {
     <>
       <path d="M5 12h14" />
       <path d="M13 6l6 6-6 6" />
+    </>
+  ),
+  /* The same arrow pointing back, for links that return somewhere. */
+  arrowBack: (
+    <>
+      <path d="M19 12H5" />
+      <path d="M11 6l-6 6 6 6" />
     </>
   ),
   /* A three-quarter car: cabin, bonnet and two wheels, on the same 24px grid. */

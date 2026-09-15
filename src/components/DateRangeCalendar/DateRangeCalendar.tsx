@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   addMonths,
   compareISO,
@@ -50,6 +50,22 @@ export default function DateRangeCalendar({
 }: DateRangeCalendarProps) {
   const [firstMonth] = useState(() => startOfMonth(new Date()));
   const today = todayISO();
+  const scrollerRef = useRef<HTMLDivElement>(null);
+
+  // A range chosen elsewhere (search, prefill) may sit months ahead — bring it
+  // into view. Only when it is out of sight, so a click never makes the list jump,
+  // and only the calendar scrolls, never the page.
+  useEffect(() => {
+    const scroller = scrollerRef.current;
+    if (!scroller || !checkIn) return;
+    const section = scroller.querySelector<HTMLElement>(`[data-month="${checkIn.slice(0, 7)}"]`);
+    const day = scroller.querySelector<HTMLElement>(`[data-day="${checkIn}"]`);
+    if (!section || !day) return;
+    const box = scroller.getBoundingClientRect();
+    const dayBox = day.getBoundingClientRect();
+    const visible = dayBox.top >= box.top && dayBox.bottom <= box.top + scroller.clientHeight;
+    if (!visible) scroller.scrollTop += section.getBoundingClientRect().top - box.top;
+  }, [checkIn]);
 
   const weekdayLabels = useMemo(() => {
     const base = new Date(2024, 0, 1);
@@ -101,7 +117,7 @@ export default function DateRangeCalendar({
         ))}
       </div>
 
-      <div className={styles.scroller} tabIndex={0} role="group" aria-label={hint}>
+      <div ref={scrollerRef} className={styles.scroller} tabIndex={0} role="group" aria-label={hint}>
         {months.map((month) => {
           const year = month.getFullYear();
           const monthIndex = month.getMonth();
@@ -120,7 +136,11 @@ export default function DateRangeCalendar({
           }).format(month);
 
           return (
-            <section className={styles.month} key={`${year}-${monthIndex}`}>
+            <section
+              className={styles.month}
+              key={`${year}-${monthIndex}`}
+              data-month={`${year}-${String(monthIndex + 1).padStart(2, '0')}`}
+            >
               <h4 className={styles.monthLabel}>{monthLabel}</h4>
               <div className={styles.grid}>
                 {cells.map((iso, idx) => {
@@ -137,6 +157,7 @@ export default function DateRangeCalendar({
                   return (
                     <button
                       key={iso}
+                      data-day={iso}
                       type="button"
                       disabled={disabled}
                       className={[

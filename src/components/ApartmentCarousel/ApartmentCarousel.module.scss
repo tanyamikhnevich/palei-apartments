@@ -55,6 +55,12 @@
   margin-top: 40px;
 }
 
+/*
+  A horizontal scroller clips vertically too, so the hovered card's lift and
+  soft shadow need room inside the track. The extra padding is handed back
+  with negative margins to keep the section's spacing unchanged.
+*/
+
 .track {
   display: flex;
   gap: 28px;
@@ -62,7 +68,8 @@
   scroll-snap-type: x mandatory;
   scroll-padding-inline: max(28px, calc((100vw - var(--maxw)) / 2 + 28px));
   padding-inline: max(28px, calc((100vw - var(--maxw)) / 2 + 28px));
-  padding-block: 6px 10px;
+  padding-block: 24px 64px;
+  margin-block: -18px -54px;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
 

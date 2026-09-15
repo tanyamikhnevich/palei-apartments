@@ -8,6 +8,7 @@ import { useLanguage } from '@/i18n/LanguageProvider';
 import { formatMoney } from '@/lib/money';
 import { bouquetCopy, bouquetCurrency, earliestDelivery } from '@/lib/flowers';
 import { ApiError, submitFlowerOrder } from '@/lib/api/client';
+import { loadBookingHandoff } from '@/lib/bookingHandoff';
 import {
   PERSON_NAME_MAX,
   PHONE_INPUT_MAX_LENGTH,
@@ -41,17 +42,24 @@ export default function FlowerOrderForm({
   */
   const earliest = useMemo(() => earliestDelivery(bouquet), [bouquet]);
 
+  /*
+    A guest who has just booked a flat gets the form filled from that booking:
+    the flat is the address, the arrival day the date, and they are both the
+    one ordering and — until they change it — the one receiving. Read once,
+    when the form opens; the form is client-only, so storage is there.
+  */
+  const [handoff] = useState(loadBookingHandoff);
+  const wanted = requestedDate ?? handoff?.checkIn ?? null;
+
   /* A requested date only wins if the florist can still make it. */
-  const [date, setDate] = useState(
-    requestedDate && requestedDate >= earliest ? requestedDate : earliest
-  );
+  const [date, setDate] = useState(wanted && wanted >= earliest ? wanted : earliest);
   const [slot, setSlot] = useState<DeliverySlot>('morning');
-  const [address, setAddress] = useState('');
-  const [recipient, setRecipient] = useState('');
-  const [recipientPhone, setRecipientPhone] = useState('');
+  const [address, setAddress] = useState(handoff?.address ?? '');
+  const [recipient, setRecipient] = useState(handoff?.name ?? '');
+  const [recipientPhone, setRecipientPhone] = useState(handoff?.contact ?? '');
   const [card, setCard] = useState('');
-  const [name, setName] = useState('');
-  const [contact, setContact] = useState('');
+  const [name, setName] = useState(handoff?.name ?? '');
+  const [contact, setContact] = useState(handoff?.contact ?? '');
   const [honeypot, setHoneypot] = useState('');
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);

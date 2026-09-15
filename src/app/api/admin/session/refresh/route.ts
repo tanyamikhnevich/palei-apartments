@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
-import { REFRESH_COOKIE } from '@/lib/auth/cookies';
+import { cookies, headers } from 'next/headers';
+import { refreshCookieName } from '@/lib/auth/cookies';
+import { PANEL_HEADER } from '@/lib/auth/panel';
 import { attachSession, clearSession } from '@/lib/auth/issue';
 import { rotateSession } from '@/lib/auth/sessions';
 import { isDbConfigured } from '@/lib/api/errors';
@@ -21,13 +22,19 @@ export const dynamic = 'force-dynamic';
  * retrying with something dead.
  */
 export async function POST() {
+  // Each panel renews its own session; the browser says which one this is.
+  const panel = headers().get(PANEL_HEADER) === 'florist' ? 'florist' : 'owner';
+
   if (!isDbConfigured()) {
-    return clearSession(NextResponse.json({ error: 'Database not configured' }, { status: 503 }));
+    return clearSession(
+      NextResponse.json({ error: 'Database not configured' }, { status: 503 }),
+      panel
+    );
   }
 
-  const token = cookies().get(REFRESH_COOKIE)?.value;
+  const token = cookies().get(refreshCookieName(panel))?.value;
   if (!token) {
-    return clearSession(NextResponse.json({ error: 'No session' }, { status: 401 }));
+    return clearSession(NextResponse.json({ error: 'No session' }, { status: 401 }), panel);
   }
 
   try {
@@ -42,17 +49,24 @@ export async function POST() {
           NextResponse.json(
             { error: 'Session ended for safety. Please sign in again.', code: 'reused' },
             { status: 401 }
-          )
+          ),
+          panel
         );
       }
       return clearSession(
-        NextResponse.json({ error: 'Session expired', code: outcome.reason }, { status: 401 })
+        NextResponse.json({ error: 'Session expired', code: outcome.reason }, { status: 401 }),
+        panel
       );
     }
 
     /* The role is re-read from the account during rotation, so this is also
        where a session finds out its home has changed under it. */
     const { role } = outcome.session;
+    // A session whose account has since moved to the other panel does not
+    // renew into this one's cookies.
+    if (role !== panel) {
+      return clearSession(NextResponse.json({ error: 'Session expired' }, { status: 401 }), panel);
+    }
     return attachSession({ ok: true, role, home: ROLE_HOME[role] }, outcome.session);
   } catch (e) {
     console.error('POST /api/admin/session/refresh', e);

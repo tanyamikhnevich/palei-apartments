@@ -184,7 +184,13 @@
   grid-column: 2;
   grid-row: 1 / span 3;
   position: sticky;
-  top: calc(var(--hdr-h) + 20px);
+  /*
+    Pinned under the header while the panel fits the screen. Taller than the
+    screen, a top-pinned panel keeps its lower half out of reach until the
+    whole left column has scrolled past — so then it rides along with the page
+    and pins by its bottom edge instead. `--book-h` is measured in the component.
+  */
+  top: min(calc(var(--hdr-h) + 20px), calc(100vh - var(--book-h, 0px) - 20px));
   min-width: 0;
   /* Clears the sticky header when the floating CTA jumps to `#book`. */
   scroll-margin-top: calc(var(--hdr-h) + 20px);

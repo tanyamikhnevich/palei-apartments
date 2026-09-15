@@ -32,6 +32,11 @@ export const ROLE_HOME: Record<AdminRole, string> = {
   florist: '/admin/flowers',
 };
 
+/** Which panel — and so which role's sign-in — a path belongs to. */
+export function panelRoleFor(pathname: string): AdminRole {
+  return pathname === '/admin/flowers' || pathname.startsWith('/admin/flowers/') ? 'florist' : 'owner';
+}
+
 /** The sign-in screen each role belongs to. */
 export const ROLE_LOGIN: Record<AdminRole, string> = {
   owner: '/admin/login',

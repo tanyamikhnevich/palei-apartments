@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import type { Apartment } from '@/types/apartment';
 import FormattedDescription from '@/components/FormattedDescription/FormattedDescription';
 import PhotoGallery from '@/components/PhotoGallery/PhotoGallery';
@@ -16,7 +17,9 @@ import BookingUpsell from '@/components/BookingUpsell/BookingUpsell';
 import FlowersPromoModal from '@/components/FlowersPromo/FlowersPromoModal';
 import { useLanguage } from '@/i18n/LanguageProvider';
 import { getApartmentCopy } from '@/i18n/apartmentLocale';
-import { formatDateRange, nightsBetween } from '@/lib/dates';
+import { formatDateRange, nightsBetween, rangeHasBlockedNight, todayISO } from '@/lib/dates';
+import { parseApartmentSearchParams } from '@/lib/apartmentSearch';
+import { saveBookingHandoff } from '@/lib/bookingHandoff';
 import { scrollToHash } from '@/lib/scrollToHash';
 import {
   fetchBookingAvailability,
@@ -60,6 +63,7 @@ export default function ApartmentDetail({ apt }: ApartmentDetailProps) {
   const photos = useMemo(() => getApartmentPhotos(apt), [apt.photos]);
   const minNights = apt.minNights ?? 1;
   const tagLine = formatApartmentTags(apt, locale, t);
+  const searchParams = useSearchParams();
 
   const [blocked, setBlocked] = useState<{ checkIn: string; checkOut: string }[]>([]);
   const [checkIn, setCheckIn] = useState<string | null>(null);
@@ -79,10 +83,48 @@ export default function ApartmentDetail({ apt }: ApartmentDetailProps) {
   const [descOpen, setDescOpen] = useState(false);
   const [descClipped, setDescClipped] = useState(false);
   const descRef = useRef<HTMLDivElement>(null);
+  const bookingColRef = useRef<HTMLElement>(null);
+
+  // Feeds the panel's height to its sticky offset (see `.bookingCol`).
+  useEffect(() => {
+    const el = bookingColRef.current;
+    if (!el) return;
+    const observer = new ResizeObserver(() => {
+      el.style.setProperty('--book-h', `${el.offsetHeight}px`);
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     fetchBookingAvailability(apt.id).then(setBlocked).catch(() => setBlocked([]));
   }, [apt.id]);
+
+  /*
+    Arriving from a search on the list, the guest has already told us when and
+    how many — carry that over instead of making them pick it all again.
+    Stale dates (in the past) are dropped rather than shown as a broken range.
+  */
+  const prefillApplied = useRef(false);
+  useEffect(() => {
+    if (prefillApplied.current) return;
+    prefillApplied.current = true;
+    const search = parseApartmentSearchParams(searchParams);
+    if (searchParams.get('guests')) setGuests(Math.min(search.guests, apt.guests));
+    if (search.checkIn && search.checkOut && search.checkIn >= todayISO()) {
+      onRangeChange({ checkIn: search.checkIn, checkOut: search.checkOut });
+    }
+    // Runs once on arrival; later URL changes do not overwrite what the guest picked here.
+  }, []);
+
+  // The list only links apartments free for those dates, but a booking can land
+  // in between — once availability is known, let go of a range that no longer fits.
+  useEffect(() => {
+    if (checkIn && checkOut && checkOut > checkIn && rangeHasBlockedNight(checkIn, checkOut, blocked)) {
+      setCheckIn(null);
+      setCheckOut(null);
+    }
+  }, [blocked]);
 
   /*
     Only offer "show more" when the clamp actually cuts something off — a short
@@ -215,6 +257,14 @@ export default function ApartmentDetail({ apt }: ApartmentDetailProps) {
         guests,
       });
       setSubmitted(true);
+      // The flower shop picks this up: delivery to this flat, on the arrival day.
+      saveBookingHandoff({
+        apartmentId: apt.id,
+        address: `${copy.location} — ${copy.title}`.slice(0, 200),
+        checkIn: checkIn!,
+        name: guestFields.guest,
+        contact: guestFields.contact,
+      });
       /*
         Same rule as the upsell below the confirmation: only where the shop
         actually delivers. The confirmation is rendered underneath either way,
@@ -340,7 +390,7 @@ export default function ApartmentDetail({ apt }: ApartmentDetailProps) {
         </section>
 
         {/* `#book` is where the floating booking CTA lands. */}
-        <aside className={styles.bookingCol} id="book">
+        <aside className={styles.bookingCol} id="book" ref={bookingColRef}>
           <section className={styles.booking}>
             {submitted ? (
               <div className={styles.success}>
@@ -349,7 +399,7 @@ export default function ApartmentDetail({ apt }: ApartmentDetailProps) {
                 </div>
                 <h2 className={styles.successTitle}>{t('booking.successTitle')}</h2>
                 <p className={styles.successDesc}>{t('booking.successDesc')}</p>
-                <Button variant="ghost" as="a" href={href(listingHref)} iconRight="arrow">
+                <Button variant="ghost" as="a" href={href(listingHref)} icon="arrowBack">
                   {t('apartments.backToAll')}
                 </Button>
 

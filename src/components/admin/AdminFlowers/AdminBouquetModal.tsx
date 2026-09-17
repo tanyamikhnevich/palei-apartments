@@ -7,7 +7,7 @@ import { AdminField, AdminInput } from '@/components/admin/ui/AdminField';
 import PhotoManager from '@/components/admin/ui/PhotoManager';
 import AdminBouquetCost from './AdminBouquetCost';
 import { blankCost, costSuggestions, hasCost } from '@/lib/bouquetCost';
-import { DEFAULT_FLOWER_AREA, FLOWER_REGIONS, sellsHere } from '@/lib/flowers';
+import { CATEGORIES, DEFAULT_FLOWER_AREA, FLOWER_REGIONS, sellsHere } from '@/lib/flowers';
 import { CURRENCY_SYMBOL } from '@/lib/money';
 import { currencyForArea } from '@/lib/regions';
 import { LOCALES, type Locale } from '@/i18n/types';
@@ -19,17 +19,6 @@ import {
   type ItemKind,
 } from '@/types/flower';
 import styles from './AdminFlowers.module.scss';
-
-/*
-  Categories are grouped by what is being sold: a balloon is never "seasonal"
-  and a bouquet is never a "number", so offering the wrong ones only invites
-  mistakes.
-*/
-const CATEGORIES: Record<ItemKind, BouquetCategory[]> = {
-  flowers: ['classic', 'seasonal', 'roses', 'boxed', 'plants'],
-  balloons: ['numbers', 'birthday', 'baby'],
-  mixed: ['classic', 'boxed', 'birthday', 'baby'],
-};
 
 function blankBouquet(): Bouquet {
   const empty = { name: '', note: '' };

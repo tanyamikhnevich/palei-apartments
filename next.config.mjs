@@ -24,6 +24,8 @@ const csp = [
   // Apartment photos live in Vercel Blob; the map draws OpenStreetMap tiles.
   "img-src 'self' data: blob: https://*.public.blob.vercel-storage.com https://*.tile.openstreetmap.org",
   "font-src 'self' data:",
+  // The admin's HEIC converter runs libheif in a worker built from a blob URL.
+  "worker-src 'self' blob:",
   "connect-src 'self' https://*.tile.openstreetmap.org",
   "media-src 'self'",
   'upgrade-insecure-requests',

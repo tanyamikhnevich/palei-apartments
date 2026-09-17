@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { jsonError } from '@/lib/api/errors';
-import { isTelegramConfigured, notifyFlowerOrder } from '@/lib/notify/telegram';
+import { isFlowersTelegramConfigured, notifyFlowerOrder } from '@/lib/notify/telegram';
 import { validatePersonName, validatePhone, validationMessageEn } from '@/lib/validation/contact';
 import { getFlowersDb, isFlowersDbConfigured, schema } from '@/db/flowers';
 import { rowToBouquet } from '@/db/flowers/schema';
@@ -50,7 +50,7 @@ export async function POST(request: Request) {
   }
   publicSubmitThrottle.consume(request);
 
-  if (!isTelegramConfigured()) {
+  if (!isFlowersTelegramConfigured()) {
     return NextResponse.json(
       { error: 'Telegram not configured. Set TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID.' },
       { status: 503 }

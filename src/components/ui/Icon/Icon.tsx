@@ -5,7 +5,7 @@ export type IconName =
   | 'sparkle' | 'heart' | 'home' | 'check' | 'plus' | 'x' | 'edit'
   | 'trash' | 'menu' | 'phone' | 'mail' | 'calendar' | 'grid' | 'inbox'
   | 'gear' | 'chevron' | 'image' | 'shield' | 'search' | 'logout'
-  | 'car' | 'flower';
+  | 'car' | 'flower' | 'download';
 
 interface IconProps {
   name: IconName;
@@ -202,6 +202,12 @@ const PATHS: Record<IconName, React.ReactNode> = {
     <>
       <path d="M14 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-2" />
       <path d="M9 12h12M18 9l3 3-3 3" />
+    </>
+  ),
+  download: (
+    <>
+      <path d="M12 4v11M7.5 10.5L12 15l4.5-4.5" />
+      <path d="M5 19h14" />
     </>
   ),
 };

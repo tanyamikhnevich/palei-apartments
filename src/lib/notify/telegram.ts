@@ -4,6 +4,11 @@
  *   TELEGRAM_CHAT_ID    — channel/group id (e.g. @my_channel or -100123...)
  * When either is missing, notifications are silently skipped, so the site
  * keeps working without Telegram set up.
+ *
+ * Flower orders can go to their own channel instead:
+ *   FLOWERS_TELEGRAM_CHAT_ID    — the shop's channel
+ *   FLOWERS_TELEGRAM_BOT_TOKEN  — optional; the shop's bot, if it is the one in
+ *                                 that channel. Falls back to TELEGRAM_BOT_TOKEN.
  */
 
 import { displayPhone, whatsappLink } from '@/lib/phone';
@@ -48,11 +53,39 @@ export interface ContactNotification {
   page?: string;
 }
 
-export function isTelegramConfigured(): boolean {
-  return Boolean(process.env.TELEGRAM_BOT_TOKEN && process.env.TELEGRAM_CHAT_ID);
+interface TelegramTarget {
+  token?: string;
+  chatId?: string;
 }
 
-function escapeHtml(value: string): string {
+function mainTarget(): TelegramTarget {
+  return { token: process.env.TELEGRAM_BOT_TOKEN, chatId: process.env.TELEGRAM_CHAT_ID };
+}
+
+/**
+ * The shop's channel when one is set, the shared one otherwise — so the flower
+ * orders keep arriving somewhere while the new channel is being set up.
+ */
+function flowersTarget(): TelegramTarget {
+  const chatId = process.env.FLOWERS_TELEGRAM_CHAT_ID;
+  if (!chatId) return mainTarget();
+  return {
+    token: process.env.FLOWERS_TELEGRAM_BOT_TOKEN || process.env.TELEGRAM_BOT_TOKEN,
+    chatId,
+  };
+}
+
+export function isTelegramConfigured(): boolean {
+  const { token, chatId } = mainTarget();
+  return Boolean(token && chatId);
+}
+
+export function isFlowersTelegramConfigured(): boolean {
+  const { token, chatId } = flowersTarget();
+  return Boolean(token && chatId);
+}
+
+export function escapeHtml(value: string): string {
   return value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
@@ -75,9 +108,10 @@ function phoneHtml(number: string): string {
  * flow that triggered it. Returns whether Telegram actually accepted it, so a
  * caller with nowhere else to store the message can tell the guest the truth.
  */
-export async function sendTelegramMessage(text: string): Promise<boolean> {
-  const token = process.env.TELEGRAM_BOT_TOKEN;
-  const chatId = process.env.TELEGRAM_CHAT_ID;
+export async function sendTelegramMessage(
+  text: string,
+  { token, chatId }: TelegramTarget = mainTarget()
+): Promise<boolean> {
   if (!token || !chatId) return false;
 
   try {
@@ -150,7 +184,7 @@ export async function notifyFlowerOrder(f: FlowerNotification): Promise<boolean>
     `👤 ${escapeHtml(f.guest)} · ${phoneHtml(f.contact)}`,
   ].filter(Boolean) as string[];
 
-  return sendTelegramMessage(lines.join('\n'));
+  return sendTelegramMessage(lines.join('\n'), flowersTarget());
 }
 
 /**

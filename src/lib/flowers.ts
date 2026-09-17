@@ -1,4 +1,4 @@
-import type { Bouquet, BouquetCopy } from '@/types/flower';
+import type { Bouquet, BouquetCategory, BouquetCopy, ItemKind } from '@/types/flower';
 import type { Locale } from '@/i18n/types';
 import type { CurrencyCode } from '@/types/settings';
 import type { Region } from '@/types/region';
@@ -18,6 +18,17 @@ export const FLOWER_COUNTRY: Region['country'] = 'IL';
 export const FLOWER_REGIONS = REGIONS.filter((r) => r.country === FLOWER_COUNTRY);
 
 export const DEFAULT_FLOWER_AREA = FLOWER_REGIONS[0].area;
+
+/*
+  Categories are grouped by what is being sold: a balloon is never "seasonal"
+  and a bouquet is never a "number", so offering the wrong ones only invites
+  mistakes. Shared by the admin form and the florist's Telegram bot.
+*/
+export const CATEGORIES: Record<ItemKind, BouquetCategory[]> = {
+  flowers: ['classic', 'seasonal', 'roses', 'boxed', 'plants'],
+  balloons: ['numbers', 'birthday', 'baby'],
+  mixed: ['classic', 'boxed', 'birthday', 'baby'],
+};
 
 /**
  * Whether the shop reaches it at all. Takes a plain area because the callers

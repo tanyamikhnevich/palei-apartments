@@ -8,7 +8,22 @@ import { AdminField } from '@/components/admin/ui/AdminField';
 import { IMAGE_UPLOAD_ACCEPT, IMAGE_UPLOAD_MAX_FILES } from '@/lib/imageUpload';
 import { isPhotoUrl } from '@/lib/apartmentMedia';
 import { uploadApartmentPhotos } from '@/lib/api/client';
+import { prepareImageForUpload } from '@/lib/prepareImageForUpload';
 import styles from './PhotoManager.module.scss';
+
+/**
+ * `download` is ignored cross-origin, so Blob photos ask the store for an
+ * attachment response instead; local uploads are same-origin and just work.
+ */
+function downloadHref(url: string): string {
+  if (!/\.blob\.vercel-storage\.com\//.test(url)) return url;
+  return `${url}${url.includes('?') ? '&' : '?'}download=1`;
+}
+
+function downloadName(url: string, index: number): string {
+  const ext = url.split('?')[0].split('.').pop() || 'webp';
+  return `photo-${index + 1}.${ext}`;
+}
 
 /**
  * Photos for anything that has them: drop files in, drag the thumbnails to
@@ -55,18 +70,28 @@ export default function PhotoManager({
 
     setUploading(true);
     setUploadError(null);
-    setUploadProgress(
-      files.length === 1 ? '1 photo' : `${files.length} photos`
-    );
 
+    // One request per photo: keeps each body well under Vercel's ~4.5 MB cap,
+    // and one bad file doesn't throw away the ones that already went up.
+    const uploaded: string[] = [];
+    const failed: string[] = [];
     try {
-      const { urls } = await uploadApartmentPhotos(files);
-      onChange([...photos, ...urls]);
-      setUploadProgress(null);
-    } catch (e) {
-      setUploadError(e instanceof Error ? e.message : 'Upload failed');
-      setUploadProgress(null);
+      for (const [i, file] of files.entries()) {
+        const n = files.length === 1 ? '' : ` ${i + 1} / ${files.length}`;
+        try {
+          setUploadProgress(`Compressing${n}…`);
+          const prepared = await prepareImageForUpload(file);
+          setUploadProgress(`Uploading${n}…`);
+          const { urls } = await uploadApartmentPhotos([prepared]);
+          uploaded.push(...urls);
+          onChange([...photos, ...uploaded]);
+        } catch (e) {
+          failed.push(`${file.name}: ${e instanceof Error ? e.message : 'upload failed'}`);
+        }
+      }
+      if (failed.length) setUploadError(failed.join('\n'));
     } finally {
+      setUploadProgress(null);
       setUploading(false);
       if (inputRef.current) inputRef.current.value = '';
     }
@@ -124,7 +149,7 @@ export default function PhotoManager({
             {uploading ? 'Uploading photos…' : 'Add photos'}
           </span>
           <span className={styles.dropzoneHint}>
-            Select or drop files here · JPEG, PNG, WebP, AVIF · up to 5 MB each
+            Select or drop files here · JPEG, PNG, WebP, AVIF, HEIC · compressed automatically
           </span>
           <span className={styles.dropzoneHint}>Drag photos below to change order (first = cover)</span>
           {uploadProgress && <span className={styles.dropzoneProgress}>{uploadProgress}</span>}
@@ -170,6 +195,18 @@ export default function PhotoManager({
                 ⋮⋮
               </span>
               <span className={styles.photoTag}>{i === 0 ? 'cover' : `#${i + 1}`}</span>
+              {isPhotoUrl(p) && (
+                <a
+                  href={downloadHref(p)}
+                  download={downloadName(p, i)}
+                  className={styles.photoDownload}
+                  aria-label="Download photo"
+                  title="Download"
+                  draggable={false}
+                >
+                  <Icon name="download" size={14} />
+                </a>
+              )}
               <button
                 type="button"
                 className={styles.photoDel}

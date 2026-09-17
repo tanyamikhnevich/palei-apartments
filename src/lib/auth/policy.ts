@@ -54,6 +54,10 @@ function isPublicApiRequest(pathname: string, method: string, params: URLSearchP
   // The token in the path is the credential for these feeds.
   if (pathname.startsWith('/api/ical/')) return isRead(method);
 
+  // Telegram delivers the florist bot's updates here; the handler checks the
+  // webhook secret and who is writing itself.
+  if (pathname === '/api/telegram/flowers') return method === 'POST';
+
   // Vercel Cron calls this one; the handler checks CRON_SECRET itself.
   if (pathname === '/api/calendar/sync') return isRead(method);
 

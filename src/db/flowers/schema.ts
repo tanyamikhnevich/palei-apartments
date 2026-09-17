@@ -124,4 +124,17 @@ export function rowToOrder(row: FlowerOrderRow): FlowerOrder {
   };
 }
 
-export const flowersSchema = { bouquets, flowerOrders };
+/**
+ * A bouquet half-way through being added from the florist's Telegram bot, one
+ * per chat. The bot runs as a webhook — every message is a fresh serverless
+ * call — so the conversation has to remember where it is somewhere other than
+ * memory. Removed once the bouquet is saved or the florist cancels.
+ */
+export const botDrafts = pgTable('bot_drafts', {
+  chatId: varchar('chat_id', { length: 32 }).primaryKey(),
+  step: varchar('step', { length: 16 }).notNull(),
+  data: jsonb('data').notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+});
+
+export const flowersSchema = { bouquets, flowerOrders, botDrafts };

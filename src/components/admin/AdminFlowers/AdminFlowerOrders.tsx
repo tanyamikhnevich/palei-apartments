@@ -50,8 +50,8 @@ export default function AdminFlowerOrders() {
             <div className={styles.orderItem}>
               <b>{order.itemName}</b>
               <span>
-                {formatMoney(order.price, order.currency as CurrencyCode, 'en')} ·{' '}
-                {order.deliveryDate} · {order.slot}
+                {formatMoney(order.price, order.currency as CurrencyCode, 'en')}
+                {order.wrapping ? ' · gift wrapped' : ''} · {order.deliveryDate} · {order.slot}
               </span>
             </div>
             <select
@@ -97,6 +97,14 @@ export default function AdminFlowerOrders() {
                   <Icon name="edit" size={13} /> Card
                 </dt>
                 <dd>«{order.card}»</dd>
+              </div>
+            )}
+            {order.comment && (
+              <div className={styles.orderCard}>
+                <dt>
+                  <Icon name="inbox" size={13} /> For the florist
+                </dt>
+                <dd>{order.comment}</dd>
               </div>
             )}
           </dl>

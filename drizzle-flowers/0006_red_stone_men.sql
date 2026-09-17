@@ -1,0 +1,1 @@
+ALTER TABLE "flower_orders" ADD COLUMN "comment" text;

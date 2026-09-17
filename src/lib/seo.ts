@@ -21,9 +21,14 @@ import { t as translate } from '@/i18n/getMessage';
  * fallback, and localhost keeps development honest rather than silently
  * publishing `http://localhost:3000` into a sitemap.
  */
+function withProtocol(url: string): string {
+  return /^https?:\/\//i.test(url) ? url : `https://${url}`;
+}
+
 function resolveSiteUrl(): string {
   const explicit = process.env.NEXT_PUBLIC_SITE_URL?.trim();
-  if (explicit) return explicit.replace(/\/+$/, '');
+  // A bare domain is an easy thing to paste; it still means the https site.
+  if (explicit) return withProtocol(explicit).replace(/\/+$/, '');
 
   // Not VERCEL_URL: that one changes with every deployment, and a canonical
   // pointing at a preview build teaches Google the wrong address.

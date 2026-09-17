@@ -17,6 +17,7 @@ import type {
   FlowerOrder,
   FlowerOrderStatus,
   ItemKind,
+  RoseBuilder,
 } from '@/types/flower';
 import type { Locale } from '@/i18n/types';
 
@@ -36,6 +37,10 @@ export const bouquets = pgTable('bouquets', {
   sameDay: boolean('same_day').notNull().default(true),
   listed: boolean('listed').notNull().default(true),
   photos: jsonb('photos').$type<string[]>(),
+  /** Surcharge for gift wrapping; null on anything not offered wrapped. */
+  wrappingPrice: integer('wrapping_price'),
+  /** Set on the made-to-order rose card only — see `RoseBuilder`. */
+  builder: jsonb('builder').$type<RoseBuilder>(),
   locales: jsonb('locales').notNull().$type<Record<Locale, BouquetCopy>>(),
   /** The costing sheet. Admin-only — stripped before the window sees a row. */
   cost: jsonb('cost').$type<BouquetCost>(),
@@ -56,6 +61,8 @@ export function rowToBouquet(row: BouquetRow): Bouquet {
     sameDay: row.sameDay,
     listed: row.listed,
     photos: row.photos ?? undefined,
+    wrappingPrice: row.wrappingPrice ?? undefined,
+    builder: row.builder ?? undefined,
     locales: row.locales,
     cost: row.cost ?? undefined,
   };
@@ -72,6 +79,8 @@ export function bouquetToInsert(bouquet: Bouquet) {
     sameDay: bouquet.sameDay,
     listed: bouquet.listed,
     photos: bouquet.photos ?? null,
+    wrappingPrice: bouquet.wrappingPrice ?? null,
+    builder: bouquet.builder ?? null,
     locales: bouquet.locales,
     cost: bouquet.cost ?? null,
   };
@@ -96,6 +105,9 @@ export const flowerOrders = pgTable('flower_orders', {
   recipient: text('recipient').notNull(),
   recipientPhone: text('recipient_phone').notNull(),
   card: text('card'),
+  /** The buyer's note to the florist. Optional, and often the useful part. */
+  comment: text('comment'),
+  wrapping: boolean('wrapping').notNull().default(false),
   guest: text('guest').notNull(),
   guestContact: text('guest_contact').notNull(),
   status: varchar('status', { length: 24 }).notNull().default('New').$type<FlowerOrderStatus>(),
@@ -117,6 +129,8 @@ export function rowToOrder(row: FlowerOrderRow): FlowerOrder {
     recipient: row.recipient,
     recipientPhone: row.recipientPhone,
     card: row.card ?? undefined,
+    comment: row.comment ?? undefined,
+    wrapping: row.wrapping,
     guest: row.guest,
     guestContact: row.guestContact,
     status: row.status,

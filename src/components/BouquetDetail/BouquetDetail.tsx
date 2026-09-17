@@ -7,8 +7,9 @@ import Button from '@/components/ui/Button/Button';
 import Icon from '@/components/ui/Icon/Icon';
 import FlowerOrderForm from '@/components/FlowersShop/FlowerOrderForm';
 import { useLanguage } from '@/i18n/LanguageProvider';
-import { bouquetCopy, bouquetCurrency } from '@/lib/flowers';
+import { bouquetCopy, bouquetCurrency, displayPrice } from '@/lib/flowers';
 import { formatMoney } from '@/lib/money';
+import { isBuilder } from '@/lib/roseBuilder';
 import type { Bouquet } from '@/types/flower';
 import styles from './BouquetDetail.module.scss';
 
@@ -73,7 +74,12 @@ export default function BouquetDetail({
 
             <div className={styles.foot}>
               <b className={styles.price}>
-                {formatMoney(bouquet.price, bouquetCurrency(bouquet), locale)}
+                {isBuilder(bouquet)
+                  ? t('flowers.fromPrice').replace(
+                      '{price}',
+                      formatMoney(displayPrice(bouquet), bouquetCurrency(bouquet), locale)
+                    )
+                  : formatMoney(bouquet.price, bouquetCurrency(bouquet), locale)}
               </b>
               <Button variant="primary" onClick={() => setOrdering(true)}>
                 {t('flowers.order')}

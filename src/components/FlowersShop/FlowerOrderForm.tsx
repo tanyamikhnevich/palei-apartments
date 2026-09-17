@@ -6,8 +6,17 @@ import btnStyles from '@/components/ui/Button/Button.module.scss';
 import Icon from '@/components/ui/Icon/Icon';
 import { useLanguage } from '@/i18n/LanguageProvider';
 import { formatMoney } from '@/lib/money';
-import { bouquetCopy, bouquetCurrency, earliestDelivery } from '@/lib/flowers';
+import { bouquetCopy, bouquetCurrency, earliestDelivery, offersWrapping, orderTotal } from '@/lib/flowers';
 import { ApiError, submitFlowerOrder } from '@/lib/api/client';
+import {
+  builderTotal,
+  colorLeadDays,
+  defaultSelection,
+  isBuilder,
+  mixRemaining,
+  selectionName,
+} from '@/lib/roseBuilder';
+import RoseBuilderFields from './RoseBuilderFields';
 import { loadBookingHandoff } from '@/lib/bookingHandoff';
 import {
   PERSON_NAME_MAX,
@@ -16,10 +25,16 @@ import {
   validatePersonName,
   validatePhone,
 } from '@/lib/validation/contact';
-import { DELIVERY_SLOTS, type Bouquet, type DeliverySlot } from '@/types/flower';
+import {
+  DELIVERY_SLOTS,
+  type Bouquet,
+  type DeliverySlot,
+  type RoseSelection,
+} from '@/types/flower';
 import styles from './FlowersShop.module.scss';
 
 const CARD_MAX = 300;
+const COMMENT_MAX = 500;
 
 interface FlowerOrderFormProps {
   bouquet: Bouquet;
@@ -40,7 +55,23 @@ export default function FlowerOrderForm({
     Computed on the client so the picker cannot offer a date the florist has
     already missed — the server checks the same rule again before sending.
   */
-  const earliest = useMemo(() => earliestDelivery(bouquet), [bouquet]);
+  const builder = isBuilder(bouquet) ? bouquet.builder : null;
+  const [roses, setRoses] = useState<RoseSelection | null>(() =>
+    builder ? defaultSelection(builder) : null
+  );
+
+  /*
+    A colour that has to be brought in moves the earliest date, so the picker
+    cannot offer a day the florist has nothing to cut. The server checks the
+    same rule against the same stored card.
+  */
+  const leadDays = builder && roses ? colorLeadDays(builder, roses.colorId, roses.mix) : 0;
+  /* A mix that does not add up is not an order yet. */
+  const mixBalanced = !builder || !roses || mixRemaining(builder, roses) === 0;
+  const earliest = useMemo(
+    () => earliestDelivery(bouquet, new Date(), leadDays),
+    [bouquet, leadDays]
+  );
 
   /*
     A guest who has just booked a flat gets the form filled from that booking:
@@ -58,9 +89,14 @@ export default function FlowerOrderForm({
   const [recipient, setRecipient] = useState(handoff?.name ?? '');
   const [recipientPhone, setRecipientPhone] = useState(handoff?.contact ?? '');
   const [card, setCard] = useState('');
+  const [comment, setComment] = useState('');
+  const [wrapping, setWrapping] = useState(false);
   const [name, setName] = useState(handoff?.name ?? '');
   const [contact, setContact] = useState(handoff?.contact ?? '');
   const [honeypot, setHoneypot] = useState('');
+  /* The same sum the server will charge — see `orderTotal`. */
+  const total =
+    builder && roses ? builderTotal(builder, roses) : orderTotal(bouquet, wrapping);
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -73,6 +109,7 @@ export default function FlowerOrderForm({
   }, [onClose]);
 
   const complete =
+    mixBalanced &&
     date >= earliest &&
     address.trim().length >= 5 &&
     validatePersonName(recipient).ok &&
@@ -96,6 +133,9 @@ export default function FlowerOrderForm({
         recipient,
         recipientPhone,
         card: card.trim() || undefined,
+        comment: comment.trim() || undefined,
+        wrapping,
+        roses: roses ?? undefined,
         name,
         contact,
         honeypot,
@@ -118,8 +158,8 @@ export default function FlowerOrderForm({
       <div className={styles.sheet}>
         <div className={styles.sheetHead}>
           <div>
-            <h2>{copy.name}</h2>
-            <span>{formatMoney(bouquet.price, bouquetCurrency(bouquet), locale)}</span>
+            <h2>{builder && roses ? selectionName(builder, roses) : copy.name}</h2>
+            <span>{formatMoney(total, bouquetCurrency(bouquet), locale)}</span>
           </div>
           <button type="button" className={styles.close} onClick={onClose} aria-label="Close">
             <Icon name="x" size={18} />
@@ -139,6 +179,24 @@ export default function FlowerOrderForm({
           </div>
         ) : (
           <div className={styles.sheetBody}>
+            {builder && roses && (
+              <>
+                <div className="eyebrow">{t('flowers.builder.title')}</div>
+                <RoseBuilderFields
+                  builder={builder}
+                  selection={roses}
+                  currency={bouquetCurrency(bouquet)}
+                  sameDay={bouquet.sameDay}
+                  onChange={setRoses}
+                />
+                <div className={styles.total}>
+                  <span>{t('flowers.fromTotal')}</span>
+                  <b>{formatMoney(total, bouquetCurrency(bouquet), locale)}</b>
+                </div>
+                <p className={styles.hint}>{t('flowers.builder.priceNote')}</p>
+              </>
+            )}
+
             <div className="eyebrow">{t('flowers.orderTitle')}</div>
 
             <div className={styles.row}>
@@ -211,6 +269,36 @@ export default function FlowerOrderForm({
                 maxLength={CARD_MAX}
                 placeholder={t('flowers.cardPlaceholder')}
                 onChange={(e) => setCard(e.target.value)}
+              />
+            </label>
+
+            {!builder && offersWrapping(bouquet) && (
+              <label className={styles.wrapping}>
+                <input
+                  type="checkbox"
+                  checked={wrapping}
+                  onChange={(e) => setWrapping(e.target.checked)}
+                />
+                <span>{t('flowers.wrapping')}</span>
+                <b>+{formatMoney(bouquet.wrappingPrice!, bouquetCurrency(bouquet), locale)}</b>
+              </label>
+            )}
+
+            {!builder && offersWrapping(bouquet) && (
+              <div className={styles.total}>
+                <span>{t('flowers.total')}</span>
+                <b>{formatMoney(total, bouquetCurrency(bouquet), locale)}</b>
+              </div>
+            )}
+
+            <label className="field">
+              <span>{t('flowers.comment')}</span>
+              <textarea
+                className="textarea"
+                value={comment}
+                maxLength={COMMENT_MAX}
+                placeholder={t('flowers.commentPlaceholder')}
+                onChange={(e) => setComment(e.target.value)}
               />
             </label>
 

@@ -30,7 +30,8 @@ async function run() {
   );
   if (missing.length) throw new Error(`Missing in .env.local: ${missing.join(', ')}`);
 
-  const site = process.env.NEXT_PUBLIC_SITE_URL!.replace(/\/+$/, '');
+  const raw = process.env.NEXT_PUBLIC_SITE_URL!.trim();
+  const site = (/^https?:\/\//i.test(raw) ? raw : `https://${raw}`).replace(/\/+$/, '');
   if (!site.startsWith('https://')) throw new Error('Telegram only calls https:// webhooks');
   const url = `${site}/api/telegram/flowers`;
 

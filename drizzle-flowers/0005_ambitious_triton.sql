@@ -1,0 +1,1 @@
+ALTER TABLE "bouquets" ADD COLUMN "builder" jsonb;

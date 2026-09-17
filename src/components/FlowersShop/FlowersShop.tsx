@@ -12,12 +12,14 @@ import FlowerOrderForm from './FlowerOrderForm';
 import { useLanguage } from '@/i18n/LanguageProvider';
 import { formatMoney } from '@/lib/money';
 import { fetchBouquets } from '@/lib/api/client';
+import { isBuilder } from '@/lib/roseBuilder';
 import {
   bouquetCopy,
   bouquetCurrency,
   bouquetsInCountry,
   FLOWER_COUNTRY,
   bouquetsOfKind,
+  displayPrice,
   KIND_FILTERS,
   windowBouquets,
   windowMixesKinds,
@@ -142,7 +144,12 @@ export default function FlowersShop() {
 
                     <div className={styles.foot}>
                       <b className={styles.price}>
-                        {formatMoney(bouquet.price, bouquetCurrency(bouquet), locale)}
+                        {isBuilder(bouquet)
+                              ? t('flowers.fromPrice').replace(
+                                  '{price}',
+                                  formatMoney(displayPrice(bouquet), bouquetCurrency(bouquet), locale)
+                                )
+                              : formatMoney(bouquet.price, bouquetCurrency(bouquet), locale)}
                       </b>
                       <Button
                         variant="primary"

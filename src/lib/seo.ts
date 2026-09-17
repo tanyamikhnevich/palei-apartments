@@ -43,7 +43,27 @@ export const SITE_URL = resolveSiteUrl();
 export const SITE_NAME = 'Palei Apartments';
 
 /** The default preview card image — 1200×630, the size every chat app crops to. */
-export const DEFAULT_OG_IMAGE = '/og-default.png';
+export const DEFAULT_OG_IMAGE = '/og-apartments.png';
+
+/**
+ * The card a pasted link shows, by the part of the business it belongs to.
+ *
+ * A flower link that previews a sunset over Bat Yam tells the reader nothing
+ * about flowers, and the three businesses share one deployment — so the section
+ * in the path is what picks the logo. Built by `scripts/buildOgCards.ts`.
+ */
+const OG_IMAGE_BY_SECTION: [prefix: string, image: string][] = [
+  ['/flowers', '/og-flowers.png'],
+  ['/cars', '/og-cars.png'],
+];
+
+export function sectionOgImage(path: string): string {
+  const clean = path.split('?')[0];
+  const match = OG_IMAGE_BY_SECTION.find(
+    ([prefix]) => clean === prefix || clean.startsWith(`${prefix}/`)
+  );
+  return match ? match[1] : DEFAULT_OG_IMAGE;
+}
 
 export function absoluteUrl(path: string): string {
   if (/^https?:\/\//i.test(path)) return path;
@@ -92,9 +112,10 @@ export function pageMetadata(input: PageMetaInput): Metadata {
   // translation is a page in its own right, tied to the others by hreflang.
   const url = absoluteUrl(localePath(path, locale));
   const custom = Boolean(image);
-  const preview = absoluteUrl(image ?? DEFAULT_OG_IMAGE);
+  const preview = absoluteUrl(image ?? sectionOgImage(path));
 
-  // Dimensions are only declared for the shared card, whose size we control.
+  // Dimensions are only declared for the cards we build ourselves, whose size
+  // we control.
   // Stating 1200×630 for an uploaded photo that is nothing of the kind makes
   // the preview render wrong in exactly the apps that trust the numbers.
   const previewImage = custom

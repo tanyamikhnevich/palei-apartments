@@ -1,4 +1,5 @@
 import type { Bouquet, BouquetCategory, BouquetCopy, ItemKind } from '@/types/flower';
+import { builderFromPrice, isBuilder } from '@/lib/roseBuilder';
 import type { Locale } from '@/i18n/types';
 import type { CurrencyCode } from '@/types/settings';
 import type { Region } from '@/types/region';
@@ -38,6 +39,20 @@ export function sellsHere(item: { area: string }): boolean {
   return regionForArea(item.area).country === FLOWER_COUNTRY;
 }
 
+/** Whether the buyer is offered wrapping at all. */
+export function offersWrapping(bouquet: Bouquet): boolean {
+  return typeof bouquet.wrappingPrice === 'number' && bouquet.wrappingPrice > 0;
+}
+
+/**
+ * What the order comes to. One function for the price the buyer sees and the
+ * price the server charges, so the two cannot drift apart — the browser's
+ * number is never trusted, it is recomputed here from the stored bouquet.
+ */
+export function orderTotal(bouquet: Bouquet, wrapping: boolean): number {
+  return bouquet.price + (wrapping && offersWrapping(bouquet) ? bouquet.wrappingPrice! : 0);
+}
+
 export function bouquetCurrency(bouquet: Bouquet): CurrencyCode {
   return currencyOf(bouquet);
 }
@@ -65,9 +80,24 @@ export function bouquetsInCountry(
   return list.filter((b) => countryOf(b) === country);
 }
 
-/** What the window shows: listed only, cheapest first. */
+/**
+ * What the window shows: listed only, cheapest first — except the made-to-order
+ * card, which leads. It is the one thing in the window that answers "I want
+ * something else", so it belongs where someone looks first, not buried between
+ * two bouquets it happens to be priced beside.
+ */
 export function windowBouquets(list: Bouquet[]): Bouquet[] {
-  return list.filter((b) => b.listed).sort((a, b) => a.price - b.price);
+  return list
+    .filter((b) => b.listed)
+    .sort((a, b) => {
+      const byKind = Number(isBuilder(b)) - Number(isBuilder(a));
+      return byKind || displayPrice(a) - displayPrice(b);
+    });
+}
+
+/** What the card shows: a fixed price, or the cheapest the builder can do. */
+export function displayPrice(bouquet: Bouquet): number {
+  return isBuilder(bouquet) ? builderFromPrice(bouquet.builder) : bouquet.price;
 }
 
 /**
@@ -96,9 +126,11 @@ export function windowMixesKinds(list: Bouquet[]): boolean {
  */
 export const SAME_DAY_CUTOFF_HOUR = 14;
 
-export function earliestDelivery(bouquet: Bouquet, now = new Date()): string {
+export function earliestDelivery(bouquet: Bouquet, now = new Date(), leadDays = 0): string {
   const day = new Date(now);
   const tooLate = now.getHours() >= SAME_DAY_CUTOFF_HOUR;
   if (!bouquet.sameDay || tooLate) day.setDate(day.getDate() + 1);
+  // A colour that has to be brought in waits on top of the cut-off, not instead of it.
+  if (leadDays > 0) day.setDate(day.getDate() + leadDays);
   return day.toISOString().slice(0, 10);
 }

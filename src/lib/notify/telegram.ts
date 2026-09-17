@@ -35,12 +35,16 @@ export interface CarNotification {
 export interface FlowerNotification {
   bouquet: string;
   price: string;
+  /** Gift wrapping, when the buyer ticked it — the price above includes it. */
+  wrapping?: boolean;
   date: string;
   slot: string;
   address: string;
   recipient: string;
   recipientPhone: string;
   card?: string;
+  /** What the buyer asked the florist to keep in mind. */
+  comment?: string;
   guest: string;
   contact: string;
 }
@@ -177,10 +181,12 @@ export async function notifyFlowerOrder(f: FlowerNotification): Promise<boolean>
   const lines = [
     '💐 <b>New flower order</b>',
     `🌸 ${escapeHtml(f.bouquet)} — ${escapeHtml(f.price)}`,
+    f.wrapping ? '🎁 Gift wrapped' : null,
     `📅 ${escapeHtml(f.date)} · ${escapeHtml(f.slot)}`,
     `📍 ${escapeHtml(f.address)}`,
     `🎁 ${escapeHtml(f.recipient)} · ${phoneHtml(f.recipientPhone)}`,
     f.card ? `✍️ «${escapeHtml(f.card)}»` : null,
+    f.comment ? `💬 ${escapeHtml(f.comment)}` : null,
     `👤 ${escapeHtml(f.guest)} · ${phoneHtml(f.contact)}`,
   ].filter(Boolean) as string[];
 

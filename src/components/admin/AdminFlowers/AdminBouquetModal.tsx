@@ -6,7 +6,9 @@ import Icon from '@/components/ui/Icon/Icon';
 import { AdminField, AdminInput } from '@/components/admin/ui/AdminField';
 import PhotoManager from '@/components/admin/ui/PhotoManager';
 import AdminBouquetCost from './AdminBouquetCost';
+import AdminBouquetBuilder from './AdminBouquetBuilder';
 import { blankCost, costSuggestions, hasCost } from '@/lib/bouquetCost';
+import { blankBuilder } from '@/lib/roseBuilder';
 import { CATEGORIES, DEFAULT_FLOWER_AREA, FLOWER_REGIONS, sellsHere } from '@/lib/flowers';
 import { CURRENCY_SYMBOL } from '@/lib/money';
 import { currencyForArea } from '@/lib/regions';
@@ -219,6 +221,58 @@ export default function AdminBouquetModal({
               }
             />
           </div>
+
+          <div className={styles.checks}>
+            <label>
+              <input
+                type="checkbox"
+                checked={Boolean(form.builder)}
+                onChange={(e) => set('builder', e.target.checked ? blankBuilder() : undefined)}
+              />
+              Made to order (rose builder)
+            </label>
+          </div>
+          {form.builder ? (
+            <AdminBouquetBuilder
+              builder={form.builder}
+              currency={currency}
+              onChange={(builder) => set('builder', builder)}
+            />
+          ) : (
+            <p className={styles.tabHint}>
+              With this on, the card asks for a count, a colour and how it is presented, and
+              prices itself per stem. The price above is then only a fallback — the window shows
+              &ldquo;from&rdquo; the cheapest order it can make.
+            </p>
+          )}
+
+          <div className={styles.checks}>
+            <label>
+              <input
+                type="checkbox"
+                disabled={Boolean(form.builder)}
+                checked={typeof form.wrappingPrice === 'number'}
+                onChange={(e) => set('wrappingPrice', e.target.checked ? 40 : undefined)}
+              />
+              Can be gift wrapped
+            </label>
+          </div>
+          {typeof form.wrappingPrice === 'number' && (
+            <div className={styles.grid}>
+              <AdminInput
+                label={`Wrapping surcharge (${symbol})`}
+                type="number"
+                min={0}
+                value={form.wrappingPrice}
+                onChange={(e) => set('wrappingPrice', parseInt(e.target.value, 10) || 0)}
+              />
+            </div>
+          )}
+          <p className={styles.tabHint}>
+            {form.builder
+              ? 'The builder has its own presentation options, so the single wrapping checkbox is off here.'
+              : 'With this on, the order form shows one checkbox and adds the surcharge to the total. Leave it off for anything there is nothing to wrap — a box, a basket, balloons.'}
+          </p>
 
           {/* Bouquets are shot tall, so the thumbnails are too. */}
           <PhotoManager

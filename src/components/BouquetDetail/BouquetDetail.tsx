@@ -7,7 +7,7 @@ import Button from '@/components/ui/Button/Button';
 import Icon from '@/components/ui/Icon/Icon';
 import FlowerOrderForm from '@/components/FlowersShop/FlowerOrderForm';
 import { useLanguage } from '@/i18n/LanguageProvider';
-import { bouquetCopy, bouquetCurrency, displayPrice } from '@/lib/flowers';
+import { bouquetCopy, bouquetCurrency, displayPrice, sizeLabelKey } from '@/lib/flowers';
 import { formatMoney } from '@/lib/money';
 import { isBuilder } from '@/lib/roseBuilder';
 import type { Bouquet } from '@/types/flower';
@@ -46,6 +46,7 @@ export default function BouquetDetail({
             className={styles.media}
             placeholderLabel={copy.name}
             sizes="(max-width: 900px) 100vw, 520px"
+            fit={bouquet.kind === 'wine' ? 'contain' : 'cover'}
           />
 
           <div className={styles.info}>
@@ -58,7 +59,7 @@ export default function BouquetDetail({
               )}
               {bouquet.stems && (
                 <span className={styles.tag}>
-                  {t(bouquet.kind === 'balloons' ? 'flowers.pieces' : 'flowers.stems').replace(
+                  {t(sizeLabelKey(bouquet.kind)).replace(
                     '{n}',
                     String(bouquet.stems)
                   )}

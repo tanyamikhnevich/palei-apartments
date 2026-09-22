@@ -644,3 +644,187 @@
   margin-top: 8px;
   padding-inline-start: 22px;
 }
+
+/* Kind filter over the window list — one tab per kind that has anything in it. */
+.kindTabs { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+
+/* Search and price order sit at the end of the tab row. */
+.search { width: 220px; margin-inline-start: auto; }
+.sort { width: auto; }
+
+@media (max-width: 640px) {
+  .search { width: 100%; margin-inline-start: 0; }
+}
+
+.kindTab {
+  display: inline-flex;
+  align-items: center;
+  padding: 7px 12px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  font: inherit;
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  color: var(--ink-soft);
+  cursor: pointer;
+
+  &:hover { border-color: var(--navy); color: var(--navy); }
+}
+
+.kindTabOn {
+  border-color: var(--navy);
+  background: var(--navy);
+  color: #fff;
+
+  &:hover { color: #fff; }
+
+  .count { background: rgba(255, 255, 255, 0.2); color: #fff; }
+}
+
+.rowWrap { display: flex; flex-direction: column; gap: 10px; }
+
+.section {
+  margin: 14px 0 0;
+  font-size: var(--fs-base);
+  letter-spacing: -0.01em;
+}
+
+.rowWrap:first-child .section { margin-top: 0; }
+
+/* Save / delete result. Fixed and above the edit modal, so a refused save is
+   seen while the form is still open. */
+.toast {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1200;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: min(560px, calc(100vw - 32px));
+  padding: 12px 14px;
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-lg);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+
+  svg { flex: none; }
+  span { overflow-wrap: anywhere; }
+}
+
+.toastOk { background: var(--ok-bg); color: var(--ok-fg); }
+.toastError { background: var(--busy-bg); color: var(--busy-fg); border: 1px solid var(--busy-line); }
+
+.toastClose {
+  display: grid;
+  place-items: center;
+  flex: none;
+  margin-inline-start: auto;
+  padding: 4px;
+  border: none;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+  opacity: 0.7;
+
+  &:hover { opacity: 1; }
+}
+
+/* Price list */
+.catalogGroup { display: flex; flex-direction: column; gap: 8px; }
+
+.catalogHead,
+.catalogRow {
+  display: grid;
+  /* Two names, then the numbers; the last column fits history, Save and delete. */
+  grid-template-columns:
+    minmax(140px, 1fr) minmax(140px, 1fr) 120px 96px 44px 88px 96px 168px;
+  align-items: center;
+  gap: 10px;
+}
+
+.catalogHead {
+  padding: 0 12px;
+  font-size: var(--fs-2xs);
+  font-weight: 700;
+  color: var(--ink-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.catalogRow {
+  padding: 10px 12px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+
+  .actions { justify-content: flex-end; flex-wrap: nowrap; }
+}
+
+.catalogUses { font-size: var(--fs-xs); white-space: nowrap; }
+
+/* The Hebrew column is read right to left, heading included. */
+.rtlHead { text-align: right; }
+
+/* Unsaved changes — the row says so until its Save is pressed. */
+.catalogDirty { border-color: var(--accent); }
+
+@media (max-width: 900px) {
+  .catalogHead { display: none; }
+  .catalogRow { grid-template-columns: 1fr 1fr; }
+}
+
+/* A sheet line that follows the price list: its price is the list's. */
+.costLinked { background: var(--mist); }
+
+.costLinkTag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--fs-2xs);
+  font-weight: 700;
+  color: var(--navy);
+}
+
+.costLinked input[readonly] {
+  background: transparent;
+  color: var(--ink-soft);
+  cursor: default;
+}
+
+/* Price history under a list row */
+.iconBtnOn { background: var(--mist); color: var(--navy); }
+
+.priceWas {
+  display: block;
+  font-size: var(--fs-2xs);
+  font-weight: 500;
+  color: var(--ink-soft);
+}
+
+.history {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 4px 0 0;
+  padding: 10px 12px;
+  list-style: none;
+  background: var(--mist);
+  border-radius: var(--r-sm);
+  font-size: var(--fs-sm);
+
+  li {
+    display: grid;
+    grid-template-columns: 96px 90px 60px 1fr;
+    align-items: baseline;
+    gap: 10px;
+  }
+}
+
+.historyDate { font-variant-numeric: tabular-nums; color: var(--ink-soft); }
+/* Dearer is the bad news for a margin, so it gets the warning colour. */
+.historyUp { color: var(--busy-fg); font-weight: 700; }
+.historyDown { color: var(--ok-fg); font-weight: 700; }

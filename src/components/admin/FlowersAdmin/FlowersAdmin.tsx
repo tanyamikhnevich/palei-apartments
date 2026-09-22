@@ -8,6 +8,7 @@ import Icon from '@/components/ui/Icon/Icon';
 import type { IconName } from '@/components/ui/Icon/Icon';
 import AdminFlowers, { type FlowersTab } from '@/components/admin/AdminFlowers/AdminFlowers';
 import AdminAccount from '@/components/admin/AdminAccount/AdminAccount';
+import AdminCostCatalog from '@/components/admin/AdminFlowers/AdminCostCatalog';
 import { GROUP_BRAND, serviceFor } from '@/lib/services';
 import styles from './FlowersAdmin.module.scss';
 
@@ -29,11 +30,12 @@ import styles from './FlowersAdmin.module.scss';
 /* The shop's own mark, from the same registry the public header reads. */
 const SHOP = serviceFor('/flowers');
 
-const SECTIONS = ['window', 'orders', 'account'] as const;
+const SECTIONS = ['window', 'costs', 'orders', 'account'] as const;
 export type ShopSection = (typeof SECTIONS)[number];
 
 const NAV: { id: ShopSection; icon: IconName; label: string; sub: string }[] = [
   { id: 'window', icon: 'flower', label: 'Window', sub: 'Bouquets and balloons on offer, and what each one costs to make.' },
+  { id: 'costs', icon: 'grid', label: 'Cost prices', sub: 'Everything the shop buys, priced once. Change a price here and every bouquet using it follows.' },
   { id: 'orders', icon: 'inbox', label: 'Orders', sub: 'Deliveries placed from the shop, and where each one has got to.' },
   { id: 'account', icon: 'shield', label: 'Account', sub: 'Your password and the devices you are signed in on.' },
 ];
@@ -147,6 +149,8 @@ export default function FlowersAdmin() {
         <div className={styles.content}>
           {section === 'account' ? (
             <AdminAccount />
+          ) : section === 'costs' ? (
+            <AdminCostCatalog />
           ) : (
             <AdminFlowers
               tab={section as FlowersTab}

@@ -29,7 +29,15 @@ export const CATEGORIES: Record<ItemKind, BouquetCategory[]> = {
   flowers: ['classic', 'seasonal', 'roses', 'boxed', 'plants'],
   balloons: ['numbers', 'birthday', 'baby'],
   mixed: ['classic', 'boxed', 'birthday', 'baby'],
+  wine: ['red', 'white', 'rose', 'sparkling'],
 };
+
+/** Which message sizes the item: stems, balloons or bottles. */
+export function sizeLabelKey(kind: ItemKind): string {
+  if (kind === 'balloons') return 'flowers.pieces';
+  if (kind === 'wine') return 'flowers.bottles';
+  return 'flowers.stems';
+}
 
 /**
  * Whether the shop reaches it at all. Takes a plain area because the callers
@@ -86,14 +94,18 @@ export function bouquetsInCountry(
  * something else", so it belongs where someone looks first, not buried between
  * two bouquets it happens to be priced beside.
  */
-export function windowBouquets(list: Bouquet[]): Bouquet[] {
+export function windowBouquets(list: Bouquet[], order: PriceOrder = 'asc'): Bouquet[] {
+  const sign = order === 'asc' ? 1 : -1;
   return list
     .filter((b) => b.listed)
     .sort((a, b) => {
       const byKind = Number(isBuilder(b)) - Number(isBuilder(a));
-      return byKind || displayPrice(a) - displayPrice(b);
+      return byKind || sign * (displayPrice(a) - displayPrice(b));
     });
 }
+
+/** Cheapest first, or dearest first — the one sort the window offers. */
+export type PriceOrder = 'asc' | 'desc';
 
 /** What the card shows: a fixed price, or the cheapest the builder can do. */
 export function displayPrice(bouquet: Bouquet): number {
@@ -105,13 +117,37 @@ export function displayPrice(bouquet: Bouquet): number {
  * and an order form, but nobody browses them together: a wall of birthday foil
  * between two bouquets helps neither shopper.
  */
-export type KindFilter = 'all' | 'flowers' | 'balloons';
-export const KIND_FILTERS: KindFilter[] = ['all', 'flowers', 'balloons'];
+export type KindFilter = 'all' | 'flowers' | 'balloons' | 'wine';
+export const KIND_FILTERS: KindFilter[] = ['all', 'flowers', 'balloons', 'wine'];
 
-/** `mixed` is both at once, so it belongs under either heading — never alone. */
+/**
+ * `mixed` is flowers and balloons at once, so it belongs under either of those
+ * headings — never alone. Wine is only ever wine.
+ */
 export function bouquetsOfKind(list: Bouquet[], kind: KindFilter): Bouquet[] {
   if (kind === 'all') return list;
+  if (kind === 'wine') return list.filter((b) => b.kind === 'wine');
   return list.filter((b) => b.kind === kind || b.kind === 'mixed');
+}
+
+/**
+ * The order the window is laid out in: flowers first, then balloons, the
+ * sets that are both, and the wine last — each under its own heading rather
+ * than all in one heap sorted by price.
+ */
+export const SECTION_ORDER: ItemKind[] = ['flowers', 'balloons', 'mixed', 'wine'];
+
+export interface WindowSection {
+  kind: ItemKind;
+  items: Bouquet[];
+}
+
+/** Splits an already-sorted window into its sections, dropping empty ones. */
+export function windowSections(list: Bouquet[]): WindowSection[] {
+  return SECTION_ORDER.map((kind) => ({
+    kind,
+    items: list.filter((b) => b.kind === kind),
+  })).filter((s) => s.items.length > 0);
 }
 
 /** Whether the split is worth offering at all — one kind needs no switch. */
@@ -133,4 +169,28 @@ export function earliestDelivery(bouquet: Bouquet, now = new Date(), leadDays = 
   // A colour that has to be brought in waits on top of the cut-off, not instead of it.
   if (leadDays > 0) day.setDate(day.getDate() + leadDays);
   return day.toISOString().slice(0, 10);
+}
+
+/**
+ * The admin list's order: by kind in window order, then by category as the
+ * form lists them, then by price within the category, then by name — so a
+ * section reads like a shelf, not like the order things were typed in.
+ */
+export function adminSorted(list: Bouquet[], order: PriceOrder = 'asc'): Bouquet[] {
+  const sign = order === 'asc' ? 1 : -1;
+  const rank = (b: Bouquet) => {
+    const kind = SECTION_ORDER.indexOf(b.kind);
+    const cats = CATEGORIES[b.kind] ?? [];
+    return [kind < 0 ? SECTION_ORDER.length : kind, Math.max(0, cats.indexOf(b.category))];
+  };
+  return [...list].sort((a, b) => {
+    const [ka, ca] = rank(a);
+    const [kb, cb] = rank(b);
+    return (
+      ka - kb ||
+      ca - cb ||
+      sign * (displayPrice(a) - displayPrice(b)) ||
+      a.locales.en.name.trim().localeCompare(b.locales.en.name.trim())
+    );
+  });
 }

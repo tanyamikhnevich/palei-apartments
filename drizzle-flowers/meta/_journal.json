@@ -50,6 +50,27 @@
       "when": 1789670265558,
       "tag": "0006_red_stone_men",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1790079383812,
+      "tag": "0007_foamy_klaw",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1790079716328,
+      "tag": "0008_remarkable_maximus",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1790079908108,
+      "tag": "0009_productive_red_wolf",
+      "breakpoints": true
     }
   ]
 }

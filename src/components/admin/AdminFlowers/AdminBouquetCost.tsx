@@ -95,7 +95,16 @@ export default function AdminBouquetCost({
         </div>
 
         {cost.lines.map((line) => (
-          <div className={styles.costRow} role="row" key={line.id}>
+          <div
+            className={`${styles.costRow} ${line.itemId ? styles.costLinked : ''}`}
+            role="row"
+            key={line.id}
+            title={
+              line.itemId
+                ? 'From the price list — change its price under Cost prices, and every bouquet follows'
+                : undefined
+            }
+          >
             <input
               className="input"
               type="number"
@@ -111,9 +120,12 @@ export default function AdminBouquetCost({
               value={line.name}
               suggestions={suggestions}
               money={money}
-              onType={(name) => setLine(line.id, { name })}
+              /* Typing over a listed name makes it this sheet's own line again. */
+              onType={(name) => setLine(line.id, { name, itemId: undefined })}
               /* An outright choice, so it carries the whole row with it. */
-              onPick={(s) => setLine(line.id, { name: s.name, unitNet: s.unitNet, vat: s.vat })}
+              onPick={(s) =>
+                setLine(line.id, { itemId: s.itemId, name: s.name, unitNet: s.unitNet, vat: s.vat })
+              }
             />
             <input
               className="input"
@@ -122,6 +134,8 @@ export default function AdminBouquetCost({
               step="any"
               inputMode="decimal"
               aria-label="Price without VAT"
+              /* A listed price is changed in the list, once, for everyone. */
+              readOnly={Boolean(line.itemId)}
               value={numberValue(line.unitNet)}
               onWheel={(e) => e.currentTarget.blur()}
               onChange={(e) => setLine(line.id, { unitNet: toNumber(e.target.value) })}
@@ -131,6 +145,7 @@ export default function AdminBouquetCost({
                 type="checkbox"
                 aria-label="Add VAT to this line"
                 checked={line.vat}
+                disabled={Boolean(line.itemId)}
                 onChange={(e) => setLine(line.id, { vat: e.target.checked })}
               />
             </label>
@@ -154,7 +169,13 @@ export default function AdminBouquetCost({
       </button>
 
       <p className={styles.costHint}>
-        {suggestions.length > 0 ? (
+        {suggestions.some((s) => s.itemId) ? (
+          <>
+            Under <b>Item</b>, the arrow opens the price list. A line picked from it (shaded) takes
+            the list&apos;s price and follows it: change the price under <b>Cost prices</b> and every
+            bouquet using it is re-costed. Type a name of your own for a one-off line.
+          </>
+        ) : suggestions.length > 0 ? (
           <>
             Under <b>Item</b>, the arrow opens everything the shop has bought before, commonest
             first. Pick one and its price and VAT come with it — both still yours to change.

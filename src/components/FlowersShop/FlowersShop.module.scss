@@ -7,12 +7,26 @@
   margin-bottom: 24px;
 }
 
-/* The window's only filter: which of the two shops in one you are looking at. */
+/* Kind filter on the left, price order on the right. */
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 28px;
+}
+
+/* Which of the shops in one you are looking at. */
 .kinds {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  margin-bottom: 28px;
+}
+
+.sort {
+  width: auto;
+  margin-inline-start: auto;
 }
 
 .kindBtn {
@@ -41,6 +55,48 @@
   &:hover {
     color: #fff;
   }
+}
+
+/* One heading per kind — flowers, balloons, wine — instead of one heap. */
+.group + .group {
+  margin-top: 48px;
+}
+
+.groupTitle {
+  margin: 0 0 18px;
+  font-size: var(--fs-xl);
+  letter-spacing: -0.02em;
+}
+
+/* Red · white · sparkling, inside the wine section. Quieter than the kinds. */
+.subKinds {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 18px;
+}
+
+.subKind {
+  padding: 0.45em 1em;
+  border-radius: 999px;
+  border: 1px solid var(--line-2);
+  background: none;
+  font-family: inherit;
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  color: var(--ink-soft);
+  cursor: pointer;
+
+  &:hover {
+    border-color: var(--navy);
+    color: var(--navy);
+  }
+}
+
+.subKindOn {
+  background: var(--mist);
+  border-color: var(--navy);
+  color: var(--navy);
 }
 
 .grid {

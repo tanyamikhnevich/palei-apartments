@@ -16,6 +16,12 @@ type PhotoGalleryProps = {
   placeholderLabel?: string;
   autoPlayMs?: number;
   showDots?: boolean;
+  /**
+   * `contain` shows the whole photo on a white ground instead of cropping it
+   * to the frame — for product shots like a wine bottle, which are far taller
+   * than the frame and lose the label when cropped.
+   */
+  fit?: 'cover' | 'contain';
   children?: React.ReactNode;
 };
 
@@ -27,6 +33,7 @@ export default function PhotoGallery({
   placeholderLabel,
   autoPlayMs = 0,
   showDots = true,
+  fit = 'cover',
   children,
 }: PhotoGalleryProps) {
   const urls = useMemo(() => photos.filter((p) => isPhotoUrl(p)), [photos]);
@@ -83,7 +90,10 @@ export default function PhotoGallery({
 
   return (
     <div className={`${styles.gallery} ${className}`.trim()}>
-      <div className={styles.frame} onPointerEnter={() => setEngaged(true)}>
+      <div
+        className={`${styles.frame} ${fit === 'contain' ? styles.contain : ''}`.trim()}
+        onPointerEnter={() => setEngaged(true)}
+      >
         {current ? (
           <>
             {urls.map((url, i) =>

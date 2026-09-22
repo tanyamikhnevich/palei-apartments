@@ -116,15 +116,13 @@ export function withoutCost(bouquet: Bouquet): Bouquet {
 }
 
 /**
- * One thing the florist has bought before, as the costing sheet offers it back.
- *
- * There is no catalogue of stems anywhere and there should not be one: a shop
- * that has to maintain a price list alongside its bouquets ends up with two
- * versions of the truth. The sheets themselves are the list — roses typed into
- * six bouquets are simply a thing bought six times, and the sixth spelling and
- * price are as good a suggestion as any register could give.
+ * One thing the costing sheet offers under Item: an entry from the price list
+ * (see `CostItem`), or — until the list has entries — something typed into an
+ * earlier sheet, gathered back out of them.
  */
 export interface CostSuggestion {
+  /** Set when it comes from the price list; picking it links the line. */
+  itemId?: string;
   /** As it was last spelled — that spelling is what the list offers. */
   name: string;
   unitNet: number;

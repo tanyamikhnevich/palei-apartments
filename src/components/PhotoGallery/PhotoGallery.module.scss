@@ -11,6 +11,16 @@
   background: var(--mist);
 }
 
+/* Product shots: the whole thing, centred on white, never cropped. */
+.contain {
+  background: #fff;
+
+  .img {
+    object-fit: contain;
+    padding: 12px;
+  }
+}
+
 /* Slides are stacked; the active one fades in over the one it replaces. */
 .img {
   object-fit: cover;

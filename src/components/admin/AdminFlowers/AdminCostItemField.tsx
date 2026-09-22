@@ -99,7 +99,7 @@ export default function AdminCostItemField({
             <li className={styles.pickEmpty}>Nothing bought under that name yet</li>
           ) : (
             shown.map((s) => (
-              <li key={s.name}>
+              <li key={s.itemId ?? s.name}>
                 <button
                   type="button"
                   className={styles.pickOption}

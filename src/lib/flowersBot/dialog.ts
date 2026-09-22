@@ -37,6 +37,7 @@ const KIND_LABELS: Record<ItemKind, string> = {
   flowers: '💐 Цветы',
   balloons: '🎈 Шары',
   mixed: '💐🎈 Микс',
+  wine: '🍷 Вино',
 };
 
 const CANCEL: InlineKeyboard = [[{ text: '✖️ Отмена', callback_data: 'cancel' }]];
@@ -341,7 +342,11 @@ function ask(chatId: number, draft: Draft) {
     case 'stems':
       return sendText(
         chatId,
-        data.kind === 'balloons' ? '🎈 Сколько шаров?' : '🌹 Сколько стеблей?',
+        data.kind === 'balloons'
+          ? '🎈 Сколько шаров?'
+          : data.kind === 'wine'
+            ? '🍷 Сколько бутылок?'
+            : '🌹 Сколько стеблей?',
         SKIP('stems')
       );
     case 'sameDay':

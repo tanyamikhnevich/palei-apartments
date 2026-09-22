@@ -1,0 +1,1 @@
+ALTER TABLE "cost_items" ADD COLUMN "name_he" text;

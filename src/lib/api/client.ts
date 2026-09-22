@@ -4,6 +4,7 @@ import type { Review, ReviewStatus } from '@/types/review';
 import type { Car } from '@/types/car';
 import type {
   Bouquet,
+  CostItem,
   FlowerOrder,
   FlowerOrderDraft,
   FlowerOrderStatus,
@@ -26,12 +27,30 @@ export class ApiError extends Error {
   }
 }
 
+/**
+ * Not every failure comes back as our JSON: a body over the host's limit or a
+ * crashed function answers with a plain page, and `res.json()` on that throws
+ * "Unexpected token" — which told nobody what went wrong. The status does.
+ */
 async function parseJson<T>(res: Response): Promise<T> {
-  const data = await res.json();
+  const text = await res.text();
+  let data: unknown = null;
+  try {
+    data = text ? JSON.parse(text) : null;
+  } catch {
+    if (res.ok) throw new ApiError('The server sent back something unreadable', res.status);
+  }
   if (!res.ok) {
-    throw new ApiError((data as { error?: string }).error ?? res.statusText, res.status);
+    const own = (data as { error?: string } | null)?.error;
+    throw new ApiError(own ?? httpProblem(res), res.status);
   }
   return data as T;
+}
+
+function httpProblem(res: Response): string {
+  if (res.status === 413) return 'Too large for the server (413) — try a smaller photo';
+  if (res.status === 401 || res.status === 403) return 'Signed out — sign in again and retry';
+  return `Server error ${res.status}${res.statusText ? ` ${res.statusText}` : ''}`;
 }
 
 export type ApartmentsLoadResult = {
@@ -516,4 +535,28 @@ export async function fetchImportedBlocks(): Promise<ImportedBlock[]> {
   const res = await apiFetch('/api/calendar/blocks', { cache: 'no-store' });
   const data = await parseJson<{ blocks: ImportedBlock[] }>(res);
   return data.blocks;
+}
+
+export type CostItemsLoadResult = { items: CostItem[]; writable: boolean };
+
+export async function fetchCostItems(): Promise<CostItemsLoadResult> {
+  const res = await apiFetch('/api/flowers/cost-items', { cache: 'no-store' });
+  return parseJson<CostItemsLoadResult>(res);
+}
+
+/** Saves an entry; `updated` is how many bouquets were re-costed by it. */
+export async function saveCostItem(item: CostItem): Promise<{ item: CostItem; updated: number }> {
+  const res = await apiFetch('/api/flowers/cost-items', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(item),
+  });
+  return parseJson<{ item: CostItem; updated: number }>(res);
+}
+
+export async function deleteCostItem(id: string): Promise<{ updated: number }> {
+  const res = await apiFetch(`/api/flowers/cost-items?id=${encodeURIComponent(id)}`, {
+    method: 'DELETE',
+  });
+  return parseJson<{ ok: true; updated: number }>(res);
 }

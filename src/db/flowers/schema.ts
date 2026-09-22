@@ -1,6 +1,8 @@
 import {
   boolean,
   date,
+  doublePrecision,
+  index,
   integer,
   jsonb,
   pgTable,
@@ -13,6 +15,8 @@ import type {
   BouquetCategory,
   BouquetCopy,
   BouquetCost,
+  CostGroup,
+  CostItem,
   DeliverySlot,
   FlowerOrder,
   FlowerOrderStatus,
@@ -151,4 +155,51 @@ export const botDrafts = pgTable('bot_drafts', {
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 });
 
-export const flowersSchema = { bouquets, flowerOrders, botDrafts };
+/**
+ * The price list the costing sheets draw from — one row per thing bought, so
+ * its price lives in one place. See `CostItem`.
+ */
+export const costItems = pgTable('cost_items', {
+  id: varchar('id', { length: 64 }).primaryKey(),
+  name: text('name').notNull(),
+  nameHe: text('name_he'),
+  group: varchar('group', { length: 16 }).notNull().default('other').$type<CostGroup>(),
+  /** Kept to the cent: a stem bought at 3.60 is not a stem at 4. */
+  unitNet: doublePrecision('unit_net').notNull().default(0),
+  vat: boolean('vat').notNull().default(true),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+});
+
+export type CostItemRow = typeof costItems.$inferSelect;
+
+export function rowToCostItem(row: CostItemRow): CostItem {
+  return {
+    id: row.id,
+    name: row.name,
+    nameHe: row.nameHe ?? undefined,
+    group: row.group,
+    unitNet: row.unitNet,
+    vat: row.vat,
+    updatedAt: row.updatedAt.toISOString(),
+  };
+}
+
+/**
+ * Every price a list entry has had. Written on each change of price or VAT, so
+ * "roses went from 3.00 to 3.60 in March" can be read back rather than
+ * remembered. Kept after the entry is deleted: it is a record, not a setting.
+ */
+export const costItemPrices = pgTable(
+  'cost_item_prices',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    itemId: varchar('item_id', { length: 64 }).notNull(),
+    unitNet: doublePrecision('unit_net').notNull(),
+    vat: boolean('vat').notNull(),
+    changedAt: timestamp('changed_at', { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => ({ byItem: index('cost_item_prices_item_idx').on(t.itemId) })
+);
+
+export const flowersSchema = { bouquets, flowerOrders, botDrafts, costItems, costItemPrices };

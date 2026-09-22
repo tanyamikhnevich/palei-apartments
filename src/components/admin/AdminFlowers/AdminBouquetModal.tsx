@@ -1,13 +1,14 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Button from '@/components/ui/Button/Button';
 import Icon from '@/components/ui/Icon/Icon';
 import { AdminField, AdminInput } from '@/components/admin/ui/AdminField';
 import PhotoManager from '@/components/admin/ui/PhotoManager';
 import AdminBouquetCost from './AdminBouquetCost';
 import AdminBouquetBuilder from './AdminBouquetBuilder';
-import { blankCost, costSuggestions, hasCost } from '@/lib/bouquetCost';
+import { blankCost, costSuggestions, hasCost, type CostSuggestion } from '@/lib/bouquetCost';
+import { costItemLabel, itemsById, relinkCost } from '@/lib/costCatalog';
 import { blankBuilder } from '@/lib/roseBuilder';
 import { CATEGORIES, DEFAULT_FLOWER_AREA, FLOWER_REGIONS, sellsHere } from '@/lib/flowers';
 import { CURRENCY_SYMBOL } from '@/lib/money';
@@ -18,6 +19,7 @@ import {
   type Bouquet,
   type BouquetCost,
   type BouquetCategory,
+  type CostItem,
   type ItemKind,
 } from '@/types/flower';
 import styles from './AdminFlowers.module.scss';
@@ -43,6 +45,8 @@ interface AdminBouquetModalProps {
    * has been bought before. Nothing here is read for anything else.
    */
   library: Bouquet[];
+  /** The shop's price list — what the sheet's Item column picks from. */
+  priceList: CostItem[];
   /** The save is in flight — the form waits rather than closing on hope. */
   saving?: boolean;
   onClose: () => void;
@@ -52,6 +56,7 @@ interface AdminBouquetModalProps {
 export default function AdminBouquetModal({
   bouquet,
   library,
+  priceList,
   saving = false,
   onClose,
   onSave,
@@ -73,10 +78,27 @@ export default function AdminBouquetModal({
      and suggesting one where the other belongs is worse than suggesting
      nothing. Today the shop is Israel-only, so this filter costs nothing — it
      is here for the day that stops being true. */
-  const suggestions = useMemo(
-    () => costSuggestions(library.filter((b) => currencyForArea(b.area) === currency)),
-    [library, currency]
+  const suggestions = useMemo<CostSuggestion[]>(
+    () =>
+      priceList.length
+        ? priceList.map((item) => ({
+            itemId: item.id,
+            name: costItemLabel(item),
+            unitNet: item.unitNet,
+            vat: item.vat,
+            uses: 0,
+          }))
+        : costSuggestions(library.filter((b) => currencyForArea(b.area) === currency)),
+    [priceList, library, currency]
   );
+
+  /* A sheet opened after the list moved shows the list's prices, not the ones
+     it was last saved with — that is what saving it would store anyway. */
+  useEffect(() => {
+    if (!priceList.length) return;
+    const items = itemsById(priceList);
+    setForm((prev) => (prev.cost ? { ...prev, cost: relinkCost(prev.cost, items) } : prev));
+  }, [priceList]);
 
   /* Always present in the form — `save` is what decides whether it is kept. */
   const cost: BouquetCost = form.cost ?? blankCost();
@@ -212,7 +234,13 @@ export default function AdminBouquetModal({
               onChange={(e) => set('price', parseInt(e.target.value, 10) || 0)}
             />
             <AdminInput
-              label={form.kind === 'balloons' ? 'Balloons (optional)' : 'Stems (optional)'}
+              label={
+                form.kind === 'balloons'
+                  ? 'Balloons (optional)'
+                  : form.kind === 'wine'
+                    ? 'Bottles (optional)'
+                    : 'Stems (optional)'
+              }
               type="number"
               min={0}
               value={form.stems ?? ''}

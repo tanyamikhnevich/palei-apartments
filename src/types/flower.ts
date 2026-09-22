@@ -16,10 +16,11 @@ import type { ApartmentArea } from './region';
 /**
  * What is being sold. Balloons share the shop, the delivery and the order form
  * with flowers — the only thing that differs is what arrives — so they are a
- * kind of item here, not a second product with its own everything.
+ * kind of item here, not a second product with its own everything. Wine joined
+ * on the same terms: a bottle to go with the bouquet, same delivery, same form.
  */
-export type ItemKind = 'flowers' | 'balloons' | 'mixed';
-export const ITEM_KINDS: ItemKind[] = ['flowers', 'balloons', 'mixed'];
+export type ItemKind = 'flowers' | 'balloons' | 'mixed' | 'wine';
+export const ITEM_KINDS: ItemKind[] = ['flowers', 'balloons', 'mixed', 'wine'];
 
 export type BouquetCategory =
   | 'classic'
@@ -29,7 +30,11 @@ export type BouquetCategory =
   | 'plants'
   | 'numbers'
   | 'birthday'
-  | 'baby';
+  | 'baby'
+  | 'red'
+  | 'white'
+  | 'rose'
+  | 'sparkling';
 
 export interface BouquetCopy {
   name: string;
@@ -176,6 +181,13 @@ export interface RoseSelection {
 /** One thing that went into the bouquet: how many, what, and what it cost. */
 export interface CostLine {
   id: string;
+  /**
+   * The price-list entry this line is bought from — see {@link CostItem}. Set,
+   * the name, price and VAT below are the list's, copied in and rewritten
+   * whenever the list changes, so every sheet using it moves together. Unset,
+   * the line is typed by hand and belongs to this sheet alone.
+   */
+  itemId?: string;
   qty: number;
   name: string;
   /** Price of one, net of VAT — the number the supplier's invoice quotes. */
@@ -186,6 +198,48 @@ export interface CostLine {
    * not, and both go into the same bouquet.
    */
   vat: boolean;
+}
+
+/** How the price list is shelved. */
+export type CostGroup = 'flowers' | 'greenery' | 'balloons' | 'packaging' | 'wine' | 'other';
+export const COST_GROUPS: CostGroup[] = [
+  'flowers',
+  'greenery',
+  'balloons',
+  'packaging',
+  'wine',
+  'other',
+];
+
+/**
+ * One thing the shop buys, priced once: "Roses, Lovely Red 50 cm" at 3.00 net.
+ *
+ * The costing sheets point at these rather than each keeping its own copy of
+ * the price, so a supplier putting roses up is one edit — here — and every
+ * bouquet made of them is re-costed at once. Admin-only, like the sheets.
+ */
+export interface CostItem {
+  id: string;
+  /** The Russian name — or whatever it is called, for things with one name. */
+  name: string;
+  /** The Hebrew name, as it reads on the supplier's invoice. */
+  nameHe?: string;
+  group: CostGroup;
+  /** Price of one, net of VAT — as the supplier's invoice quotes it. */
+  unitNet: number;
+  /** Whether VAT is paid on top; the rate is the sheet's. */
+  vat: boolean;
+  updatedAt?: string;
+  /** Every price it has had, oldest first — the first entry is where it started. */
+  history?: CostPricePoint[];
+}
+
+/** One price a list entry had, and from when. */
+export interface CostPricePoint {
+  unitNet: number;
+  vat: boolean;
+  /** ISO timestamp of the change. */
+  at: string;
 }
 
 /**

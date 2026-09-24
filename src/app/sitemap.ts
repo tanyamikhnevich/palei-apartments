@@ -8,9 +8,11 @@ import { getFlowersDb, isFlowersDbConfigured, schema as flowersSchema } from '@/
 import { sellsHere } from '@/lib/flowers';
 import { isSectionLive } from '@/lib/services';
 import { unstable_cache } from 'next/cache';
+import { headers } from 'next/headers';
 import { absoluteUrl } from '@/lib/seo';
 import { localeAlternates, localePath } from '@/i18n/routing';
 import { LOCALES } from '@/i18n/types';
+import { pathBelongsToHost } from '@/lib/sites';
 
 /**
  * Rebuilt hourly: apartments come and go far more slowly than that.
@@ -108,18 +110,32 @@ async function bouquetEntries(): Promise<Entry[]> {
   }
 }
 
+/**
+ * The pages of whichever domain was asked. One deployment answers for the main
+ * site and for the flower shop's own domain, and Google rejects a sitemap that
+ * lists another host's addresses — so each domain's sitemap is only its own.
+ */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const pages: Entry[] = [
-    ...entries('/', 1, 'weekly'),
-    ...entries('/apartments', 0.9, 'daily'),
-    ...entries('/about', 0.5, 'monthly'),
-    ...entries('/location', 0.5, 'monthly'),
-    ...entries('/contact', 0.5, 'monthly'),
+  const host = headers().get('host');
+  const here = (path: string) => pathBelongsToHost(path, host);
+
+  const pages: Entry[] = [];
+  const add = (path: string, ...rest: [number, Entry['changeFrequency']]) => {
+    if (here(path)) pages.push(...entries(path, ...rest));
+  };
+
+  add('/', 1, 'weekly');
+  add('/apartments', 0.9, 'daily');
+  add('/about', 0.5, 'monthly');
+  add('/location', 0.5, 'monthly');
+  add('/contact', 0.5, 'monthly');
+  if (isSectionLive('/flowers')) add('/flowers', 0.6, 'monthly');
+  if (isSectionLive('/cars')) add('/cars', 0.6, 'monthly');
+  if (isSectionLive('/cyprus')) add('/cyprus', 0.7, 'weekly');
+
+  return [
+    ...pages,
+    ...(here('/apartments') ? await apartmentEntries() : []),
+    ...(here('/flowers') ? await bouquetEntries() : []),
   ];
-
-  if (isSectionLive('/flowers')) pages.push(...entries('/flowers', 0.6, 'monthly'));
-  if (isSectionLive('/cars')) pages.push(...entries('/cars', 0.6, 'monthly'));
-  if (isSectionLive('/cyprus')) pages.push(...entries('/cyprus', 0.7, 'weekly'));
-
-  return [...pages, ...(await apartmentEntries()), ...(await bouquetEntries())];
 }

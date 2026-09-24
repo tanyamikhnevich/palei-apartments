@@ -40,26 +40,30 @@ import styles from './FlowersShop.module.scss';
 /** Enough to fill the first screen without pretending to know the real count. */
 const SKELETON_COUNT = 6;
 
-export default function FlowersShop() {
+export default function FlowersShop({ initial }: { initial?: Bouquet[] }) {
   const { locale, t, href } = useLanguage();
   const params = useSearchParams();
 
   /* A date can arrive from an apartment booking — the arrival day. */
   const wantedDate = params.get('date');
   const requestedDate = wantedDate && /^\d{4}-\d{2}-\d{2}$/.test(wantedDate) ? wantedDate : null;
-  const [list, setList] = useState<Bouquet[]>([]);
-  const [loading, setLoading] = useState(true);
+  /* Rendered on the server when the page could read the window itself — so
+     the bouquets, and the links to their pages, are in the HTML a search
+     engine receives rather than arriving after a script it may never run. */
+  const [list, setList] = useState<Bouquet[]>(initial ?? []);
+  const [loading, setLoading] = useState(!initial);
   const [kind, setKind] = useState<KindFilter>('all');
   const [priceOrder, setPriceOrder] = useState<PriceOrder>('asc');
   const [wineType, setWineType] = useState<BouquetCategory | 'all'>('all');
   const [ordering, setOrdering] = useState<Bouquet | null>(null);
 
   useEffect(() => {
+    if (initial) return;
     fetchBouquets()
       .then(({ bouquets }) => setList(bouquets))
       .catch(() => setList([]))
       .finally(() => setLoading(false));
-  }, []);
+  }, [initial]);
 
   const shown = useMemo(
     () => windowBouquets(bouquetsInCountry(list, FLOWER_COUNTRY), priceOrder),

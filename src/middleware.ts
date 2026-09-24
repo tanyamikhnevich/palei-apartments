@@ -15,7 +15,14 @@ import {
   splitLocale,
 } from '@/i18n/routing';
 import { isLocale, type Locale } from '@/i18n/types';
-import { isScratchHost, isUnder, MAIN_SITE_URL, sectionForHost, sectionForPath } from '@/lib/sites';
+import {
+  isLegacyHost,
+  isScratchHost,
+  isUnder,
+  MAIN_SITE_URL,
+  sectionForHost,
+  sectionForPath,
+} from '@/lib/sites';
 
 /** The panel and its API must never end up in a search index or a shared cache. */
 function markPrivate(response: NextResponse): NextResponse {
@@ -53,12 +60,17 @@ const LANG_PARAM = 'lang';
  * flowers link would land on paleiflowers.co.il in Hebrew. So the language
  * goes along as `?lang=`, for the other side to turn into its own cookie.
  */
-function handOver(request: NextRequest, origin: string, reading: Locale): NextResponse {
+function handOver(
+  request: NextRequest,
+  origin: string,
+  reading: Locale,
+  status: 307 | 308 = 307
+): NextResponse {
   const { pathname, search } = request.nextUrl;
   const url = new URL(`${pathname}${search}`, origin);
   const prefixed = splitLocale(pathname).pathname !== pathname;
   if (!prefixed && reading !== localeForHost(url.host)) url.searchParams.set(LANG_PARAM, reading);
-  return NextResponse.redirect(url, 307);
+  return NextResponse.redirect(url, status);
 }
 
 /**
@@ -186,6 +198,17 @@ export async function middleware(request: NextRequest) {
 
   /** The language this request would be answered in, prefix or not. */
   const reading: Locale = prefixed || chose ? locale : hostLocale;
+
+  /*
+    An old address. Permanent, because the point is for Google to move the
+    listing over — its change-of-address tool will not accept anything less.
+    A section's page goes straight to the section's own domain, not by way of
+    the main site.
+  */
+  if (isLegacyHost(host)) {
+    const target = sectionForPath(bare)?.origin ?? MAIN_SITE_URL;
+    return handOver(request, target, reading, 308);
+  }
 
   /*
     A section with a domain of its own (flowers on paleiflowers.co.il) is only

@@ -18,6 +18,18 @@ export const SITE_URL = MAIN_SITE_URL;
 
 export const SITE_NAME = 'Palei Apartments';
 
+/** The flower shop trades under its own name, on its own domain. */
+export const FLOWERS_BRAND = 'Palei Flowers';
+
+/**
+ * The name a page is published under. A bouquet titled "… — Palei Apartments"
+ * in a search result reads as a mistake, and the shop has a brand of its own.
+ */
+export function brandForPath(path: string): string {
+  const clean = splitLocale(path.split('?')[0]).pathname;
+  return clean === '/flowers' || clean.startsWith('/flowers/') ? FLOWERS_BRAND : SITE_NAME;
+}
+
 /** The default preview card image — 1200×630, the size every chat app crops to. */
 export const DEFAULT_OG_IMAGE = '/og-apartments.png';
 
@@ -97,6 +109,7 @@ export function pageMetadata(input: PageMetaInput): Metadata {
   const url = absoluteUrl(localePath(path, locale));
   const custom = Boolean(image);
   const preview = absoluteUrl(image ?? sectionOgImage(path));
+  const brand = brandForPath(path);
 
   // Dimensions are only declared for the cards we build ourselves, whose size
   // we control.
@@ -107,14 +120,17 @@ export function pageMetadata(input: PageMetaInput): Metadata {
     : { url: preview, width: 1200, height: 630, alt: title };
 
   return {
-    title,
+    // The layout appends the apartments' name to every title; a section with a
+    // brand of its own says so itself instead.
+    title: brand === SITE_NAME ? title : { absolute: `${title} — ${brand}` },
     description,
+    applicationName: brand,
     alternates: { canonical: url, languages: languageAlternates(path) },
     robots: noIndex ? { index: false, follow: false } : undefined,
     openGraph: {
       type,
       url,
-      siteName: SITE_NAME,
+      siteName: brand,
       title,
       description,
       images: [previewImage],

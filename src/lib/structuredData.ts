@@ -1,5 +1,9 @@
 import type { Apartment } from '@/types/apartment';
-import { SITE_NAME, SITE_URL, absoluteUrl, DEFAULT_OG_IMAGE } from '@/lib/seo';
+import { FLOWERS_BRAND, SITE_NAME, SITE_URL, absoluteUrl, DEFAULT_OG_IMAGE } from '@/lib/seo';
+import type { Bouquet, BouquetCopy } from '@/types/flower';
+import { bouquetCurrency, displayPrice } from '@/lib/flowers';
+import { isBuilder } from '@/lib/roseBuilder';
+import { isPhotoUrl } from '@/lib/apartmentMedia';
 import { SOCIAL_URLS } from '@/lib/social';
 import { getApartmentPhotos } from '@/lib/apartmentMedia';
 import { currencyOf } from '@/lib/regions';
@@ -144,5 +148,120 @@ export function apartmentListSchema(apartments: Apartment[], path: string) {
       position: index + 1,
       url: absoluteUrl(`/apartments/${apt.id}`),
     })),
+  };
+}
+
+/** Stable across languages: one shop, whichever translation is being read. */
+const FLORIST_ID = () => `${absoluteUrl('/flowers')}#florist`;
+
+/**
+ * The flower shop as a business of its own — a `Florist`, which is what local
+ * search matches "flower delivery Bat Yam" against. The same care with the
+ * address as for the apartments: the city, never a street.
+ */
+export function floristSchema(description: string, locale: Locale = DEFAULT_LOCALE) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Florist',
+    '@id': FLORIST_ID(),
+    name: FLOWERS_BRAND,
+    url: absoluteUrl(localePath('/flowers', locale)),
+    description,
+    logo: absoluteUrl('/palei-flowers-logo.png'),
+    image: absoluteUrl('/og-flowers.png'),
+    address: {
+      '@type': 'PostalAddress',
+      addressLocality: 'Bat Yam',
+      addressCountry: 'IL',
+    },
+    areaServed: { '@type': 'City', name: 'Bat Yam' },
+    // Same family as the apartments — the link that tells a search engine the
+    // two sites are one business rather than a stranger borrowing the name.
+    parentOrganization: { '@id': `${SITE_URL}/#business` },
+  };
+}
+
+/** The shop's own domain, named as a site in its own right. */
+export function flowersWebsiteSchema() {
+  const url = absoluteUrl('/flowers');
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    '@id': `${url}#website`,
+    url,
+    name: FLOWERS_BRAND,
+    publisher: { '@id': FLORIST_ID() },
+  };
+}
+
+/** The window as a list, so every bouquet page is one hop from the shop. */
+export function bouquetListSchema(
+  bouquets: { id: string; name: string }[],
+  locale: Locale = DEFAULT_LOCALE
+) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    url: absoluteUrl(localePath('/flowers', locale)),
+    numberOfItems: bouquets.length,
+    itemListElement: bouquets.map((b, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      name: b.name,
+      url: absoluteUrl(localePath(`/flowers/${b.id}`, locale)),
+    })),
+  };
+}
+
+/**
+ * One bouquet as a `Product` with an offer — what puts a price and a photo
+ * next to it in a search result.
+ *
+ * The rose builder has no single price, only a cheapest one, so it is offered
+ * as a range starting there rather than claiming a price nobody would pay.
+ */
+export function bouquetSchema(
+  bouquet: Bouquet,
+  copy: BouquetCopy,
+  description: string,
+  category: string,
+  locale: Locale = DEFAULT_LOCALE
+) {
+  const url = absoluteUrl(localePath(`/flowers/${bouquet.id}`, locale));
+  const photos = (bouquet.photos ?? []).filter(isPhotoUrl).map(absoluteUrl);
+  const currency = bouquetCurrency(bouquet);
+  const seller = { '@id': FLORIST_ID() };
+  const availability = 'https://schema.org/InStock';
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    '@id': `${url}#product`,
+    name: copy.name,
+    description,
+    url,
+    sku: bouquet.id,
+    category,
+    image: photos.length ? photos.slice(0, 8) : [absoluteUrl('/og-flowers.png')],
+    brand: { '@type': 'Brand', name: FLOWERS_BRAND },
+    offers: isBuilder(bouquet)
+      ? {
+          '@type': 'AggregateOffer',
+          url,
+          lowPrice: displayPrice(bouquet),
+          priceCurrency: currency,
+          offerCount: 1,
+          availability,
+          seller,
+        }
+      : {
+          '@type': 'Offer',
+          url,
+          price: bouquet.price,
+          priceCurrency: currency,
+          itemCondition: 'https://schema.org/NewCondition',
+          availability,
+          seller,
+        },
   };
 }

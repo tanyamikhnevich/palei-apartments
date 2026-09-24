@@ -38,7 +38,7 @@ export const en = {
     flowers: {
       title: 'Flower delivery in Bat Yam',
       description:
-        'Bouquets made up the morning they go out and delivered in Bat Yam — or left in the apartment before you arrive.',
+        'Bouquets, balloons and wine delivered in Bat Yam. Flowers made up the morning they go out — to any address, or left in the apartment before you arrive.',
     },
     cyprus: {
       title: 'Apartments in Cyprus',

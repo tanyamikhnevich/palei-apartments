@@ -41,3 +41,26 @@ export const loadPublicBouquet = cache(async (id: string): Promise<Bouquet | nul
     return null;
   }
 });
+
+/**
+ * The whole window, read on the server so the shop arrives as HTML.
+ *
+ * The shop used to fetch it from the browser, which left a crawler looking at
+ * six grey skeleton cards and not one link to a bouquet — the pages existed,
+ * and nothing on the site led to them. Same rules as the single bouquet: on
+ * show, delivered here, costing sheet removed.
+ */
+export const loadPublicBouquets = cache(async (): Promise<Bouquet[]> => {
+  if (!isFlowersDbConfigured()) return [];
+
+  try {
+    const rows = await getFlowersDb().select().from(schema.bouquets);
+    return rows
+      .map(rowToBouquet)
+      .filter((bouquet) => bouquet.listed && sellsHere(bouquet))
+      .map(withoutCost);
+  } catch (e) {
+    if (!isShopSchemaOutdated(e)) console.error('loadPublicBouquets', e);
+    return [];
+  }
+});

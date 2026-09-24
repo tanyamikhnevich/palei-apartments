@@ -38,7 +38,7 @@ export const fr: Translation<Messages> = {
     flowers: {
       title: 'Livraison de fleurs à Bat Yam',
       description:
-        'Des bouquets composés le matin même, livrés à Bat Yam ou déposés dans l’appartement avant votre arrivée.',
+        'Bouquets, ballons et vin livrés à Bat Yam. Des fleurs composées le matin même, livrées à l’adresse de votre choix ou déposées dans l’appartement avant votre arrivée.',
     },
     cyprus: {
       title: 'Appartements à Chypre',

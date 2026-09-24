@@ -95,3 +95,35 @@ export function isScratchHost(host: string | null | undefined): boolean {
     name.endsWith('.vercel.app')
   );
 }
+
+/**
+ * Addresses the main site used to live at, before the domain was spelled
+ * right. Their pages are sent to `MAIN_SITE_URL` for good, so search engines
+ * move the listing across; the API is left answering there, so a webhook still
+ * pointed at an old address keeps working until it is moved.
+ */
+const LEGACY_HOSTS = ['paleiapartaments.com', 'paleiapartaments.co.il'];
+
+export function isLegacyHost(host: string | null | undefined): boolean {
+  const name = bareHost(host);
+  // Never away from the address the site is configured to be — that would
+  // be a loop, if MAIN_SITE_URL were still left on an old domain.
+  return LEGACY_HOSTS.includes(name) && name !== bareHost(new URL(MAIN_SITE_URL).host);
+}
+
+/**
+ * The origin that answers for `host`: a section's own domain, or the main
+ * site for everything else. What robots.txt and the sitemap speak for — each
+ * domain lists only its own pages, because Google refuses a sitemap that
+ * names addresses on another host.
+ */
+export function originForHost(host: string | null | undefined): string {
+  return sectionForHost(host)?.origin ?? MAIN_SITE_URL;
+}
+
+/** Whether `path` (unprefixed) is served from the origin that answers for `host`. */
+export function pathBelongsToHost(path: string, host: string | null | undefined): boolean {
+  const own = sectionForHost(host);
+  if (own) return isUnder(path, own.prefix);
+  return !sectionForPath(path);
+}

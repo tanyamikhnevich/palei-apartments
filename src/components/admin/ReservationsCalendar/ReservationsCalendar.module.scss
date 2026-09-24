@@ -96,13 +96,34 @@
 }
 
 .grid {
+  /* The name column's width, shared by everything that has to clear it. */
+  --apt-w: 170px;
+
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--r-md);
   overflow: hidden;
 }
 
+/*
+  Scrolls both ways inside itself, so the head can stick to its top and the
+  names to its left — neither works against the page's own scroll.
+*/
+.scroller {
+  overflow: auto;
+  max-height: calc(100vh - 240px);
+  overscroll-behavior-x: contain;
+}
+
+.canvas {
+  width: max-content;
+  min-width: 100%;
+}
+
 .headRow {
+  position: sticky;
+  top: 0;
+  z-index: 3;
   display: flex;
   border-bottom: 1px solid var(--line);
   background: var(--bg);
@@ -110,7 +131,9 @@
 
 .aptHeadCell,
 .aptCell {
-  width: 150px;
+  position: sticky;
+  left: 0;
+  width: var(--apt-w);
   flex: none;
   padding: 10px 14px;
   font-size: 13px;
@@ -121,6 +144,8 @@
 }
 
 .aptHeadCell {
+  z-index: 4;
+  align-items: flex-end;
   background: var(--bg);
   font-weight: 700;
   color: var(--ink-soft);
@@ -129,44 +154,88 @@
 }
 
 .aptCell {
+  z-index: 2;
   font-weight: 600;
+}
+
+/* The ellipsis has to sit on the text's own box — a flex container's text
+   cannot be cut short. */
+.aptName {
+  min-width: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  /* Rows are as tall as their overlaps now, so the name centres itself
-     rather than being pinned to a height that no longer exists. */
+}
+
+.timeline {
+  flex: none;
+}
+
+.monthsHead {
   display: flex;
-  align-items: center;
-  padding: 10px 14px;
+}
+
+.monthHead {
+  flex: none;
+  border-left: 1px solid var(--line-2);
+  padding: 10px 0 2px;
+
+  &:first-child {
+    border-left: none;
+  }
+}
+
+/* Keeps the month's name on screen for as long as any of its days are. */
+.monthName {
+  position: sticky;
+  left: calc(var(--apt-w) + 12px);
+  display: inline-block;
+  padding-inline: 12px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink);
+  white-space: nowrap;
 }
 
 .daysHead {
   display: flex;
-  flex: 1;
-  min-width: 0;
 }
 
 .dayHead {
-  flex: 1 1 0;
-  min-width: 0;
-  text-align: center;
+  width: var(--day-w);
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 4px 0 8px;
   font-size: 11px;
   color: var(--ink-soft);
-  padding: 10px 0;
-  border-right: 1px solid var(--line);
-
-  &:last-child {
-    border-right: none;
-  }
 
   &.weekend {
     background: var(--mist);
   }
+}
 
-  &.today {
-    color: var(--accent);
-    font-weight: 700;
-  }
+.weekday {
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.dayNum {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.today .dayNum {
+  background: var(--accent);
+  color: #fff;
 }
 
 .aptRow {
@@ -178,35 +247,42 @@
   }
 }
 
-/* Height is set per row: a row is as tall as the stays that overlap in it. */
+/*
+  Height is set per row: a row is as tall as the stays that overlap in it.
+  The day lines and the weekend stripe are painted, not built from a div per
+  day — the strip grows by months, and every apartment carries every day.
+*/
 .track {
   position: relative;
-  display: flex;
-  flex: 1;
-  min-width: 0;
+  flex: none;
+  background-image:
+    linear-gradient(to right, transparent calc(var(--day-w) - 1px), var(--line) 0),
+    linear-gradient(to right, rgb(241 245 249 / 70%) calc(var(--day-w) * 2), transparent 0);
+  background-size:
+    var(--day-w) 100%,
+    calc(var(--day-w) * 7) 100%;
+  background-position:
+    0 0,
+    var(--weekend-x) 0;
 }
 
-.cell {
-  flex: 1 1 0;
-  min-width: 0;
-  height: 100%;
-  border-right: 1px solid var(--line);
-
-  &:last-child {
-    border-right: none;
-  }
+/* Nights already gone: still readable, no longer asking for attention. */
+.past {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: rgb(15 23 42 / 3.5%);
+  pointer-events: none;
 }
 
-/*
-  Weekends used to be a beige band strong enough to compete with the bars over
-  it. They only need to be findable, not announced.
-*/
-.weekendCell {
-  background: rgb(241 245 249 / 70%);
-}
-
-.todayCell {
-  box-shadow: inset 0 0 0 1px var(--accent-tint);
+.todayCol {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  box-shadow:
+    inset 1px 0 0 var(--accent),
+    inset -1px 0 0 var(--accent);
+  opacity: 0.45;
+  pointer-events: none;
 }
 
 /* Position, height, fill and text colour all arrive inline — they depend on
@@ -316,19 +392,27 @@
 }
 
 @media (max-width: 720px) {
+  .grid {
+    --apt-w: 104px;
+  }
+
   .aptHeadCell,
   .aptCell {
-    width: 96px;
     padding: 0 8px;
     font-size: 12px;
   }
 
-  .dayHead {
-    font-size: 9px;
-    padding: 8px 0;
+  .aptHeadCell {
+    padding-bottom: 8px;
   }
 
-  .barText {
-    display: none;
+  .dayNum {
+    width: 22px;
+    height: 22px;
+    font-size: 12px;
+  }
+
+  .monthName {
+    font-size: 13px;
   }
 }

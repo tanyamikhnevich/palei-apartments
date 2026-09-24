@@ -14,6 +14,8 @@ import {
   PATHNAME_HEADER,
   splitLocale,
 } from '@/i18n/routing';
+import { isLocale, type Locale } from '@/i18n/types';
+import { isScratchHost, isUnder, MAIN_SITE_URL, sectionForHost, sectionForPath } from '@/lib/sites';
 
 /** The panel and its API must never end up in a search index or a shared cache. */
 function markPrivate(response: NextResponse): NextResponse {
@@ -37,6 +39,26 @@ function isInternal(pathname: string): boolean {
     pathname === '/sitemap.xml' ||
     /\.[a-zA-Z0-9]+$/.test(pathname)
   );
+}
+
+/** Query parameter that carries the visitor's language from one of our domains to another. */
+const LANG_PARAM = 'lang';
+
+/**
+ * The same address on another of our domains, in the language being read.
+ *
+ * A prefixed path carries its language already. An unprefixed one means
+ * English — or the domain's own language — and the next domain may open in a
+ * different one: an English reader on paleiapartments.co.il following the
+ * flowers link would land on paleiflowers.co.il in Hebrew. So the language
+ * goes along as `?lang=`, for the other side to turn into its own cookie.
+ */
+function handOver(request: NextRequest, origin: string, reading: Locale): NextResponse {
+  const { pathname, search } = request.nextUrl;
+  const url = new URL(`${pathname}${search}`, origin);
+  const prefixed = splitLocale(pathname).pathname !== pathname;
+  if (!prefixed && reading !== localeForHost(url.host)) url.searchParams.set(LANG_PARAM, reading);
+  return NextResponse.redirect(url, 307);
 }
 
 /**
@@ -137,6 +159,57 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url, 308);
   }
 
+  const host = request.headers.get('host');
+  const hostLocale = localeForHost(host);
+  const chose = request.cookies.get(LOCALE_CHOICE_COOKIE);
+
+  /*
+    Arriving from another of our domains with the language to keep. The cookie
+    is set as though the visitor had picked it by hand — which, on the domain
+    they came from, they had — and the address is cleaned of the parameter.
+  */
+  const carried = searchParams.get(LANG_PARAM);
+  if (carried !== null) {
+    const url = request.nextUrl.clone();
+    url.searchParams.delete(LANG_PARAM);
+    if (!isLocale(carried)) return NextResponse.redirect(url, 307);
+
+    url.pathname = localePath(bare, carried);
+    const response = NextResponse.redirect(url, 307);
+    response.cookies.set(LOCALE_CHOICE_COOKIE, carried, {
+      path: '/',
+      maxAge: 60 * 60 * 24 * 365,
+      sameSite: 'lax',
+    });
+    return response;
+  }
+
+  /** The language this request would be answered in, prefix or not. */
+  const reading: Locale = prefixed || chose ? locale : hostLocale;
+
+  /*
+    A section with a domain of its own (flowers on paleiflowers.co.il) is only
+    that section there: its front page is the section's, and any other page is
+    sent to the main site. Everywhere else the section's paths are sent to its
+    domain — except in development and preview builds, where the section has to
+    stay reachable to be tried out before it ships.
+
+    Temporary redirects, for the same reason as the language one below: where
+    they lead depends on the visitor's cookie, and a cached 308 would not ask.
+  */
+  const ownSection = sectionForHost(host);
+  if (ownSection && !isUnder(bare, ownSection.prefix)) {
+    if (bare === '/') {
+      const url = request.nextUrl.clone();
+      url.pathname = localePath(ownSection.prefix, reading);
+      return NextResponse.redirect(url, 307);
+    }
+    return handOver(request, MAIN_SITE_URL, reading);
+  }
+
+  const elsewhere = ownSection ? undefined : sectionForPath(bare);
+  if (elsewhere && !isScratchHost(host)) return handOver(request, elsewhere.origin, reading);
+
   /*
     The domain is the front door: paleiapartments.co.il opens in Hebrew, .com
     in English. Only unprefixed addresses are sent on — `/ru/about` was asked
@@ -146,9 +219,6 @@ export async function middleware(request: NextRequest) {
     the visitor who then switches to English would be bounced back to Hebrew
     by their own cache, with no request reaching us to say otherwise.
   */
-  const hostLocale = localeForHost(request.headers.get('host'));
-  const chose = request.cookies.get(LOCALE_CHOICE_COOKIE);
-
   if (!prefixed && hostLocale !== DEFAULT_LOCALE && !chose) {
     const url = request.nextUrl.clone();
     url.pathname = localePath(bare, hostLocale);

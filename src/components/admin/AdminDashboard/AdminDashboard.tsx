@@ -7,7 +7,6 @@ import AdminSidebar, {
   type AdminView,
 } from '@/components/admin/AdminSidebar/AdminSidebar';
 import AdminTopbar from '@/components/admin/AdminTopbar/AdminTopbar';
-import AdminStats from '@/components/admin/AdminStats/AdminStats';
 import AdminApartmentTable from '@/components/admin/AdminApartmentTable/AdminApartmentTable';
 import AdminApartmentCard, {
   AdminApartmentCardGrid,
@@ -208,7 +207,6 @@ export default function AdminDashboard() {
                   <code>DATABASE_URL</code>.
                 </p>
               )}
-              <AdminStats apartments={list} />
               <AdminListBar
                 mode={listMode}
                 onModeChange={setListMode}

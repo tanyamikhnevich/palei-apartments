@@ -34,14 +34,14 @@ const DEFAULT_HOST_LOCALES: readonly { host: string; locale: Locale }[] = [
 ];
 
 /**
- * `LOCALE_HOSTS` overrides the table above: comma-separated `locale:host`
- * pairs, e.g. `he:paleiapartaments.co.il`. A host also covers its subdomains,
- * so one entry answers for both the apex and `www.`.
+ * `LOCALE_HOSTS` adds to the table above: comma-separated `locale:host`
+ * pairs, e.g. `en:paleiflowers.co.il`. A host also covers its subdomains, so
+ * one entry answers for both the apex and `www.`, and a more specific host
+ * beats the built-in `.co.il` rule.
  *
- * Unset — which is the normal case — the built-in `.co.il` rule stands. That
- * fallback is the point: a variable missing or mistyped in one deployment
- * would otherwise silently serve the Israeli domain in English, and nothing
- * would look broken enough to notice.
+ * It adds rather than replaces on purpose. When it replaced, a variable naming
+ * one Israeli domain turned every other one — a renamed domain, a new section's
+ * domain — silently English, and nothing looked broken enough to notice.
  */
 function hostLocaleTable(): readonly { host: string; locale: Locale }[] {
   const raw = process.env.LOCALE_HOSTS?.trim();
@@ -52,7 +52,7 @@ function hostLocaleTable(): readonly { host: string; locale: Locale }[] {
     return isLocale(locale) && host ? [{ host, locale }] : [];
   });
 
-  return parsed.length ? parsed : DEFAULT_HOST_LOCALES;
+  return [...parsed, ...DEFAULT_HOST_LOCALES];
 }
 
 /**

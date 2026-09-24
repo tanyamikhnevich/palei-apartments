@@ -8,7 +8,7 @@ import { getFlowersDb, isFlowersDbConfigured, schema as flowersSchema } from '@/
 import { sellsHere } from '@/lib/flowers';
 import { isSectionLive } from '@/lib/services';
 import { unstable_cache } from 'next/cache';
-import { SITE_URL } from '@/lib/seo';
+import { absoluteUrl } from '@/lib/seo';
 import { localeAlternates, localePath } from '@/i18n/routing';
 import { LOCALES } from '@/i18n/types';
 
@@ -34,7 +34,7 @@ type Entry = MetadataRoute.Sitemap[number];
 function alternatesFor(path: string) {
   const map = localeAlternates(path);
   return {
-    languages: Object.fromEntries(LOCALES.map((l) => [l, `${SITE_URL}${map[l]}`])),
+    languages: Object.fromEntries(LOCALES.map((l) => [l, absoluteUrl(map[l])])),
   };
 }
 
@@ -45,7 +45,7 @@ function entries(
   lastModified: Date = new Date()
 ): Entry[] {
   return LOCALES.map((locale) => ({
-    url: `${SITE_URL}${localePath(path, locale)}`,
+    url: absoluteUrl(localePath(path, locale)),
     lastModified,
     changeFrequency,
     priority,

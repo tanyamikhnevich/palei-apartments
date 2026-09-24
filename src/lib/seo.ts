@@ -1,8 +1,9 @@
 import type { Metadata } from 'next';
-import { localeAlternates, localePath } from '@/i18n/routing';
+import { localeAlternates, localePath, splitLocale } from '@/i18n/routing';
 import { LOCALES, type Locale } from '@/i18n/types';
 import { currentLocale } from '@/i18n/server';
 import { t as translate } from '@/i18n/getMessage';
+import { MAIN_SITE_URL, sectionForPath } from '@/lib/sites';
 
 /**
  * Everything a search engine or a chat app needs to know about a page.
@@ -12,33 +13,8 @@ import { t as translate } from '@/i18n/getMessage';
  * three become duplicates of whatever else matches.
  */
 
-/**
- * The site's own address.
- *
- * Canonical URLs, the sitemap and preview images must all be absolute and must
- * all agree, so this is the one place the domain is decided. Set
- * `NEXT_PUBLIC_SITE_URL` in the deployment; Vercel's production domain is the
- * fallback, and localhost keeps development honest rather than silently
- * publishing `http://localhost:3000` into a sitemap.
- */
-function withProtocol(url: string): string {
-  return /^https?:\/\//i.test(url) ? url : `https://${url}`;
-}
-
-function resolveSiteUrl(): string {
-  const explicit = process.env.NEXT_PUBLIC_SITE_URL?.trim();
-  // A bare domain is an easy thing to paste; it still means the https site.
-  if (explicit) return withProtocol(explicit).replace(/\/+$/, '');
-
-  // Not VERCEL_URL: that one changes with every deployment, and a canonical
-  // pointing at a preview build teaches Google the wrong address.
-  const production = process.env.VERCEL_PROJECT_PRODUCTION_URL?.trim();
-  if (production) return `https://${production.replace(/\/+$/, '')}`;
-
-  return 'http://localhost:3000';
-}
-
-export const SITE_URL = resolveSiteUrl();
+/** The main site's address; see `MAIN_SITE_URL`. */
+export const SITE_URL = MAIN_SITE_URL;
 
 export const SITE_NAME = 'Palei Apartments';
 
@@ -65,9 +41,17 @@ export function sectionOgImage(path: string): string {
   return match ? match[1] : DEFAULT_OG_IMAGE;
 }
 
+/**
+ * `path` on whichever domain it lives on: a section with a domain of its own
+ * (`/flowers` on paleiflowers.co.il) gets that one, everything else the main
+ * site. Canonicals, `hreflang`, the sitemap and the bot's links all go through
+ * here, so none of them points at the address that only redirects.
+ */
 export function absoluteUrl(path: string): string {
   if (/^https?:\/\//i.test(path)) return path;
-  return `${SITE_URL}${path.startsWith('/') ? path : `/${path}`}`;
+  const clean = path.startsWith('/') ? path : `/${path}`;
+  const section = sectionForPath(splitLocale(clean.split('?')[0]).pathname);
+  return `${section?.origin ?? SITE_URL}${clean}`;
 }
 
 type PageMetaInput = {

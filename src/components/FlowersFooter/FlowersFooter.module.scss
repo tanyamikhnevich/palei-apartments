@@ -1,0 +1,10 @@
+/*
+  Layout and type come from the site footer; only the ground changes — a deep
+  wine instead of navy, so the shop's footer is the shop's.
+*/
+.footer {
+  background: #3a1f2b;
+  /* The site footer keeps a gap above it; here the dark group band sits right
+     on top, and the gap showed as a white seam between the two. */
+  margin-top: 0;
+}

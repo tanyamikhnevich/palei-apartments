@@ -194,15 +194,19 @@ export function flowersWebsiteSchema() {
   };
 }
 
-/** The window as a list, so every bouquet page is one hop from the shop. */
+/**
+ * The window — or one aisle of it — as a list, so every bouquet page is one
+ * hop from the page that shows it.
+ */
 export function bouquetListSchema(
   bouquets: { id: string; name: string }[],
-  locale: Locale = DEFAULT_LOCALE
+  locale: Locale = DEFAULT_LOCALE,
+  path = '/flowers'
 ) {
   return {
     '@context': 'https://schema.org',
     '@type': 'ItemList',
-    url: absoluteUrl(localePath('/flowers', locale)),
+    url: absoluteUrl(localePath(path, locale)),
     numberOfItems: bouquets.length,
     itemListElement: bouquets.map((b, index) => ({
       '@type': 'ListItem',

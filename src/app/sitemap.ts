@@ -6,6 +6,8 @@ import { rowToApartment } from '@/db/map';
 import { isDbConfigured } from '@/lib/api/errors';
 import { getFlowersDb, isFlowersDbConfigured, schema as flowersSchema } from '@/db/flowers';
 import { sellsHere } from '@/lib/flowers';
+import { stockedCategories } from '@/lib/flowerCategories';
+import { rowToBouquet } from '@/db/flowers/schema';
 import { isSectionLive } from '@/lib/services';
 import { unstable_cache } from 'next/cache';
 import { headers } from 'next/headers';
@@ -94,16 +96,24 @@ const listBouquets = unstable_cache(
   { revalidate: 3600 }
 );
 
-/** Each bouquet has a page of its own, so each belongs in the sitemap. */
+/**
+ * Each bouquet has a page of its own, so each belongs in the sitemap — and so
+ * does each aisle with something on it, which is what "roses Bat Yam" should
+ * land on. An empty aisle is left out, as it is from the header.
+ */
 async function bouquetEntries(): Promise<Entry[]> {
   if (!isSectionLive('/flowers') || !isFlowersDbConfigured()) return [];
 
   try {
-    const rows = await listBouquets();
+    const rows = (await listBouquets()).filter((row) => row.listed && sellsHere(row));
+    const aisles = stockedCategories(rows.map(rowToBouquet));
 
-    return rows
-      .filter((row) => row.listed && sellsHere(row))
-      .flatMap((row) => entries(`/flowers/${row.id}`, 0.6, 'weekly', row.updatedAt ?? new Date()));
+    return [
+      ...aisles.flatMap((category) => entries(`/flowers/${category}`, 0.6, 'weekly')),
+      ...rows.flatMap((row) =>
+        entries(`/flowers/${row.id}`, 0.6, 'weekly', row.updatedAt ?? new Date())
+      ),
+    ];
   } catch (e) {
     console.error('sitemap: could not list bouquets', e);
     return [];
@@ -129,7 +139,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   add('/about', 0.5, 'monthly');
   add('/location', 0.5, 'monthly');
   add('/contact', 0.5, 'monthly');
-  if (isSectionLive('/flowers')) add('/flowers', 0.6, 'monthly');
+  if (isSectionLive('/flowers')) add('/flowers', 0.7, 'weekly');
   if (isSectionLive('/cars')) add('/cars', 0.6, 'monthly');
   if (isSectionLive('/cyprus')) add('/cyprus', 0.7, 'weekly');
 

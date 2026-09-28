@@ -104,7 +104,7 @@ export function windowBouquets(list: Bouquet[], order: PriceOrder = 'asc'): Bouq
     });
 }
 
-/** Cheapest first, or dearest first — the one sort the window offers. */
+/** Cheapest first, or dearest first — the one sort the shop offers. */
 export type PriceOrder = 'asc' | 'desc';
 
 /** What the card shows: a fixed price, or the cheapest the builder can do. */
@@ -113,47 +113,11 @@ export function displayPrice(bouquet: Bouquet): number {
 }
 
 /**
- * The window's top-level split. Balloons and flowers share a shop, a delivery
- * and an order form, but nobody browses them together: a wall of birthday foil
- * between two bouquets helps neither shopper.
- */
-export type KindFilter = 'all' | 'flowers' | 'balloons' | 'wine';
-export const KIND_FILTERS: KindFilter[] = ['all', 'flowers', 'balloons', 'wine'];
-
-/**
- * `mixed` is flowers and balloons at once, so it belongs under either of those
- * headings — never alone. Wine is only ever wine.
- */
-export function bouquetsOfKind(list: Bouquet[], kind: KindFilter): Bouquet[] {
-  if (kind === 'all') return list;
-  if (kind === 'wine') return list.filter((b) => b.kind === 'wine');
-  return list.filter((b) => b.kind === kind || b.kind === 'mixed');
-}
-
-/**
- * The order the window is laid out in: flowers first, then balloons, the
- * sets that are both, and the wine last — each under its own heading rather
- * than all in one heap sorted by price.
+ * The order admin shelves the window in: flowers first, then balloons, the
+ * sets that are both, and the wine last. The public shop is split by aisle
+ * instead — see `src/lib/flowerCategories.ts`.
  */
 export const SECTION_ORDER: ItemKind[] = ['flowers', 'balloons', 'mixed', 'wine'];
-
-export interface WindowSection {
-  kind: ItemKind;
-  items: Bouquet[];
-}
-
-/** Splits an already-sorted window into its sections, dropping empty ones. */
-export function windowSections(list: Bouquet[]): WindowSection[] {
-  return SECTION_ORDER.map((kind) => ({
-    kind,
-    items: list.filter((b) => b.kind === kind),
-  })).filter((s) => s.items.length > 0);
-}
-
-/** Whether the split is worth offering at all — one kind needs no switch. */
-export function windowMixesKinds(list: Bouquet[]): boolean {
-  return new Set(list.map((b) => b.kind)).size > 1;
-}
 
 /**
  * Same-day only holds while the florist can still get to the market. After the

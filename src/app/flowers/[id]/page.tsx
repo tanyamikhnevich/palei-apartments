@@ -1,11 +1,10 @@
 import { Suspense } from 'react';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import Header from '@/components/Header/Header';
-import Footer from '@/components/Footer/Footer';
 import BouquetDetail from '@/components/BouquetDetail/BouquetDetail';
 import { loadPublicBouquet } from '@/lib/server/bouquets';
 import { bouquetCopy } from '@/lib/flowers';
+import { primaryCategory } from '@/lib/flowerCategories';
 import { isPhotoUrl } from '@/lib/apartmentMedia';
 import { FLOWERS_BRAND, pageMetadata } from '@/lib/seo';
 import { currentLocale } from '@/i18n/server';
@@ -66,6 +65,7 @@ export default async function BouquetPage({ params, searchParams }: BouquetPageP
 
   const locale = currentLocale();
   const copy = bouquetCopy(bouquet, locale);
+  const aisle = primaryCategory(bouquet);
 
   return (
     <>
@@ -82,18 +82,17 @@ export default async function BouquetPage({ params, searchParams }: BouquetPageP
         data={breadcrumbSchema(
           [
             { name: FLOWERS_BRAND, path: '/flowers' },
+            { name: t(locale, `shop.categories.${aisle}.label`), path: `/flowers/${aisle}` },
             { name: copy.name, path: `/flowers/${bouquet.id}` },
           ],
           locale
         )}
       />
-      <Header />
       <main>
         <Suspense>
           <BouquetDetail bouquet={bouquet} requestedDate={requestedDate} />
         </Suspense>
       </main>
-      <Footer />
     </>
   );
 }

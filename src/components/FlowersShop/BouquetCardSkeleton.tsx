@@ -1,6 +1,9 @@
 import Skeleton from '@/components/ui/Skeleton/Skeleton';
 import styles from './FlowersShop.module.scss';
 
+/** Enough to fill the first screen without pretending to know the real count. */
+export const SKELETON_COUNT = 6;
+
 /**
  * The shape of a card before its bouquet arrives. Built from the card's own
  * classes rather than from guessed pixel sizes, so the two states line up and

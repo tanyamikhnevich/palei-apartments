@@ -6,10 +6,12 @@ import PhotoGallery from '@/components/PhotoGallery/PhotoGallery';
 import Button from '@/components/ui/Button/Button';
 import Icon from '@/components/ui/Icon/Icon';
 import FlowerOrderForm from '@/components/FlowersShop/FlowerOrderForm';
+import AddOnSuggestions from '@/components/FlowersShop/AddOnSuggestions';
 import { useLanguage } from '@/i18n/LanguageProvider';
 import { bouquetCopy, bouquetCurrency, displayPrice, sizeLabelKey } from '@/lib/flowers';
 import { formatMoney } from '@/lib/money';
 import { isBuilder } from '@/lib/roseBuilder';
+import { primaryCategory } from '@/lib/flowerCategories';
 import type { Bouquet } from '@/types/flower';
 import styles from './BouquetDetail.module.scss';
 
@@ -30,13 +32,15 @@ export default function BouquetDetail({
   const { locale, t, href } = useLanguage();
   const [ordering, setOrdering] = useState(false);
   const copy = bouquetCopy(bouquet, locale);
+  const aisle = primaryCategory(bouquet);
 
   return (
     <section className={styles.section}>
       <div className="wrap">
-        <Link href={href('/flowers')} className={styles.back}>
+        {/* Back to the aisle it was found in, not to the front of the shop. */}
+        <Link href={href(`/flowers/${aisle}`)} className={styles.back}>
           <Icon name="chevron" size={15} className={styles.backIcon} />
-          {t('flowers.backToShop')}
+          {t('shop.backTo').replace('{category}', t(`shop.categories.${aisle}.label`))}
         </Link>
 
         <div className={styles.layout}>
@@ -86,6 +90,9 @@ export default function BouquetDetail({
                 {t('flowers.order')}
               </Button>
             </div>
+
+            {/* What goes with it — each a link to its own page for now. */}
+            <AddOnSuggestions bought={bouquet} title={t('flowers.addOn.detailTitle')} />
           </div>
         </div>
       </div>

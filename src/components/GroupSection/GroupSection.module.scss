@@ -32,6 +32,11 @@
   gap: 14px;
 }
 
+/* One card stretched across the whole band reads as a banner, not a card. */
+.single {
+  grid-template-columns: minmax(0, 420px);
+}
+
 /*
   The blue outline is the resting state, not a hover reward — it marks all four
   as one set. Hover switches it to the booking coral, the same colour the

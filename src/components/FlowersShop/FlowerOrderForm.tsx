@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Button from '@/components/ui/Button/Button';
 import btnStyles from '@/components/ui/Button/Button.module.scss';
 import Icon from '@/components/ui/Icon/Icon';
@@ -17,7 +18,11 @@ import {
   selectionName,
 } from '@/lib/roseBuilder';
 import RoseBuilderFields from './RoseBuilderFields';
+import AddOnSuggestions from './AddOnSuggestions';
 import { loadBookingHandoff } from '@/lib/bookingHandoff';
+import { useScrollLock } from '@/lib/useScrollLock';
+import { clearDeliveryDraft, loadDeliveryDraft, saveDeliveryDraft } from '@/lib/deliveryDraft';
+import { primaryCategory } from '@/lib/flowerCategories';
 import {
   PERSON_NAME_MAX,
   PHONE_INPUT_MAX_LENGTH,
@@ -25,6 +30,7 @@ import {
   validatePersonName,
   validatePhone,
 } from '@/lib/validation/contact';
+import { resolveValidationMessage } from '@/lib/validation/resolveMessage';
 import {
   DELIVERY_SLOTS,
   type Bouquet,
@@ -35,6 +41,7 @@ import styles from './FlowersShop.module.scss';
 
 const CARD_MAX = 300;
 const COMMENT_MAX = 500;
+const ADDRESS_MIN = 5;
 
 interface FlowerOrderFormProps {
   bouquet: Bouquet;
@@ -43,19 +50,40 @@ interface FlowerOrderFormProps {
   onClose: () => void;
 }
 
+/** The fields that can be wrong, in the order they appear — the first one gets focus. */
+type Field = 'mix' | 'date' | 'address' | 'recipient' | 'recipientPhone' | 'name' | 'contact';
+const FIELDS: Field[] = ['mix', 'date', 'address', 'recipient', 'recipientPhone', 'name', 'contact'];
+type Errors = Partial<Record<Field, string>>;
+
+/** `2026-10-05` → `5.10.2026`, for the "not before" message. */
+function readableDate(iso: string): string {
+  const [y, m, d] = iso.split('-');
+  return `${Number(d)}.${Number(m)}.${y}`;
+}
+
 export default function FlowerOrderForm({
   bouquet,
   requestedDate,
   onClose,
 }: FlowerOrderFormProps) {
-  const { locale, t } = useLanguage();
-  const copy = bouquetCopy(bouquet, locale);
+  const { locale, t, href } = useLanguage();
+  const router = useRouter();
+  const item = bouquet;
+  const copy = bouquetCopy(item, locale);
+
+  /*
+    An order placed a moment ago, with "add to this delivery" pressed: its
+    address, time and people are filled in here, and the note at the top says
+    so. Read once, when the form opens — the form is client-only.
+  */
+  const [draft] = useState(loadDeliveryDraft);
+  const previous = draft?.after ?? null;
 
   /*
     Computed on the client so the picker cannot offer a date the florist has
     already missed — the server checks the same rule again before sending.
   */
-  const builder = isBuilder(bouquet) ? bouquet.builder : null;
+  const builder = isBuilder(item) ? item.builder : null;
   const [roses, setRoses] = useState<RoseSelection | null>(() =>
     builder ? defaultSelection(builder) : null
   );
@@ -66,11 +94,9 @@ export default function FlowerOrderForm({
     same rule against the same stored card.
   */
   const leadDays = builder && roses ? colorLeadDays(builder, roses.colorId, roses.mix) : 0;
-  /* A mix that does not add up is not an order yet. */
-  const mixBalanced = !builder || !roses || mixRemaining(builder, roses) === 0;
   const earliest = useMemo(
-    () => earliestDelivery(bouquet, new Date(), leadDays),
-    [bouquet, leadDays]
+    () => earliestDelivery(item, new Date(), leadDays),
+    [item, leadDays]
   );
 
   /*
@@ -80,26 +106,43 @@ export default function FlowerOrderForm({
     when the form opens; the form is client-only, so storage is there.
   */
   const [handoff] = useState(loadBookingHandoff);
-  const wanted = requestedDate ?? handoff?.checkIn ?? null;
+  const wanted = requestedDate ?? draft?.date ?? handoff?.checkIn ?? null;
 
   /* A requested date only wins if the florist can still make it. */
   const [date, setDate] = useState(wanted && wanted >= earliest ? wanted : earliest);
-  const [slot, setSlot] = useState<DeliverySlot>('morning');
-  const [address, setAddress] = useState(handoff?.address ?? '');
-  const [recipient, setRecipient] = useState(handoff?.name ?? '');
-  const [recipientPhone, setRecipientPhone] = useState(handoff?.contact ?? '');
+  const [slot, setSlot] = useState<DeliverySlot>(draft?.slot ?? 'morning');
+  const [address, setAddress] = useState(draft?.address ?? handoff?.address ?? '');
+  const [recipient, setRecipient] = useState(draft?.recipient ?? handoff?.name ?? '');
+  const [recipientPhone, setRecipientPhone] = useState(
+    draft?.recipientPhone ?? handoff?.contact ?? ''
+  );
   const [card, setCard] = useState('');
   const [comment, setComment] = useState('');
   const [wrapping, setWrapping] = useState(false);
-  const [name, setName] = useState(handoff?.name ?? '');
-  const [contact, setContact] = useState(handoff?.contact ?? '');
+  const [name, setName] = useState(draft?.name ?? handoff?.name ?? '');
+  const [contact, setContact] = useState(draft?.contact ?? handoff?.contact ?? '');
   const [honeypot, setHoneypot] = useState('');
   /* The same sum the server will charge — see `orderTotal`. */
   const total =
-    builder && roses ? builderTotal(builder, roses) : orderTotal(bouquet, wrapping);
+    builder && roses ? builderTotal(builder, roses) : orderTotal(item, wrapping);
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
+  /** What the server said went wrong — the form's own checks are `errors` below. */
   const [error, setError] = useState<string | null>(null);
+  /*
+    A field speaks up as soon as it has been left — not while the first letters
+    are still going in, which reads as scolding, and not only at the very end,
+    which is too late. From then on it follows every keystroke, so a fixed
+    field clears itself. Sending shows every remaining problem at once.
+  */
+  const [tried, setTried] = useState(false);
+  const [touched, setTouched] = useState<ReadonlySet<Field>>(() => new Set());
+  const touch = (field: Field) =>
+    setTouched((prev) => (prev.has(field) ? prev : new Set(prev).add(field)));
+  const bodyRef = useRef<HTMLDivElement>(null);
+
+  // The page behind stays put; only the sheet scrolls.
+  useScrollLock();
 
   // Escape closes it, the way every other dialog on the web does.
   useEffect(() => {
@@ -108,25 +151,60 @@ export default function FlowerOrderForm({
     return () => document.removeEventListener('keydown', onKey);
   }, [onClose]);
 
-  const complete =
-    mixBalanced &&
-    date >= earliest &&
-    address.trim().length >= 5 &&
-    validatePersonName(recipient).ok &&
-    validatePhone(recipientPhone).ok &&
-    validatePersonName(name).ok &&
-    validatePhone(contact).ok;
+  const personError = (value: string) => {
+    const r = validatePersonName(value);
+    return r.ok ? undefined : resolveValidationMessage(locale, r.code);
+  };
+  const phoneError = (value: string) => {
+    const r = validatePhone(value);
+    return r.ok ? undefined : resolveValidationMessage(locale, r.code);
+  };
+
+  const errors: Errors = {
+    mix: builder && roses && mixRemaining(builder, roses) !== 0 ? t('flowers.errors.mix') : undefined,
+    date:
+      !date || date < earliest
+        ? t('flowers.errors.date').replace('{date}', readableDate(earliest))
+        : undefined,
+    address: address.trim().length < ADDRESS_MIN ? t('flowers.errors.address') : undefined,
+    recipient: personError(recipient),
+    recipientPhone: phoneError(recipientPhone),
+    name: personError(name),
+    contact: phoneError(contact),
+  };
+  const firstError = FIELDS.find((f) => errors[f]);
+  const complete = !firstError;
+  const shown = (field: Field) => (tried || touched.has(field) ? errors[field] : undefined);
+
+  /** Props that mark a field wrong for sighted readers and screen readers alike. */
+  const invalid = (field: Field, base: string) => ({
+    className: `${base} ${shown(field) ? 'inputInvalid' : ''}`,
+    'aria-invalid': shown(field) ? true : undefined,
+    'aria-describedby': shown(field) ? `fo-${field}-error` : undefined,
+    'data-field': field,
+    onBlur: () => touch(field),
+  });
+  const fieldError = (field: Field) =>
+    shown(field) ? (
+      <span className="fieldError" id={`fo-${field}-error`} role="alert">
+        {shown(field)}
+      </span>
+    ) : null;
 
   const handleSubmit = async () => {
-    if (!complete) {
-      setError(t('booking.fillRequired'));
+    setTried(true);
+    if (firstError) {
+      // Straight to the first thing to fix, rather than a message at the bottom.
+      const target = bodyRef.current?.querySelector<HTMLElement>(`[data-field="${firstError}"]`);
+      target?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      target?.focus({ preventScroll: true });
       return;
     }
     setError(null);
     setSending(true);
     try {
       await submitFlowerOrder({
-        bouquetId: bouquet.id,
+        bouquetId: item.id,
         date,
         slot,
         address: address.trim(),
@@ -140,6 +218,8 @@ export default function FlowerOrderForm({
         contact,
         honeypot,
       });
+      // The delivery it was carried for has its second order now.
+      if (draft) clearDeliveryDraft();
       setSent(true);
     } catch (err) {
       console.error('flower order', err);
@@ -153,13 +233,34 @@ export default function FlowerOrderForm({
     }
   };
 
+  /*
+    "Add to this delivery": the delivery is kept, and the buyer is taken to
+    the aisle the suggestion came from — the wine, the balloons — to pick from
+    all of it. Whatever they order there opens with the same address, time and
+    people already filled in.
+  */
+  const addToDelivery = (next: Bouquet) => {
+    saveDeliveryDraft({
+      after: copy.name,
+      date,
+      slot,
+      address: address.trim(),
+      recipient,
+      recipientPhone,
+      name,
+      contact,
+    });
+    onClose();
+    router.push(href(`/flowers/${primaryCategory(next)}`));
+  };
+
   return (
     <div className={styles.overlay} role="dialog" aria-modal="true" aria-label={copy.name}>
       <div className={styles.sheet}>
         <div className={styles.sheetHead}>
           <div>
             <h2>{builder && roses ? selectionName(builder, roses) : copy.name}</h2>
-            <span>{formatMoney(total, bouquetCurrency(bouquet), locale)}</span>
+            <span>{formatMoney(total, bouquetCurrency(item), locale)}</span>
           </div>
           <button type="button" className={styles.close} onClick={onClose} aria-label="Close">
             <Icon name="x" size={18} />
@@ -167,31 +268,51 @@ export default function FlowerOrderForm({
         </div>
 
         {sent ? (
-          <div className={styles.sent}>
-            <div className={styles.sentIcon}>
-              <Icon name="check" size={26} />
+          <div className={styles.sheetBody}>
+            <div className={styles.sent}>
+              <div className={styles.sentIcon}>
+                <Icon name="check" size={26} />
+              </div>
+              <h3>{t('flowers.successTitle')}</h3>
+              <p>{t('flowers.successDesc')}</p>
             </div>
-            <h3>{t('flowers.successTitle')}</h3>
-            <p>{t('flowers.successDesc')}</p>
-            <Button variant="ghost" onClick={onClose}>
+
+            <AddOnSuggestions
+              bought={item}
+              title={t('flowers.addOn.title')}
+              sub={t('flowers.addOn.sub')}
+              onAdd={addToDelivery}
+            />
+
+            <Button variant="ghost" block onClick={onClose}>
               {t('flowers.backToAll')}
             </Button>
           </div>
         ) : (
-          <div className={styles.sheetBody}>
+          <div className={styles.sheetBody} ref={bodyRef}>
+            {previous && (
+              <p className={styles.sameDelivery}>
+                <Icon name="check" size={15} />
+                {t('flowers.addOn.sameDelivery').replace('{item}', previous)}
+              </p>
+            )}
+
             {builder && roses && (
               <>
                 <div className="eyebrow">{t('flowers.builder.title')}</div>
-                <RoseBuilderFields
-                  builder={builder}
-                  selection={roses}
-                  currency={bouquetCurrency(bouquet)}
-                  sameDay={bouquet.sameDay}
-                  onChange={setRoses}
-                />
+                <div data-field="mix" tabIndex={-1}>
+                  <RoseBuilderFields
+                    builder={builder}
+                    selection={roses}
+                    currency={bouquetCurrency(item)}
+                    sameDay={item.sameDay}
+                    onChange={setRoses}
+                  />
+                  {fieldError('mix')}
+                </div>
                 <div className={styles.total}>
                   <span>{t('flowers.fromTotal')}</span>
-                  <b>{formatMoney(total, bouquetCurrency(bouquet), locale)}</b>
+                  <b>{formatMoney(total, bouquetCurrency(item), locale)}</b>
                 </div>
                 <p className={styles.hint}>{t('flowers.builder.priceNote')}</p>
               </>
@@ -203,12 +324,16 @@ export default function FlowerOrderForm({
               <label className="field">
                 <span>{t('flowers.date')}</span>
                 <input
-                  className="input"
+                  {...invalid('date', 'input')}
                   type="date"
                   value={date}
                   min={earliest}
-                  onChange={(e) => setDate(e.target.value)}
+                  onChange={(e) => {
+                    setDate(e.target.value);
+                    touch('date');
+                  }}
                 />
+                {fieldError('date')}
               </label>
               <label className="field">
                 <span>{t('flowers.slot')}</span>
@@ -226,38 +351,43 @@ export default function FlowerOrderForm({
               </label>
             </div>
 
-            {!bouquet.sameDay && <p className={styles.hint}>{t('flowers.cutoff')}</p>}
+            {!item.sameDay && <p className={styles.hint}>{t('flowers.cutoff')}</p>}
 
             <label className="field">
               <span>{t('flowers.address')}</span>
               <input
-                className="input"
+                {...invalid('address', 'input')}
                 value={address}
                 maxLength={200}
+                autoComplete="street-address"
                 placeholder={t('flowers.addressPlaceholder')}
                 onChange={(e) => setAddress(e.target.value)}
               />
+              {fieldError('address')}
             </label>
 
             <div className={styles.row}>
               <label className="field">
                 <span>{t('flowers.recipient')}</span>
                 <input
-                  className="input"
+                  {...invalid('recipient', 'input')}
                   value={recipient}
                   maxLength={PERSON_NAME_MAX}
                   onChange={(e) => setRecipient(e.target.value)}
                 />
+                {fieldError('recipient')}
               </label>
               <label className="field">
                 <span>{t('flowers.recipientPhone')}</span>
                 <input
-                  className="input"
+                  {...invalid('recipientPhone', 'input')}
                   inputMode="tel"
                   value={recipientPhone}
                   maxLength={PHONE_INPUT_MAX_LENGTH}
+                  placeholder={t('booking.contactPlaceholder')}
                   onChange={(e) => setRecipientPhone(sanitizePhoneInput(e.target.value))}
                 />
+                {fieldError('recipientPhone')}
               </label>
             </div>
 
@@ -272,7 +402,7 @@ export default function FlowerOrderForm({
               />
             </label>
 
-            {!builder && offersWrapping(bouquet) && (
+            {!builder && offersWrapping(item) && (
               <label className={styles.wrapping}>
                 <input
                   type="checkbox"
@@ -280,14 +410,14 @@ export default function FlowerOrderForm({
                   onChange={(e) => setWrapping(e.target.checked)}
                 />
                 <span>{t('flowers.wrapping')}</span>
-                <b>+{formatMoney(bouquet.wrappingPrice!, bouquetCurrency(bouquet), locale)}</b>
+                <b>+{formatMoney(item.wrappingPrice!, bouquetCurrency(item), locale)}</b>
               </label>
             )}
 
-            {!builder && offersWrapping(bouquet) && (
+            {!builder && offersWrapping(item) && (
               <div className={styles.total}>
                 <span>{t('flowers.total')}</span>
-                <b>{formatMoney(total, bouquetCurrency(bouquet), locale)}</b>
+                <b>{formatMoney(total, bouquetCurrency(item), locale)}</b>
               </div>
             )}
 
@@ -307,21 +437,26 @@ export default function FlowerOrderForm({
               <label className="field">
                 <span>{t('booking.yourName')}</span>
                 <input
-                  className="input"
+                  {...invalid('name', 'input')}
                   value={name}
                   maxLength={PERSON_NAME_MAX}
+                  autoComplete="name"
                   onChange={(e) => setName(e.target.value)}
                 />
+                {fieldError('name')}
               </label>
               <label className="field">
                 <span>{t('booking.contact')}</span>
                 <input
-                  className="input"
+                  {...invalid('contact', 'input')}
                   inputMode="tel"
                   value={contact}
                   maxLength={PHONE_INPUT_MAX_LENGTH}
+                  autoComplete="tel"
+                  placeholder={t('booking.contactPlaceholder')}
                   onChange={(e) => setContact(sanitizePhoneInput(e.target.value))}
                 />
+                {fieldError('contact')}
               </label>
             </div>
 
@@ -335,7 +470,12 @@ export default function FlowerOrderForm({
               onChange={(e) => setHoneypot(e.target.value)}
             />
 
-            {error && <p className={styles.error}>{error}</p>}
+            {/* The summary goes away by itself once the last field is fixed. */}
+            {(tried && firstError) || error ? (
+              <p className={styles.error} role="alert">
+                {tried && firstError ? t('booking.fillRequired') : error}
+              </p>
+            ) : null}
 
             <Button
               variant="primary"

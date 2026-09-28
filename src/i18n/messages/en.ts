@@ -287,14 +287,14 @@ export const en = {
     kinds: { flowers: 'Flowers', balloons: 'Balloons', mixed: 'Flowers and balloons', wine: 'Wine' },
     promo: {
       status: 'Your request is with the owners — they confirm by hand, usually within the hour.',
-      title: 'Have flowers waiting inside',
-      sub: 'Bouquets made up the morning they go out, balloons blown up fresh — left in the apartment before you walk in.',
+      title: 'Flowers, balloons or wine waiting inside',
+      sub: 'A bouquet made up that morning, balloons blown up fresh or a bottle for the first evening — left in the apartment before you walk in.',
       points: {
-        fresh: 'Made up the morning of delivery',
+        fresh: 'Bouquets made up the morning of delivery',
         nextDay: 'Delivered across central Israel the next day',
         inside: 'Waiting inside when you arrive',
       },
-      cta: 'Choose a bouquet',
+      cta: 'Choose a gift',
       stay: 'Not now',
       countdown: 'Opening the flower shop in {n} s',
     },
@@ -349,6 +349,81 @@ export const en = {
     total: 'Total',
     successTitle: 'Order received',
     successDesc: 'We will confirm the delivery shortly and send a photo of the bouquet before it goes out.',
+    errors: {
+      date: 'Pick a date no earlier than {date}.',
+      address: 'Enter the full address: street, building and flat.',
+      mix: 'Place every rose in the mix — the colours must add up to the count.',
+    },
+    addOn: {
+      title: 'Add to this delivery?',
+      sub: 'Brought together with your order — same address, same time.',
+      add: 'Add',
+      sameDelivery: 'Same delivery as “{item}” — address and time are filled in.',
+      detailTitle: 'Goes well with it',
+    },
+  },
+  /** Palei Flowers as a shop of its own: its header, aisles and footer. */
+  shop: {
+    nav: 'Shop categories',
+    all: 'All',
+    call: 'Call us',
+    categories: {
+      bouquets: {
+        label: 'Bouquets',
+        sub: 'Hand-tied bouquets made up the morning they go out — classic, seasonal, and sets with balloons.',
+        seoTitle: 'Bouquet delivery in Bat Yam',
+        seoDescription:
+          'Fresh bouquets delivered in Bat Yam and central Israel — made up the morning they go out, same day on orders before 14:00.',
+      },
+      roses: {
+        label: 'Roses',
+        sub: 'Ready rose bouquets — or build your own: the count, the colour and how it is wrapped.',
+        seoTitle: 'Rose delivery in Bat Yam',
+        seoDescription:
+          'Red, white and pink roses delivered in Bat Yam. Pick a ready bouquet or choose the count, colour and wrapping yourself.',
+      },
+      boxes: {
+        label: 'Flower boxes',
+        sub: 'Arrangements set in a box — no vase needed, and they stay fresh for days.',
+        seoTitle: 'Flower boxes delivered in Bat Yam',
+        seoDescription:
+          'Flower arrangements in a box, delivered in Bat Yam — a gift that needs no vase and stays fresh for days.',
+      },
+      plants: {
+        label: 'Plants',
+        sub: 'Potted plants that last long after the bouquets are gone.',
+        seoTitle: 'Plant delivery in Bat Yam',
+        seoDescription: 'Potted plants delivered in Bat Yam and central Israel — a gift that keeps growing.',
+      },
+      balloons: {
+        label: 'Balloons',
+        sub: 'Numbers, birthday and baby sets, blown up fresh on the day — on their own or with flowers.',
+        seoTitle: 'Balloon delivery in Bat Yam',
+        seoDescription:
+          'Balloons delivered in Bat Yam: numbers, birthday and baby sets, blown up fresh on the day of delivery.',
+      },
+      wine: {
+        label: 'Wine',
+        sub: 'A bottle to go with the flowers — red, white, rosé or sparkling, in the same delivery.',
+        seoTitle: 'Wine delivery in Bat Yam',
+        seoDescription:
+          'Red, white, rosé and sparkling wine delivered in Bat Yam — on its own or together with flowers.',
+      },
+    },
+    shelves: 'Shop by category',
+    seeAll: 'See all',
+    backTo: 'Back to {category}',
+    footer: {
+      tagline:
+        'Flowers, balloons and wine delivered in Bat Yam and across central Israel. Made up the morning they go out.',
+      shop: 'Shop',
+      delivery: 'Same-day delivery on orders before {time}',
+      copyright: '© 2026 Palei Flowers · Bat Yam',
+    },
+    group: {
+      title: 'Also from our family',
+      sub: 'The same people run apartments by the sea in Bat Yam — for a few nights or a few months.',
+    },
   },
   group: {
     title: 'More than apartments',

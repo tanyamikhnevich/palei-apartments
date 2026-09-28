@@ -15,12 +15,26 @@ import styles from './GroupSection.module.scss';
  * entirely rather than shown as "coming soon": an empty promise on the home
  * page is worse than no mention at all. If nothing is left but the apartments
  * the strip has nothing to introduce, so it does not render.
+ *
+ * A section with a site of its own — the flower shop — shows the same strip
+ * without itself (`except`), under its own heading: a shop does not open with
+ * "more than apartments".
  */
-export default function GroupSection() {
+export default function GroupSection({
+  except,
+  titleKey = 'group.title',
+  subKey = 'group.sub',
+}: {
+  /** The section this strip is shown inside, left out of it. */
+  except?: string;
+  titleKey?: string;
+  subKey?: string;
+}) {
   const { t, href } = useLanguage();
-  const services = liveServices();
+  const services = liveServices().filter((s) => s.href !== except);
 
-  if (services.length < 2) return null;
+  // The group's own page lists itself too, so one card there is no group at all.
+  if (services.length < (except ? 1 : 2)) return null;
 
   return (
     <section className={`section--tight ${styles.section}`} id="group">
@@ -28,11 +42,11 @@ export default function GroupSection() {
         <div className={styles.head}>
           {/* The brand name stays in Latin — it is a name, not a phrase. */}
           <div className="eyebrow">Palei Group</div>
-          <h2 className="section-title">{t('group.title')}</h2>
-          <p className="section-sub">{t('group.sub')}</p>
+          <h2 className="section-title">{t(titleKey)}</h2>
+          <p className="section-sub">{t(subKey)}</p>
         </div>
 
-        <div className={styles.grid}>
+        <div className={`${styles.grid} ${services.length === 1 ? styles.single : ''}`}>
           {services.map((service) => (
             <Link key={service.href} href={href(service.href)} className={styles.card}>
               <span className={styles.label}>{t(`group.services.${service.key}.label`)}</span>

@@ -1,0 +1,8 @@
+/*
+  Tall enough that the footer never rides up under the header — not while the
+  next aisle is loading, and not on an aisle with two bottles in it.
+*/
+.page {
+  min-height: calc(100vh - 120px);
+  min-height: calc(100dvh - 120px);
+}

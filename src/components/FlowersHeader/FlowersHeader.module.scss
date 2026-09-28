@@ -1,0 +1,153 @@
+/*
+  The shop's own colours — the flowers accent from `SERVICES`, and a blush of
+  it for the resting pills. Scoped here rather than global: the apartment site
+  keeps its navy.
+*/
+.hdr {
+  --shop: #a04a64;
+  --shop-deep: #8f4a63;
+  --shop-blush: #f7ecf0;
+
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: rgba(251, 252, 253, 0.92);
+  backdrop-filter: blur(14px) saturate(1.1);
+  border-bottom: 1px solid var(--line);
+  transition: box-shadow 0.25s;
+
+  &.stuck {
+    box-shadow: 0 6px 20px -16px rgba(30, 40, 55, 0.5);
+  }
+}
+
+.bar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  height: 68px;
+}
+
+.logoLink {
+  display: inline-flex;
+  flex-shrink: 0;
+  border-radius: 8px;
+
+  &:hover {
+    opacity: 0.88;
+  }
+}
+
+.logo {
+  height: 48px;
+  width: auto;
+  object-fit: contain;
+}
+
+.right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-inline-start: auto;
+}
+
+.call {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0.55em 1em;
+  border-radius: 999px;
+  border: 1px solid var(--shop);
+  color: var(--shop-deep);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  white-space: nowrap;
+  transition: background 0.15s, color 0.15s;
+
+  &:hover {
+    background: var(--shop);
+    color: #fff;
+  }
+}
+
+/* The aisles: one row under the bar, the shop's real navigation. */
+.aisles {
+  border-top: 1px solid var(--line);
+}
+
+.aislesRow {
+  display: flex;
+  gap: 4px;
+  padding-block: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.aisle {
+  flex: none;
+  padding: 0.55em 1.05em;
+  border-radius: 999px;
+  font-size: var(--fs-md);
+  font-weight: 600;
+  color: var(--ink);
+  white-space: nowrap;
+  transition: background 0.15s, color 0.15s;
+
+  &:hover {
+    background: var(--shop-blush);
+    color: var(--shop-deep);
+  }
+}
+
+.aisleOn {
+  background: var(--shop);
+  color: #fff;
+
+  &:hover {
+    background: var(--shop-deep);
+    color: #fff;
+  }
+}
+
+@media (max-width: 760px) {
+  .bar {
+    height: 60px;
+    gap: 10px;
+  }
+
+  .logo {
+    height: 40px;
+  }
+
+  .right {
+    gap: 8px;
+  }
+
+  /* The number is a tap away either way; on a phone the icon says enough. */
+  .call {
+    padding: 9px;
+  }
+
+  .callNumber {
+    display: none;
+  }
+
+  .aislesRow {
+    padding-block: 6px;
+  }
+
+  .aisle {
+    font-size: var(--fs-sm);
+    padding: 0.5em 0.9em;
+  }
+}
+
+@media (max-width: 400px) {
+  .logo {
+    height: 34px;
+  }
+}

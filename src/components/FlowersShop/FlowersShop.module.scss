@@ -57,46 +57,109 @@
   }
 }
 
-/* One heading per kind — flowers, balloons, wine — instead of one heap. */
-.group + .group {
-  margin-top: 48px;
+/*
+  The front page: one card per aisle. Big photo, the aisle's name, a line on
+  what is in it, and where its prices start — the whole card is the link.
+*/
+.aisleCards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
 }
 
-.groupTitle {
-  margin: 0 0 18px;
-  font-size: var(--fs-xl);
-  letter-spacing: -0.02em;
-}
-
-/* Red · white · sparkling, inside the wine section. Quieter than the kinds. */
-.subKinds {
+.aisleCard {
   display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-bottom: 18px;
-}
-
-.subKind {
-  padding: 0.45em 1em;
-  border-radius: 999px;
-  border: 1px solid var(--line-2);
-  background: none;
-  font-family: inherit;
-  font-size: var(--fs-sm);
-  font-weight: 700;
-  color: var(--ink-soft);
-  cursor: pointer;
+  flex-direction: column;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  color: var(--ink);
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.2s var(--ease), transform 0.2s var(--ease),
+    border-color 0.2s var(--ease);
 
   &:hover {
-    border-color: var(--navy);
-    color: var(--navy);
+    border-color: #a04a64;
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+  }
+
+  &:hover .aisleImg {
+    transform: scale(1.04);
+  }
+
+  &:hover .aisleGo {
+    transform: translateX(4px);
   }
 }
 
-.subKindOn {
-  background: var(--mist);
-  border-color: var(--navy);
-  color: var(--navy);
+.aisleMedia {
+  position: relative;
+  display: grid;
+  place-items: center;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  background: #f7ecf0;
+  color: #a04a64;
+}
+
+.aisleImg {
+  object-fit: cover;
+  transition: transform 0.4s var(--ease);
+}
+
+.aisleBody {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+  padding: 18px 20px 20px;
+}
+
+.aisleName {
+  font-size: var(--fs-lg);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.aisleSub {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-size: var(--fs-sm);
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+.aisleFoot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: auto;
+  padding-top: 12px;
+}
+
+.aisleFrom {
+  font-size: var(--fs-md);
+  font-weight: 700;
+  color: #8f4a63;
+}
+
+.aisleGo {
+  flex: none;
+  color: #a04a64;
+  transition: transform 0.2s var(--ease);
+
+  :global([dir='rtl']) & {
+    transform: rotate(180deg);
+  }
+}
+
+:global([dir='rtl']) .aisleCard:hover .aisleGo {
+  transform: rotate(180deg) translateX(4px);
 }
 
 .grid {
@@ -285,6 +348,8 @@
   flex-direction: column;
   gap: 14px;
   overflow-y: auto;
+  /* Reaching the end of the sheet does not hand the scroll on to the page. */
+  overscroll-behavior: contain;
 }
 
 .row {
@@ -458,7 +523,7 @@
   align-items: center;
   text-align: center;
   gap: 12px;
-  padding: 40px 24px;
+  padding: 16px 8px 4px;
 
   h3 { margin: 0; font-size: var(--fs-xl); }
   p { margin: 0; color: var(--ink-soft); font-size: var(--fs-sm); max-width: 44ch; }
@@ -474,6 +539,131 @@
   color: var(--ok-fg);
 }
 
+/*
+  "Add to this delivery" — a bottle or a balloon set offered with the order.
+  Quiet cards in a list: it is a suggestion, not a second shop window.
+*/
+.addOns {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px;
+  border-radius: var(--r-lg);
+  background: #f7ecf0;
+}
+
+.addOnsHead {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+
+  b {
+    font-size: var(--fs-base);
+    letter-spacing: -0.01em;
+  }
+
+  span {
+    font-size: var(--fs-xs);
+    color: var(--ink-soft);
+  }
+}
+
+.addOnsList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.addOn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 10px 8px 8px;
+  border-radius: 12px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  color: var(--ink);
+  transition: border-color 0.15s;
+
+  &:hover {
+    border-color: #a04a64;
+  }
+}
+
+.addOnMedia {
+  position: relative;
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 56px;
+  height: 56px;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #f7ecf0;
+  color: #a04a64;
+}
+
+.addOnImg {
+  object-fit: cover;
+}
+
+/* Bottles are tall; cropping them square would lose the label. */
+.addOnImgContain {
+  object-fit: contain;
+  background: #fff;
+}
+
+.addOnText {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  flex: 1;
+  min-width: 0;
+  font-size: var(--fs-sm);
+
+  b {
+    font-size: var(--fs-sm);
+  }
+}
+
+.addOnKind {
+  font-size: var(--fs-2xs);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #8f4a63;
+}
+
+.addOnName {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-weight: 600;
+}
+
+.addOnGo {
+  flex: none;
+  color: #a04a64;
+
+  :global([dir='rtl']) & {
+    transform: rotate(180deg);
+  }
+}
+
+/* The second order's reminder that it rides with the first. */
+.sameDelivery {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: var(--r-sm);
+  background: var(--ok-bg);
+  color: var(--ok-fg);
+  font-size: var(--fs-xs);
+  font-weight: 600;
+}
+
 /* Anti-bot field: out of sight and out of the tab order, but a real input. */
 .honeypot {
   position: absolute;
@@ -486,6 +676,14 @@
 
 @media (max-width: 640px) {
   .section { padding: 32px 0 72px; }
+
+  /* Two across on a phone: the photo and the name are what gets tapped. */
+  .aisleCards { grid-template-columns: 1fr 1fr; gap: 12px; }
+  .aisleBody { padding: 12px 12px 14px; gap: 4px; }
+  .aisleName { font-size: var(--fs-base); }
+  .aisleSub { display: none; }
+  .aisleFoot { padding-top: 6px; }
+  .aisleFrom { font-size: var(--fs-sm); }
   .row { grid-template-columns: 1fr; }
   .overlay { padding: 0; align-items: flex-end; }
   .sheet { max-height: 92vh; border-radius: var(--r-lg) var(--r-lg) 0 0; }

@@ -14,9 +14,11 @@ import {
   bouquetCopy,
   bouquetCurrency,
   bouquetsInCountry,
+  displayPrice,
   FLOWER_COUNTRY,
   windowBouquets,
 } from '@/lib/flowers';
+import { isBuilder } from '@/lib/roseBuilder';
 import { formatMoney } from '@/lib/money';
 import type { Bouquet } from '@/types/flower';
 import styles from './FlowersPromoModal.module.scss';
@@ -24,8 +26,25 @@ import styles from './FlowersPromoModal.module.scss';
 /** How long the pitch holds the screen before it takes the guest to the shop. */
 const REDIRECT_SECONDS = 10;
 
-/** Enough to show the window is real, few enough to stay one glance. */
-const SHOWCASE = 3;
+/**
+ * One of each thing the shop sends — a bouquet, balloons, a bottle — chosen
+ * once and kept, so the pitch always shows its best faces rather than whatever
+ * happens to be cheapest this week. Should one come off the window, the
+ * cheapest of the same kind stands in for it, so the row is never short.
+ */
+const SHOWCASE: { id: string; kind: Bouquet['kind'] }[] = [
+  { id: 'bq-1789665445548', kind: 'flowers' }, // Бархатная полночь
+  { id: 'bq-1788706357252', kind: 'balloons' }, // Морская волна
+  { id: 'bq-1789985839080', kind: 'wine' }, // Moët & Chandon Brut Impérial
+];
+
+function showcase(window: Bouquet[]): Bouquet[] {
+  return SHOWCASE.flatMap(({ id, kind }) => {
+    const pinned = window.find((b) => b.id === id);
+    const stand = pinned ?? window.find((b) => b.kind === kind && !isBuilder(b));
+    return stand ? [stand] : [];
+  });
+}
 
 const POINTS = ['fresh', 'nextDay', 'inside'] as const;
 
@@ -56,14 +75,14 @@ export default function FlowersPromoModal({ checkIn, onClose }: FlowersPromoModa
   const target = href(checkIn ? `/flowers?date=${checkIn}` : '/flowers');
 
   /*
-    Real stock, not stock photos: three of the cheapest things actually in the
-    window. A guest who recognises them on the next screen believes the offer.
+    Real stock, not stock photos: a guest who recognises them on the next
+    screen believes the offer.
   */
   useEffect(() => {
     let alive = true;
     fetchBouquets()
       .then(({ bouquets }) => {
-        if (alive) setPicks(windowBouquets(bouquetsInCountry(bouquets, FLOWER_COUNTRY)).slice(0, SHOWCASE));
+        if (alive) setPicks(showcase(windowBouquets(bouquetsInCountry(bouquets, FLOWER_COUNTRY))));
       })
       .catch(() => undefined)
       .finally(() => {
@@ -100,10 +119,17 @@ export default function FlowersPromoModal({ checkIn, onClose }: FlowersPromoModa
       picks.map((bouquet) => ({
         id: bouquet.id,
         name: bouquetCopy(bouquet, locale).name,
-        price: formatMoney(bouquet.price, bouquetCurrency(bouquet), locale),
+        // The rose builder has no fixed price — its card says where it starts.
+        price: isBuilder(bouquet)
+          ? t('flowers.fromPrice').replace(
+              '{price}',
+              formatMoney(displayPrice(bouquet), bouquetCurrency(bouquet), locale)
+            )
+          : formatMoney(bouquet.price, bouquetCurrency(bouquet), locale),
         photo: (bouquet.photos ?? []).find(isPhotoUrl),
+        contain: bouquet.kind === 'wine',
       })),
-    [picks, locale]
+    [picks, locale, t]
   );
 
   return (
@@ -143,7 +169,7 @@ export default function FlowersPromoModal({ checkIn, onClose }: FlowersPromoModa
         */}
         {picksLoading ? (
           <div className={styles.picks}>
-            {Array.from({ length: SHOWCASE }, (_, i) => (
+            {SHOWCASE.map((_, i) => (
               <span className={styles.pick} key={i}>
                 {/* Same classes as the real card, so the two states measure alike. */}
                 <Skeleton className={styles.pickMedia} height="auto" />
@@ -167,7 +193,7 @@ export default function FlowersPromoModal({ checkIn, onClose }: FlowersPromoModa
                       alt=""
                       fill
                       sizes="150px"
-                      className={styles.pickImg}
+                      className={`${styles.pickImg} ${card.contain ? styles.pickImgContain : ''}`}
                       unoptimized
                     />
                   ) : (

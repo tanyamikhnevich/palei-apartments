@@ -95,7 +95,8 @@
 /* The window itself, in miniature. One link: any of them means "show me". */
 .picks {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  /* minmax(0, …): a long wine name must clip, not push its column wider. */
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 10px;
   margin-bottom: 20px;
   text-decoration: none;
@@ -105,6 +106,7 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
+  min-width: 0;
   text-align: start;
 }
 
@@ -121,6 +123,12 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+/* A bottle is far taller than the frame; cropped, it loses its label. */
+.pickImgContain {
+  object-fit: contain;
+  background: #fff;
 }
 
 /* Both lines are pinned to one line box, so a skeleton and a name are the

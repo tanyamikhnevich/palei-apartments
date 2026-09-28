@@ -38,6 +38,10 @@ export default function BookCta() {
   // Match against the path without its language prefix, or `/ru/apartments/x`
   // reads as an ordinary page and the button points at the wrong thing.
   const { pathname: bare } = splitLocale(pathname);
+
+  // The flower shop is its own shop — booking a flat is not its next step.
+  if (bare === '/flowers' || bare.startsWith('/flowers/')) return null;
+
   const onApartmentPage = /^\/apartments\/[^/]+$/.test(bare);
   const href =
     onApartmentPage ? '#book' : bare === '/contact' ? '#contact' : localeHref('/contact');

@@ -290,14 +290,14 @@ export const fr: Translation<Messages> = {
     kinds: { flowers: 'Fleurs', balloons: 'Ballons', mixed: 'Fleurs et ballons', wine: 'Vins' },
     promo: {
       status: 'Votre demande est partie chez les propriétaires — ils confirment à la main, en général dans l’heure.',
-      title: 'Des fleurs qui vous attendent déjà',
-      sub: 'Des bouquets composés le matin même et des ballons gonflés frais — déposés dans l’appartement avant votre arrivée.',
+      title: 'Des fleurs, des ballons ou du vin qui vous attendent',
+      sub: 'Un bouquet composé le matin même, des ballons gonflés frais ou une bouteille pour le premier soir — déposés dans l’appartement avant votre arrivée.',
       points: {
-        fresh: 'Composé le matin de la livraison',
+        fresh: 'Bouquets composés le matin de la livraison',
         nextDay: 'Livraison dans le centre d’Israël dès le lendemain',
-        inside: 'Vous attend dans l’appartement',
+        inside: 'Tout vous attend dans l’appartement',
       },
-      cta: 'Choisir un bouquet',
+      cta: 'Choisir un cadeau',
       stay: 'Pas maintenant',
       countdown: 'Ouverture de la boutique dans {n} s',
     },
@@ -352,6 +352,78 @@ export const fr: Translation<Messages> = {
     total: 'Total',
     successTitle: 'Commande reçue',
     successDesc: 'Nous confirmerons la livraison sous peu et enverrons une photo du bouquet avant le départ.',
+    errors: {
+      date: 'Choisissez une date à partir du {date}.',
+      address: 'Indiquez l’adresse complète : rue, immeuble et appartement.',
+      mix: 'Répartissez toutes les roses — le total des couleurs doit correspondre au nombre.',
+    },
+    addOn: {
+      title: 'Ajouter à cette livraison ?',
+      sub: 'Livré avec votre commande — même adresse, même créneau.',
+      add: 'Ajouter',
+      sameDelivery: 'Même livraison que « {item} » — adresse et créneau déjà remplis.',
+      detailTitle: 'Pour l’accompagner',
+    },
+  },
+  shop: {
+    nav: 'Rayons de la boutique',
+    all: 'Tout',
+    call: 'Appeler',
+    categories: {
+      bouquets: {
+        label: 'Bouquets',
+        sub: 'Des bouquets composés le matin même de la livraison — classiques, de saison, et des ensembles avec ballons.',
+        seoTitle: 'Livraison de bouquets à Bat Yam',
+        seoDescription:
+          'Bouquets frais livrés à Bat Yam et dans le centre d’Israël — composés le matin même, livrés le jour même pour toute commande avant 14 h.',
+      },
+      roses: {
+        label: 'Roses',
+        sub: 'Des bouquets de roses prêts — ou composez le vôtre : le nombre, la couleur et la présentation.',
+        seoTitle: 'Livraison de roses à Bat Yam',
+        seoDescription:
+          'Roses rouges, blanches et roses livrées à Bat Yam. Un bouquet prêt, ou le vôtre : nombre, couleur et présentation au choix.',
+      },
+      boxes: {
+        label: 'Boîtes à fleurs',
+        sub: 'Des compositions en boîte — pas besoin de vase, et elles restent fraîches des jours.',
+        seoTitle: 'Boîtes à fleurs livrées à Bat Yam',
+        seoDescription: 'Compositions florales en boîte livrées à Bat Yam — un cadeau qui se passe de vase.',
+      },
+      plants: {
+        label: 'Plantes',
+        sub: 'Des plantes en pot qui durent bien après les bouquets.',
+        seoTitle: 'Livraison de plantes à Bat Yam',
+        seoDescription: 'Plantes en pot livrées à Bat Yam et dans le centre d’Israël — un cadeau qui continue de pousser.',
+      },
+      balloons: {
+        label: 'Ballons',
+        sub: 'Chiffres, anniversaire et naissance, gonflés le jour même — seuls ou avec des fleurs.',
+        seoTitle: 'Livraison de ballons à Bat Yam',
+        seoDescription:
+          'Ballons livrés à Bat Yam : chiffres, ensembles d’anniversaire et de naissance, gonflés le jour de la livraison.',
+      },
+      wine: {
+        label: 'Vins',
+        sub: 'Une bouteille pour accompagner les fleurs — rouge, blanc, rosé ou pétillant, dans la même livraison.',
+        seoTitle: 'Livraison de vin à Bat Yam',
+        seoDescription: 'Vins rouges, blancs, rosés et pétillants livrés à Bat Yam — seuls ou avec des fleurs.',
+      },
+    },
+    shelves: 'Nos rayons',
+    seeAll: 'Tout voir',
+    backTo: 'Retour : {category}',
+    footer: {
+      tagline:
+        'Fleurs, ballons et vins livrés à Bat Yam et dans le centre d’Israël. Composés le matin même de la livraison.',
+      shop: 'Boutique',
+      delivery: 'Livraison le jour même pour toute commande avant {time}',
+      copyright: '© 2026 Palei Flowers · Bat Yam',
+    },
+    group: {
+      title: 'Aussi dans la famille',
+      sub: 'La même équipe loue des appartements au bord de la mer à Bat Yam — pour quelques nuits ou quelques mois.',
+    },
   },
   group: {
     title: 'Pas seulement des appartements',

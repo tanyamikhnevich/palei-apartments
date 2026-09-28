@@ -20,7 +20,8 @@ const NAV = [
   { key: 'nav.flowers', href: '/flowers' },
 ] as const;
 
-function LangSwitch() {
+/** Shared with the flower shop's own header, which wears the same pills. */
+export function LangSwitch() {
   const { locale, setLocale, t } = useLanguage();
 
   return (

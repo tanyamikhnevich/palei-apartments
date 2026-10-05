@@ -2,6 +2,7 @@ import { Suspense } from 'react';
 import type { Metadata } from 'next';
 import { localizedPageMetadata } from '@/lib/seo';
 import FlowersHome from '@/components/FlowersShop/FlowersHome';
+import ShelfSkeleton from '@/components/FlowersShop/ShelfSkeleton';
 import GroupSection from '@/components/GroupSection/GroupSection';
 import JsonLd from '@/components/seo/JsonLd';
 import { loadPublicBouquets } from '@/lib/server/bouquets';
@@ -31,7 +32,7 @@ export default async function FlowersPage() {
       <JsonLd data={flowersWebsiteSchema()} />
       <main>
         {/* The cards read the delivery date from the address, to carry it on. */}
-        <Suspense>
+        <Suspense fallback={<ShelfSkeleton />}>
           <FlowersHome window={bouquets} />
         </Suspense>
         {/* The rest of the family, once the shop has had its say. */}

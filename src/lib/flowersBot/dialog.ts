@@ -40,6 +40,20 @@ const KIND_LABELS: Record<ItemKind, string> = {
   wine: '🍷 Вино',
 };
 
+/** The bot speaks Russian; the stored values are the keys, as in admin. */
+const CATEGORY_LABELS: Record<BouquetCategory, string> = {
+  classic: 'Букеты',
+  roses: 'Розы',
+  boxed: 'Корзины и коробки',
+  numbers: 'Цифры',
+  birthday: 'День рождения',
+  baby: 'Малышам',
+  red: 'Красное',
+  white: 'Белое',
+  rose: 'Розовое',
+  sparkling: 'Игристое',
+};
+
 const CANCEL: InlineKeyboard = [[{ text: '✖️ Отмена', callback_data: 'cancel' }]];
 const SKIP = (step: string): InlineKeyboard => [
   [{ text: '⏭ Пропустить', callback_data: `skip:${step}` }],
@@ -335,7 +349,11 @@ function ask(chatId: number, draft: Draft) {
       const options = CATEGORIES[data.kind ?? 'flowers'];
       const rows: InlineKeyboard = [];
       for (let i = 0; i < options.length; i += 3) {
-        rows.push(options.slice(i, i + 3).map((c) => ({ text: c, callback_data: `cat:${c}` })));
+        rows.push(
+          options
+            .slice(i, i + 3)
+            .map((c) => ({ text: CATEGORY_LABELS[c], callback_data: `cat:${c}` }))
+        );
       }
       return sendText(chatId, 'Категория?', [...rows, ...CANCEL]);
     }
@@ -374,7 +392,7 @@ function summary({ data }: Draft): string {
     '',
     `🌸 <b>${escapeHtml(data.name ?? '')}</b>`,
     `💰 ${formatMoney(data.price ?? 0, currency, 'en')}`,
-    `${KIND_LABELS[data.kind ?? 'flowers']} · ${data.category}`,
+    `${KIND_LABELS[data.kind ?? 'flowers']} · ${data.category ? CATEGORY_LABELS[data.category] : ''}`,
     data.stems ? `🔢 ${data.stems} шт.` : null,
     `🚚 В тот же день: ${data.sameDay ? 'да' : 'нет'}`,
     `📷 Фото: ${data.photos.length}`,

@@ -15,21 +15,50 @@ import { countryOf, currencyOf, regionForArea } from '@/lib/regions';
  */
 export const FLOWER_COUNTRY: Region['country'] = 'IL';
 
+/**
+ * The florist's own line. Not the number in business settings: that one books
+ * apartments, and someone ringing about a bouquet should reach the person who
+ * makes it. E.164, like every number the site stores.
+ */
+export const FLOWERS_PHONE = '+972525505515';
+
 /** The regions a bouquet may belong to — what admin is allowed to choose. */
 export const FLOWER_REGIONS = REGIONS.filter((r) => r.country === FLOWER_COUNTRY);
 
 export const DEFAULT_FLOWER_AREA = FLOWER_REGIONS[0].area;
 
 /*
-  Categories are grouped by what is being sold: a balloon is never "seasonal"
+  Categories are grouped by what is being sold: a balloon is never "roses"
   and a bouquet is never a "number", so offering the wrong ones only invites
   mistakes. Shared by the admin form and the florist's Telegram bot.
+
+  Flowers come three ways, one per aisle: a bouquet, roses, or an arrangement
+  in a basket or box. "Seasonal" and "plants" were once on the list too;
+  nothing the shop makes was ever one or the other, so they are gone.
 */
 export const CATEGORIES: Record<ItemKind, BouquetCategory[]> = {
-  flowers: ['classic', 'seasonal', 'roses', 'boxed', 'plants'],
+  flowers: ['classic', 'roses', 'boxed'],
   balloons: ['numbers', 'birthday', 'baby'],
   mixed: ['classic', 'boxed', 'birthday', 'baby'],
   wine: ['red', 'white', 'rose', 'sparkling'],
+};
+
+/**
+ * What admin calls each category. The stored values are older than the shop's
+ * aisles — "classic" is simply a bouquet, "boxed" covers baskets too — and the
+ * form should say what the florist means, not what the column holds.
+ */
+export const CATEGORY_LABELS: Record<BouquetCategory, string> = {
+  classic: 'Bouquets',
+  roses: 'Roses',
+  boxed: 'Baskets & boxes',
+  numbers: 'Numbers',
+  birthday: 'Birthday',
+  baby: 'Baby',
+  red: 'Red',
+  white: 'White',
+  rose: 'Rosé',
+  sparkling: 'Sparkling',
 };
 
 /** Which message sizes the item: stems, balloons or bottles. */

@@ -98,7 +98,8 @@
   position: relative;
   display: grid;
   place-items: center;
-  aspect-ratio: 4 / 3;
+  /* The product card's own shape — see `.media` — so a shelf and what is on it match. */
+  aspect-ratio: 4 / 5;
   overflow: hidden;
   background: #f7ecf0;
   color: #a04a64;

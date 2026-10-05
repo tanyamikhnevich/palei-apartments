@@ -1,6 +1,7 @@
 import { Suspense } from 'react';
 import type { Metadata } from 'next';
 import FlowersShop from '@/components/FlowersShop/FlowersShop';
+import ShelfSkeleton from '@/components/FlowersShop/ShelfSkeleton';
 import JsonLd from '@/components/seo/JsonLd';
 import { loadPublicBouquets } from '@/lib/server/bouquets';
 import { bouquetCopy, windowBouquets } from '@/lib/flowers';
@@ -54,7 +55,8 @@ export default async function CategoryPage({ category }: { category: ShopCategor
       />
       {listed.length > 0 && <JsonLd data={bouquetListSchema(listed, locale, path)} />}
       <main>
-        <Suspense>
+        {/* The shelf's script can land after its data; hold the shape until it does. */}
+        <Suspense fallback={<ShelfSkeleton />}>
           <FlowersShop initial={bouquets} category={category} />
         </Suspense>
       </main>

@@ -9,7 +9,7 @@ import AdminBouquetModal from './AdminBouquetModal';
 import AdminFlowerOrders from './AdminFlowerOrders';
 import AdminPager from '@/components/admin/ui/AdminPager';
 import { pageCountFor, pageOfIndex, pageSlice } from '@/lib/adminPaging';
-import { adminSorted, SECTION_ORDER, type PriceOrder } from '@/lib/flowers';
+import { adminSorted, CATEGORY_LABELS, SECTION_ORDER, type PriceOrder } from '@/lib/flowers';
 import { isPhotoUrl } from '@/lib/apartmentMedia';
 import { formatMoney } from '@/lib/money';
 import { currencyOf } from '@/lib/regions';
@@ -323,7 +323,7 @@ export default function AdminFlowers({ tab: outerTab, onTabChange }: AdminFlower
                 <div className={styles.name}>
                   <b>{bouquet.locales.en.name}</b>
                   <span>
-                    {bouquet.kind} · {bouquet.category}
+                    {bouquet.kind} · {CATEGORY_LABELS[bouquet.category] ?? bouquet.category}
                     {bouquet.stems ? ` · ${bouquet.stems}` : ''} · {bouquet.area}
                   </span>
                 </div>

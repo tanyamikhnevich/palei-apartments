@@ -6,10 +6,10 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import Icon from '@/components/ui/Icon/Icon';
 import { LangSwitch } from '@/components/Header/Header';
-import { useBusiness } from '@/components/BusinessProvider/BusinessProvider';
 import { useLanguage } from '@/i18n/LanguageProvider';
 import { splitLocale } from '@/i18n/routing';
 import { displayPhone, telLink } from '@/lib/phone';
+import { FLOWERS_PHONE } from '@/lib/flowers';
 import type { ShopCategory } from '@/lib/flowerCategories';
 import styles from './FlowersHeader.module.scss';
 
@@ -23,7 +23,6 @@ import styles from './FlowersHeader.module.scss';
  */
 export default function FlowersHeader({ aisles }: { aisles: ShopCategory[] }) {
   const { t, href } = useLanguage();
-  const { contactPhone } = useBusiness();
   const pathname = usePathname();
   const [stuck, setStuck] = useState(false);
   const activeRef = useRef<HTMLAnchorElement>(null);
@@ -65,15 +64,13 @@ export default function FlowersHeader({ aisles }: { aisles: ShopCategory[] }) {
         </Link>
 
         <div className={styles.right}>
-          {contactPhone && (
-            <a href={telLink(contactPhone)} className={styles.call} aria-label={t('shop.call')}>
-              <Icon name="phone" size={16} />
-              {/* Numbers read left to right in every language. */}
-              <span className={styles.callNumber} dir="ltr">
-                {displayPhone(contactPhone)}
-              </span>
-            </a>
-          )}
+          <a href={telLink(FLOWERS_PHONE)} className={styles.call} aria-label={t('shop.call')}>
+            <Icon name="phone" size={16} />
+            {/* Numbers read left to right in every language. */}
+            <span className={styles.callNumber} dir="ltr">
+              {displayPhone(FLOWERS_PHONE)}
+            </span>
+          </a>
           <LangSwitch />
         </div>
       </div>

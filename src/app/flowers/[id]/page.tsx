@@ -2,6 +2,7 @@ import { Suspense } from 'react';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import BouquetDetail from '@/components/BouquetDetail/BouquetDetail';
+import ShelfSkeleton from '@/components/FlowersShop/ShelfSkeleton';
 import { loadPublicBouquet } from '@/lib/server/bouquets';
 import { bouquetCopy } from '@/lib/flowers';
 import { primaryCategory } from '@/lib/flowerCategories';
@@ -89,7 +90,7 @@ export default async function BouquetPage({ params, searchParams }: BouquetPageP
         )}
       />
       <main>
-        <Suspense>
+        <Suspense fallback={<ShelfSkeleton />}>
           <BouquetDetail bouquet={bouquet} requestedDate={requestedDate} />
         </Suspense>
       </main>

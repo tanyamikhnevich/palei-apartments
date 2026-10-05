@@ -272,10 +272,8 @@ export const fr: Translation<Messages> = {
     all: 'Tous',
     categories: {
       classic: 'Classiques',
-      seasonal: 'De saison',
       roses: 'Roses',
-      boxed: 'En boîte',
-      plants: 'Plantes',
+      boxed: 'Paniers et boîtes',
       numbers: 'Chiffres',
       birthday: 'Anniversaire',
       baby: 'Naissance',
@@ -385,16 +383,10 @@ export const fr: Translation<Messages> = {
           'Roses rouges, blanches et roses livrées à Bat Yam. Un bouquet prêt, ou le vôtre : nombre, couleur et présentation au choix.',
       },
       boxes: {
-        label: 'Boîtes à fleurs',
-        sub: 'Des compositions en boîte — pas besoin de vase, et elles restent fraîches des jours.',
-        seoTitle: 'Boîtes à fleurs livrées à Bat Yam',
-        seoDescription: 'Compositions florales en boîte livrées à Bat Yam — un cadeau qui se passe de vase.',
-      },
-      plants: {
-        label: 'Plantes',
-        sub: 'Des plantes en pot qui durent bien après les bouquets.',
-        seoTitle: 'Livraison de plantes à Bat Yam',
-        seoDescription: 'Plantes en pot livrées à Bat Yam et dans le centre d’Israël — un cadeau qui continue de pousser.',
+        label: 'Paniers et boîtes',
+        sub: 'Des compositions en panier ou en boîte — pas besoin de vase, et elles restent fraîches des jours.',
+        seoTitle: 'Paniers et boîtes de fleurs livrés à Bat Yam',
+        seoDescription: 'Compositions florales en panier ou en boîte livrées à Bat Yam — un cadeau qui se passe de vase.',
       },
       balloons: {
         label: 'Ballons',

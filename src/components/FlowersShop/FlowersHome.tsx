@@ -8,7 +8,7 @@ import { isPhotoUrl } from '@/lib/apartmentMedia';
 import { isAvifImagePath } from '@/lib/imageUpload';
 import { formatMoney } from '@/lib/money';
 import { bouquetCurrency, bouquetsInCountry, displayPrice, FLOWER_COUNTRY, windowBouquets } from '@/lib/flowers';
-import { inCategory, stockedCategories } from '@/lib/flowerCategories';
+import { AISLE_COVERS, inCategory, stockedCategories } from '@/lib/flowerCategories';
 import type { Bouquet } from '@/types/flower';
 import { useCarriedDate } from './useCarriedDate';
 import styles from './FlowersShop.module.scss';
@@ -32,7 +32,10 @@ export default function FlowersHome({ window: all }: { window: Bouquet[] }) {
     const cheapest = items.reduce((a, b) => (displayPrice(b) < displayPrice(a) ? b : a));
     return {
       category,
-      cover: items.flatMap((b) => b.photos ?? []).find(isPhotoUrl),
+      // The florist's pick first; its photos missing, whatever the shelf has.
+      cover: [...items.filter((b) => b.id === AISLE_COVERS[category]), ...items]
+        .flatMap((b) => b.photos ?? [])
+        .find(isPhotoUrl),
       from: formatMoney(displayPrice(cheapest), bouquetCurrency(cheapest), locale),
     };
   });

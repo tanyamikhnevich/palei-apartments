@@ -24,10 +24,8 @@ export const ITEM_KINDS: ItemKind[] = ['flowers', 'balloons', 'mixed', 'wine'];
 
 export type BouquetCategory =
   | 'classic'
-  | 'seasonal'
   | 'roses'
   | 'boxed'
-  | 'plants'
   | 'numbers'
   | 'birthday'
   | 'baby'

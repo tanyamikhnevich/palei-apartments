@@ -10,7 +10,7 @@ import AdminBouquetBuilder from './AdminBouquetBuilder';
 import { blankCost, costSuggestions, hasCost, type CostSuggestion } from '@/lib/bouquetCost';
 import { costItemLabel, itemsById, relinkCost } from '@/lib/costCatalog';
 import { blankBuilder } from '@/lib/roseBuilder';
-import { CATEGORIES, DEFAULT_FLOWER_AREA, FLOWER_REGIONS, sellsHere } from '@/lib/flowers';
+import { CATEGORIES, CATEGORY_LABELS, DEFAULT_FLOWER_AREA, FLOWER_REGIONS, sellsHere } from '@/lib/flowers';
 import { CURRENCY_SYMBOL } from '@/lib/money';
 import { currencyForArea } from '@/lib/regions';
 import { LOCALES, type Locale } from '@/i18n/types';
@@ -199,7 +199,7 @@ export default function AdminBouquetModal({
               >
                 {CATEGORIES[form.kind].map((c) => (
                   <option key={c} value={c}>
-                    {c}
+                    {CATEGORY_LABELS[c]}
                   </option>
                 ))}
               </select>

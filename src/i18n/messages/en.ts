@@ -269,10 +269,8 @@ export const en = {
     all: 'All',
     categories: {
       classic: 'Classic',
-      seasonal: 'Seasonal',
       roses: 'Roses',
-      boxed: 'In a box',
-      plants: 'Plants',
+      boxed: 'Baskets & boxes',
       numbers: 'Numbers',
       birthday: 'Birthday',
       baby: 'Baby',
@@ -383,17 +381,11 @@ export const en = {
           'Red, white and pink roses delivered in Bat Yam. Pick a ready bouquet or choose the count, colour and wrapping yourself.',
       },
       boxes: {
-        label: 'Flower boxes',
-        sub: 'Arrangements set in a box — no vase needed, and they stay fresh for days.',
-        seoTitle: 'Flower boxes delivered in Bat Yam',
+        label: 'Baskets & boxes',
+        sub: 'Arrangements set in a basket or a box — no vase needed, and they stay fresh for days.',
+        seoTitle: 'Flower baskets and boxes delivered in Bat Yam',
         seoDescription:
-          'Flower arrangements in a box, delivered in Bat Yam — a gift that needs no vase and stays fresh for days.',
-      },
-      plants: {
-        label: 'Plants',
-        sub: 'Potted plants that last long after the bouquets are gone.',
-        seoTitle: 'Plant delivery in Bat Yam',
-        seoDescription: 'Potted plants delivered in Bat Yam and central Israel — a gift that keeps growing.',
+          'Flower arrangements in a basket or a box, delivered in Bat Yam — a gift that needs no vase and stays fresh for days.',
       },
       balloons: {
         label: 'Balloons',

@@ -3,9 +3,8 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useLanguage } from '@/i18n/LanguageProvider';
-import { useBusiness } from '@/components/BusinessProvider/BusinessProvider';
 import { displayPhone, telLink } from '@/lib/phone';
-import { SAME_DAY_CUTOFF_HOUR } from '@/lib/flowers';
+import { FLOWERS_PHONE, SAME_DAY_CUTOFF_HOUR } from '@/lib/flowers';
 import type { ShopCategory } from '@/lib/flowerCategories';
 import { liveServices } from '@/lib/services';
 import type { Locale } from '@/i18n/types';
@@ -28,7 +27,6 @@ const LANG_LINKS: { locale: Locale; key: string }[] = [
  */
 export default function FlowersFooter({ aisles }: { aisles: ShopCategory[] }) {
   const { t, setLocale, href } = useLanguage();
-  const { contactPhone } = useBusiness();
   const family = liveServices().filter((s) => s.href !== '/flowers');
 
   return (
@@ -56,13 +54,11 @@ export default function FlowersFooter({ aisles }: { aisles: ShopCategory[] }) {
           <div className={base.col}>
             <h5>{t('footer.contact')}</h5>
             <ul>
-              {contactPhone && (
-                <li>
-                  <a href={telLink(contactPhone)} dir="ltr">
-                    {displayPhone(contactPhone)}
-                  </a>
-                </li>
-              )}
+              <li>
+                <a href={telLink(FLOWERS_PHONE)} dir="ltr">
+                  {displayPhone(FLOWERS_PHONE)}
+                </a>
+              </li>
               <li>
                 <span className={base.plain}>Bat Yam, Israel</span>
               </li>

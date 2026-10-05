@@ -13,25 +13,23 @@ import { CATEGORIES } from '@/lib/flowers';
  * not a column in the database. Admin keeps choosing kind and category as it
  * always has, and the aisles follow.
  */
-export type ShopCategory = 'bouquets' | 'roses' | 'boxes' | 'plants' | 'balloons' | 'wine';
+export type ShopCategory = 'bouquets' | 'roses' | 'boxes' | 'balloons' | 'wine';
 
 /** Header order — also the order the front page lays its shelves out in. */
 export const SHOP_CATEGORIES: ShopCategory[] = [
   'bouquets',
   'roses',
   'boxes',
-  'plants',
   'balloons',
   'wine',
 ];
 
 /** The flower categories that have an aisle of their own rather than living under bouquets. */
-const OWN_AISLE: BouquetCategory[] = ['roses', 'boxed', 'plants'];
+const OWN_AISLE: BouquetCategory[] = ['roses', 'boxed'];
 
 const MATCHES: Record<ShopCategory, (b: Bouquet) => boolean> = {
   roses: (b) => isBuilder(b) || (b.kind === 'flowers' && b.category === 'roses'),
   boxes: (b) => (b.kind === 'flowers' || b.kind === 'mixed') && b.category === 'boxed',
-  plants: (b) => b.kind === 'flowers' && b.category === 'plants',
   // Everything flowery that has no aisle of its own, so nothing falls through.
   bouquets: (b) =>
     (b.kind === 'flowers' && !isBuilder(b) && !OWN_AISLE.includes(b.category)) ||
@@ -59,11 +57,22 @@ export function stockedCategories(window: Bouquet[]): ShopCategory[] {
 }
 
 /**
+ * The bouquet whose first photo fronts an aisle on the shop's front page — the
+ * florist's pick, by id. An aisle not named here, or one whose pick has left
+ * the window, falls back to the first photo found on its shelf.
+ */
+export const AISLE_COVERS: Partial<Record<ShopCategory, string>> = {
+  bouquets: 'bq-1789665124671', // Sweet Pink & Cream Rose Medley
+  roses: 'bq-1791202032105', // Pure Romance
+  wine: 'bq-1789985839080', // Moët & Chandon Brut Impérial
+};
+
+/**
  * The one aisle an item is shelved under when it can only be shown once — on
  * the front page, and as the way back from its own page. Most specific first:
  * a boxed flowers-and-balloons set is a box before it is a bouquet.
  */
-const PRIMARY_ORDER: ShopCategory[] = ['roses', 'boxes', 'plants', 'bouquets', 'balloons', 'wine'];
+const PRIMARY_ORDER: ShopCategory[] = ['roses', 'boxes', 'bouquets', 'balloons', 'wine'];
 
 export function primaryCategory(bouquet: Bouquet): ShopCategory {
   return PRIMARY_ORDER.find((c) => MATCHES[c](bouquet)) ?? 'bouquets';

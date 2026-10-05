@@ -1,7 +1,7 @@
 import type { Apartment } from '@/types/apartment';
 import { FLOWERS_BRAND, SITE_NAME, SITE_URL, absoluteUrl, DEFAULT_OG_IMAGE } from '@/lib/seo';
 import type { Bouquet, BouquetCopy } from '@/types/flower';
-import { bouquetCurrency, displayPrice } from '@/lib/flowers';
+import { FLOWERS_PHONE, bouquetCurrency, displayPrice } from '@/lib/flowers';
 import { isBuilder } from '@/lib/roseBuilder';
 import { isPhotoUrl } from '@/lib/apartmentMedia';
 import { SOCIAL_URLS } from '@/lib/social';
@@ -169,6 +169,7 @@ export function floristSchema(description: string, locale: Locale = DEFAULT_LOCA
     description,
     logo: absoluteUrl('/palei-flowers-logo.png'),
     image: absoluteUrl('/og-flowers.png'),
+    telephone: FLOWERS_PHONE,
     address: {
       '@type': 'PostalAddress',
       addressLocality: 'Bat Yam',

@@ -142,3 +142,113 @@
   font-size: 13px;
   font-style: italic;
 }
+
+/*
+  The same cards the bookings become on a phone — see BookingsTable. Here the
+  review itself gets the full width of the card, where it can be read.
+*/
+@media (max-width: 760px) {
+  .wrap {
+    background: none;
+    border: none;
+    border-radius: 0;
+    overflow: visible;
+  }
+
+  .table {
+    display: block;
+    min-width: 0;
+  }
+
+  .thead {
+    display: none;
+  }
+
+  .tbody {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .tbody tr {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px 12px;
+    padding: 14px;
+    border: 1px solid var(--line);
+    border-radius: var(--r-md);
+    background: var(--surface);
+
+    &:hover {
+      background: var(--surface);
+    }
+  }
+
+  .tbody td {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 0;
+    border: none;
+    font-size: 14px;
+    text-align: end;
+
+    &[data-label]::before {
+      content: attr(data-label);
+      flex: none;
+      color: var(--ink-faint);
+      font-size: 12.5px;
+      font-weight: 500;
+      text-align: start;
+    }
+  }
+
+  .tbody td.guestCell {
+    grid-column: 1;
+    grid-row: 1;
+    justify-content: flex-start;
+    font-size: 16px;
+    text-align: start;
+  }
+
+  .tbody td.statusCell {
+    grid-column: 2;
+    grid-row: 1;
+    align-items: flex-start;
+  }
+
+  .tbody td.actionCell {
+    display: block;
+    margin-top: 4px;
+    padding-top: 12px;
+    border-top: 1px solid var(--line);
+  }
+
+  .actions {
+    justify-content: stretch;
+    flex-wrap: wrap;
+
+    > * {
+      flex: 1 1 auto;
+      justify-content: center;
+      min-height: 42px;
+    }
+  }
+
+  .cols {
+    display: none;
+  }
+
+  /* Read as a paragraph, not squeezed against a label. */
+  .tbody td.textCell {
+    display: block;
+    text-align: start;
+  }
+
+  /* The delete button is an icon: it keeps its size instead of stretching. */
+  .actions > *:last-child {
+    flex: 0 0 46px;
+  }
+}

@@ -24,6 +24,7 @@ import type { AdminRole } from '@/lib/auth/roles';
 import type { Locale } from '@/i18n/types';
 import type { CurrencyCode } from '@/types/settings';
 import type { ReviewSource, ReviewStatus } from '@/types/review';
+import type { AccessCodeKind, GuideStep, LocalizedText } from '@/types/guide';
 
 export type ApartmentLocales = Record<Locale, ApartmentLocaleCopy>;
 
@@ -176,6 +177,80 @@ export const adminSessions = pgTable('admin_sessions', {
   expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
 });
 
+/**
+ * How to get into an apartment: the exact address, the steps with their photos,
+ * the Wi-Fi. One row per apartment, and deliberately not columns on
+ * `apartments` — that row is what the public catalogue serialises, and nothing
+ * here may ever ride along with it.
+ */
+export const checkInGuides = pgTable('check_in_guides', {
+  apartmentId: varchar('apartment_id', { length: 64 }).primaryKey(),
+  address: text('address').notNull().default(''),
+  /** `HH:mm` in the apartment's own time zone. */
+  checkInTime: varchar('check_in_time', { length: 5 }).notNull().default('15:00'),
+  checkOutTime: varchar('check_out_time', { length: 5 }).notNull().default('11:00'),
+  /** Hours before check-in at which the codes appear on a guest's page. */
+  revealHours: integer('reveal_hours').notNull().default(3),
+  wifiName: text('wifi_name').notNull().default(''),
+  wifiPassword: text('wifi_password').notNull().default(''),
+  steps: jsonb('steps').notNull().$type<GuideStep[]>().default([]),
+  notes: jsonb('notes').notNull().$type<LocalizedText>().default({}),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+});
+
+/**
+ * Lockbox and door codes, with the moment each one takes over. A change is a
+ * new row dated ahead, not an edit — the guest still inside keeps the code they
+ * arrived with until the hour the next one starts.
+ */
+export const accessCodes = pgTable('access_codes', {
+  id: varchar('id', { length: 64 }).primaryKey(),
+  apartmentId: varchar('apartment_id', { length: 64 }).notNull(),
+  kind: varchar('kind', { length: 16 }).notNull().$type<AccessCodeKind>(),
+  code: text('code').notNull(),
+  /** `YYYY-MM-DDTHH:mm`, wall-clock time where the apartment is. */
+  validFrom: varchar('valid_from', { length: 16 }).notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+});
+
+/**
+ * A guest's personal link to the guide. The link's secret half is not stored
+ * anywhere: it is an HMAC of `id`, recomputed when the link is opened, so this
+ * table on its own opens nothing.
+ */
+export const guestPasses = pgTable('guest_passes', {
+  id: varchar('id', { length: 64 }).primaryKey(),
+  apartmentId: varchar('apartment_id', { length: 64 }).notNull(),
+  /** Set when the pass was made from a booking; its dates then follow the booking. */
+  bookingId: varchar('booking_id', { length: 64 }),
+  guestName: text('guest_name').notNull(),
+  guestContact: text('guest_contact'),
+  checkIn: date('check_in').notNull(),
+  checkOut: date('check_out').notNull(),
+  revokedAt: timestamp('revoked_at', { withTimezone: true }),
+  firstOpenedAt: timestamp('first_opened_at', { withTimezone: true }),
+  lastOpenedAt: timestamp('last_opened_at', { withTimezone: true }),
+  openCount: integer('open_count').notNull().default(0),
+  /** When the guest pressed "I'm in". */
+  arrivedAt: timestamp('arrived_at', { withTimezone: true }),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+});
+
+/**
+ * The link printed on the sticker inside an apartment: Wi-Fi, house rules and
+ * how to leave — never a door code. Stored, unlike a guest's link, because it
+ * is on a wall: it has to outlive every secret the server ever rotates, and
+ * change only when the owner decides to print a new sticker.
+ */
+export const houseLinks = pgTable('house_links', {
+  apartmentId: varchar('apartment_id', { length: 64 }).primaryKey(),
+  token: varchar('token', { length: 64 }).notNull().unique(),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+});
+
+export type CheckInGuideRow = typeof checkInGuides.$inferSelect;
+export type AccessCodeRow = typeof accessCodes.$inferSelect;
+export type GuestPassRow = typeof guestPasses.$inferSelect;
 export type ApartmentRow = typeof apartments.$inferSelect;
 export type ApartmentInsert = typeof apartments.$inferInsert;
 export type BookingRow = typeof bookings.$inferSelect;

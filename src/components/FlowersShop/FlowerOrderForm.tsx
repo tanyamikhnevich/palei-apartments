@@ -262,7 +262,7 @@ export default function FlowerOrderForm({
             <h2>{builder && roses ? selectionName(builder, roses) : copy.name}</h2>
             <span>{formatMoney(total, bouquetCurrency(item), locale)}</span>
           </div>
-          <button type="button" className={styles.close} onClick={onClose} aria-label="Close">
+          <button type="button" className={styles.close} onClick={onClose} aria-label={t('a11y.close')}>
             <Icon name="x" size={18} />
           </button>
         </div>

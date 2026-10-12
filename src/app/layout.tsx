@@ -3,6 +3,9 @@ import '@/styles/globals.scss';
 import { LanguageProvider } from '@/i18n/LanguageProvider';
 import { BusinessProvider } from '@/components/BusinessProvider/BusinessProvider';
 import BookCta from '@/components/BookCta/BookCta';
+import AccessibilityMenu from '@/components/Accessibility/AccessibilityMenu';
+import SkipLink from '@/components/Accessibility/SkipLink';
+import { A11Y_BOOT_SCRIPT } from '@/lib/a11y';
 import { DEFAULT_OG_IMAGE, SITE_NAME, SITE_URL, absoluteUrl } from '@/lib/seo';
 import { currentLocale } from '@/i18n/server';
 import { isRtl } from '@/i18n/routing';
@@ -74,10 +77,15 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html lang={locale} dir={isRtl(locale) ? 'rtl' : 'ltr'} suppressHydrationWarning>
       <body>
+        {/* Before anything is painted: large text or no motion, if this
+            visitor chose them last time. */}
+        <script dangerouslySetInnerHTML={{ __html: A11Y_BOOT_SCRIPT }} />
         <LanguageProvider locale={locale}>
           <BusinessProvider settings={business}>
+            <SkipLink />
             {children}
             <BookCta />
+            <AccessibilityMenu />
           </BusinessProvider>
         </LanguageProvider>
       </body>

@@ -93,7 +93,7 @@ export default function ReviewsTable({ apartments }: ReviewsTableProps) {
     <div className={styles.wrap}>
       <table className={styles.table}>
         {/* Fixed layout, or the nowrap columns squeeze the review into a ribbon. */}
-        <colgroup>
+        <colgroup className={styles.cols}>
           <col className={styles.colGuest} />
           <col className={styles.colApartment} />
           <col className={styles.colRating} />
@@ -116,18 +116,20 @@ export default function ReviewsTable({ apartments }: ReviewsTableProps) {
         <tbody className={styles.tbody}>
           {visible.map((r) => (
             <tr key={r.id}>
-              <td>
+              <td className={styles.guestCell}>
                 <div className={styles.guestName}>
                   {r.guestName}
                   {r.contact && <span className={styles.contact}>{r.contact}</span>}
                   {r.source === 'airbnb' && <span className={styles.sourceTag}>from Airbnb</span>}
                 </div>
               </td>
-              <td className={styles.muted}>{titles[r.apartmentId] ?? r.apartmentId}</td>
-              <td>
+              <td className={styles.muted} data-label="Apartment">
+                {titles[r.apartmentId] ?? r.apartmentId}
+              </td>
+              <td data-label="Rating">
                 <StarRating value={r.rating} size={14} />
               </td>
-              <td className={styles.text}>
+              <td className={`${styles.text} ${styles.textCell}`}>
                 {r.text ? (
                   <>
                     <p className={openText.has(r.id) ? styles.textBody : styles.textClamped}>
@@ -147,19 +149,19 @@ export default function ReviewsTable({ apartments }: ReviewsTableProps) {
                   <span className={styles.dash}>— stars only</span>
                 )}
               </td>
-              <td className={`${styles.muted} ${styles.nowrap}`}>
+              <td className={`${styles.muted} ${styles.nowrap}`} data-label="Date">
                 {new Date(r.createdAt).toLocaleDateString('en', {
                   day: 'numeric',
                   month: 'short',
                   year: 'numeric',
                 })}
               </td>
-              <td>
+              <td className={styles.statusCell}>
                 <Badge tone={reviewTone(r.status)} dot>
                   {r.status}
                 </Badge>
               </td>
-              <td>
+              <td className={styles.actionCell}>
                 <div className={styles.actions}>
                   {r.status !== 'approved' && (
                     <Button size="sm" variant="primary" onClick={() => setStatus(r.id, 'approved')}>

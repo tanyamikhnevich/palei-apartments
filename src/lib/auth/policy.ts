@@ -8,8 +8,8 @@ import { isShopPath } from './panel';
  * The list is deny-by-default on purpose: a route that nobody has thought about
  * yet is closed, not open. Everything a guest actually touches is named here —
  * browsing apartments, cars and bouquets, checking free dates, sending a
- * booking, hire, order, review or contact message, and the iCal feed the
- * booking platforms subscribe to.
+ * booking, hire, order, review or contact message, the iCal feed the booking
+ * platforms subscribe to, and a check-in guide saying it was opened.
  */
 
 /** A guest never sends anything but these. */
@@ -57,6 +57,13 @@ function isPublicApiRequest(pathname: string, method: string, params: URLSearchP
   // Telegram delivers the florist bot's updates here; the handler checks the
   // webhook secret and who is writing itself.
   if (pathname === '/api/telegram/flowers') return method === 'POST';
+
+  // The owner's bot, for changing a door code from a phone. Same arrangement.
+  if (pathname === '/api/telegram/guide') return method === 'POST';
+
+  // A guest's check-in guide reporting that it was opened. The signed token in
+  // the path is the credential, as it is for the page itself.
+  if (pathname.startsWith('/api/stay/')) return method === 'POST';
 
   // Vercel Cron calls this one; the handler checks CRON_SECRET itself.
   if (pathname === '/api/calendar/sync') return isRead(method);

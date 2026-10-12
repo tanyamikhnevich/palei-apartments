@@ -5,7 +5,7 @@ export type IconName =
   | 'sparkle' | 'heart' | 'home' | 'check' | 'plus' | 'x' | 'edit'
   | 'trash' | 'menu' | 'phone' | 'mail' | 'calendar' | 'grid' | 'inbox'
   | 'gear' | 'chevron' | 'image' | 'shield' | 'search' | 'logout'
-  | 'car' | 'flower' | 'download';
+  | 'car' | 'flower' | 'download' | 'expand' | 'key' | 'copy' | 'lock' | 'wifi' | 'access' | 'pause' | 'play';
 
 interface IconProps {
   name: IconName;
@@ -179,6 +179,42 @@ const PATHS: Record<IconName, React.ReactNode> = {
     </>
   ),
   chevron: <path d="M9 6l6 6-6 6" />,
+  /* The universal access figure: head, open arms, legs apart. */
+  access: (
+    <>
+      <circle cx="12" cy="4.6" r="1.7" fill="currentColor" stroke="none" />
+      <path d="M5 8.4c2.3.9 4.6 1.3 7 1.3s4.7-.4 7-1.3" />
+      <path d="M12 9.7v5.1M12 14.8l-3.1 5.6M12 14.8l3.1 5.6" />
+    </>
+  ),
+  pause: <path d="M9 6v12M15 6v12" />,
+  play: <path d="M8 5.5v13l10-6.5z" fill="currentColor" stroke="none" />,
+  key: (
+    <>
+      <circle cx="8" cy="15.5" r="4" />
+      <path d="M11 12.5l8.5-8.5M16 7.5l2.5 2.5" />
+    </>
+  ),
+  copy: (
+    <>
+      <rect x="9" y="9" width="11" height="11" rx="2" />
+      <path d="M5 15V6a2 2 0 0 1 2-2h8" />
+    </>
+  ),
+  lock: (
+    <>
+      <rect x="5" y="11" width="14" height="9" rx="2" />
+      <path d="M8 11V8a4 4 0 0 1 8 0v3" />
+    </>
+  ),
+  wifi: (
+    <>
+      <path d="M3 9.5a13 13 0 0 1 18 0M6 13a8.5 8.5 0 0 1 12 0M9 16.5a4.2 4.2 0 0 1 6 0" />
+      <circle cx="12" cy="19.5" r="0.9" fill="currentColor" stroke="none" />
+    </>
+  ),
+  /* Four corners pulling outwards: open this full screen. */
+  expand: <path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5" />,
   image: (
     <>
       <rect x="3.5" y="5" width="17" height="14" rx="2" />

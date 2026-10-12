@@ -1,0 +1,138 @@
+/*
+  Photos page left to right in every language: this is a filmstrip, not text,
+  and a fixed direction keeps the scroll maths the same in Hebrew.
+*/
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1300;
+  display: flex;
+  flex-direction: column;
+  direction: ltr;
+  background: rgba(8, 14, 22, 0.97);
+  color: #fff;
+  animation: fade 0.2s ease-out;
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+}
+
+.bar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: max(14px, env(safe-area-inset-top)) max(18px, env(safe-area-inset-right)) 14px
+    max(18px, env(safe-area-inset-left));
+}
+
+.counter {
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+}
+
+.close {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.18s var(--ease);
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.24);
+  }
+}
+
+.track {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.slide {
+  position: relative;
+  flex: 0 0 100%;
+  scroll-snap-align: center;
+  scroll-snap-stop: always;
+}
+
+/* Room on either side for the arrows, so they never sit on top of a photo. */
+.photo {
+  position: absolute;
+  inset: 0 84px max(24px, env(safe-area-inset-bottom));
+}
+
+.img {
+  object-fit: contain;
+  user-select: none;
+}
+
+.nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.18s var(--ease);
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.24);
+  }
+}
+
+.navPrev {
+  left: 18px;
+}
+
+.navNext {
+  right: 18px;
+}
+
+.chevPrev {
+  transform: rotate(180deg);
+}
+
+/* On a phone the photo takes the full width and a swipe does the paging. */
+@media (max-width: 760px), (hover: none) {
+  .photo {
+    inset: 0 0 max(16px, env(safe-area-inset-bottom));
+  }
+
+  .nav {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .overlay {
+    animation: none;
+  }
+}

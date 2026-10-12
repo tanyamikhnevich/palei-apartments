@@ -42,6 +42,9 @@ export default function BookCta() {
   // The flower shop is its own shop — booking a flat is not its next step.
   if (bare === '/flowers' || bare.startsWith('/flowers/')) return null;
 
+  // A guest reading how to get in has already booked.
+  if (bare.startsWith('/stay/') || bare.startsWith('/house/')) return null;
+
   const onApartmentPage = /^\/apartments\/[^/]+$/.test(bare);
   const href =
     onApartmentPage ? '#book' : bare === '/contact' ? '#contact' : localeHref('/contact');

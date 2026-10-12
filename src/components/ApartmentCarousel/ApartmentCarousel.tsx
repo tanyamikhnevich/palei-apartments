@@ -12,8 +12,8 @@ import { apartmentsInCountry } from '@/lib/regions';
 import styles from './ApartmentCarousel.module.scss';
 
 /** The home page shows a taste of the list, not the list itself. */
-const CAROUSEL_LIMIT = 2;
-const SKELETON_COUNT = 2;
+const CAROUSEL_LIMIT = 3;
+const SKELETON_COUNT = 3;
 
 export default function ApartmentCarousel() {
   const { t, href } = useLanguage();
@@ -59,7 +59,7 @@ export default function ApartmentCarousel() {
   }, [displayed.length, syncPosition]);
 
   /*
-    Two cards fit on a wide screen with nothing left over: both ends are
+    Three cards fit on a wide screen with nothing left over: both ends are
     reached at once and there is nothing to page through. The arrows and dots
     step aside then rather than sit there permanently disabled.
   */

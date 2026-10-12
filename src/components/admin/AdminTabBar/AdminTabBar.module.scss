@@ -1,0 +1,73 @@
+/* Phones only — the sidebar does this job wherever there is room for it. */
+.bar {
+  display: none;
+}
+
+@media (max-width: 860px) {
+  .bar {
+    position: fixed;
+    inset: auto 0 0 0;
+    /* Above the page, below the drawer's dimmer (250) and every dialog (200+). */
+    z-index: 40;
+    display: flex;
+    padding: 6px 4px calc(6px + env(safe-area-inset-bottom));
+    background: rgba(255, 255, 255, 0.96);
+    backdrop-filter: blur(12px);
+    border-top: 1px solid var(--line);
+  }
+
+  .tab {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    padding: 6px 0 4px;
+    border: none;
+    border-radius: 12px;
+    background: none;
+    color: var(--ink-faint);
+    font-family: inherit;
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .on {
+    color: var(--accent-press);
+  }
+
+  .icon {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 26px;
+    border-radius: 999px;
+    transition: background 0.18s var(--ease);
+  }
+
+  .on .icon {
+    background: var(--accent-tint);
+  }
+
+  .count {
+    position: absolute;
+    top: -4px;
+    inset-inline-end: 0;
+    min-width: 17px;
+    height: 17px;
+    padding: 0 4px;
+    display: grid;
+    place-items: center;
+    border-radius: 999px;
+    background: var(--coral);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 800;
+    box-shadow: 0 0 0 2px #fff;
+  }
+}

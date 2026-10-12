@@ -15,6 +15,7 @@ import type {
   CalendarFeedSource,
   CalendarSyncOutcome,
 } from '@/types/calendar';
+import type { AccessCode, CheckInGuide, GuestPass } from '@/types/guide';
 import { apartments as fallbackApartments } from '@/data/apartments';
 import { apiFetch } from '@/lib/api/adminFetch';
 
@@ -559,4 +560,74 @@ export async function deleteCostItem(id: string): Promise<{ updated: number }> {
     method: 'DELETE',
   });
   return parseJson<{ ok: true; updated: number }>(res);
+}
+
+export type GuideBundle = { guide: CheckInGuide; codes: AccessCode[] };
+
+export async function fetchGuide(apartmentId: string): Promise<GuideBundle> {
+  const res = await apiFetch(`/api/guides/${encodeURIComponent(apartmentId)}`, {
+    cache: 'no-store',
+  });
+  return parseJson<GuideBundle>(res);
+}
+
+export async function saveGuide(bundle: GuideBundle): Promise<GuideBundle> {
+  const res = await apiFetch(`/api/guides/${encodeURIComponent(bundle.guide.apartmentId)}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(bundle),
+  });
+  return parseJson<GuideBundle>(res);
+}
+
+export async function fetchGuestPasses(apartmentId: string): Promise<GuestPass[]> {
+  const res = await apiFetch(`/api/guest-passes?apartmentId=${encodeURIComponent(apartmentId)}`, {
+    cache: 'no-store',
+  });
+  const data = await parseJson<{ passes: GuestPass[] }>(res);
+  return data.passes;
+}
+
+export type GuestPassInput =
+  | { bookingId: string }
+  | {
+      apartmentId: string;
+      guestName: string;
+      guestContact?: string;
+      checkIn: string;
+      checkOut: string;
+    };
+
+/** For a booking this hands back the link it already has, if it has one. */
+export async function createGuestPass(input: GuestPassInput): Promise<GuestPass> {
+  const res = await apiFetch('/api/guest-passes', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(input),
+  });
+  const data = await parseJson<{ pass: GuestPass }>(res);
+  return data.pass;
+}
+
+export async function revokeGuestPass(id: string): Promise<void> {
+  const res = await apiFetch(`/api/guest-passes/${encodeURIComponent(id)}`, { method: 'DELETE' });
+  await parseJson<{ ok: true }>(res);
+}
+
+export type StickerLink = { path: string; url: string };
+
+/** The permanent link printed on an apartment's sticker. */
+export async function fetchStickerLink(apartmentId: string): Promise<StickerLink> {
+  const res = await apiFetch(`/api/guides/${encodeURIComponent(apartmentId)}/sticker`, {
+    cache: 'no-store',
+  });
+  return parseJson<StickerLink>(res);
+}
+
+/** Replaces it — the sticker already printed stops working. */
+export async function renewStickerLink(apartmentId: string): Promise<StickerLink> {
+  const res = await apiFetch(`/api/guides/${encodeURIComponent(apartmentId)}/sticker`, {
+    method: 'POST',
+  });
+  return parseJson<StickerLink>(res);
 }

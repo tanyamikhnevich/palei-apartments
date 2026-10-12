@@ -191,14 +191,19 @@
     padding: 16px 18px;
   }
 
+  /*
+    Side by side, not stacked: the footer is pinned, and two full-width buttons
+    one above the other took a fifth of a phone's screen away from the form.
+  */
   .foot {
-    flex-direction: column-reverse;
+    flex-wrap: wrap;
     gap: 8px;
-    padding: 14px 18px;
+    padding: 10px 14px calc(10px + env(safe-area-inset-bottom));
 
     :global(button) {
-      width: 100%;
+      flex: 1;
       justify-content: center;
+      min-height: 46px;
     }
   }
 

@@ -12,6 +12,8 @@ import { currencyOf } from '@/lib/regions';
 interface AdminApartmentCardProps {
   apt: Apartment;
   onEdit: (apt: Apartment) => void;
+  /** Opens the check-in guide: codes, steps and guest links. */
+  onGuide: (apt: Apartment) => void;
   onDelete: (apt: Apartment) => void;
   onToggle: (apt: Apartment) => void;
 }
@@ -23,6 +25,7 @@ export function AdminApartmentCardGrid({ children }: { children: React.ReactNode
 export default function AdminApartmentCard({
   apt,
   onEdit,
+  onGuide,
   onDelete,
   onToggle,
 }: AdminApartmentCardProps) {
@@ -93,6 +96,15 @@ export default function AdminApartmentCard({
         <div className={styles.row} style={{ borderTop: 'none', paddingTop: 0, marginTop: 0 }}>
           <span className={styles.availLabel}>{isListed ? 'On website' : 'Hidden'}</span>
           <div className={styles.actions}>
+            <button
+              type="button"
+              className={styles.iconBtn}
+              aria-label="Check-in guide"
+              title="Check-in guide"
+              onClick={() => onGuide(apt)}
+            >
+              <Icon name="key" size={16} />
+            </button>
             <button
               type="button"
               className={styles.iconBtn}

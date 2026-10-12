@@ -11,6 +11,7 @@ import { currencyOf } from '@/lib/regions';
 interface AdminApartmentTableProps {
   apartments: Apartment[];
   onEdit: (apt: Apartment) => void;
+  onGuide: (apt: Apartment) => void;
   onDelete: (apt: Apartment) => void;
   onToggle: (apt: Apartment) => void;
 }
@@ -18,6 +19,7 @@ interface AdminApartmentTableProps {
 export default function AdminApartmentTable({
   apartments,
   onEdit,
+  onGuide,
   onDelete,
   onToggle,
 }: AdminApartmentTableProps) {
@@ -65,6 +67,15 @@ export default function AdminApartmentTable({
                     onClick={() => onToggle(a)}
                     aria-label="Toggle availability"
                   />
+                  <button
+                    type="button"
+                    className={styles.iconBtn}
+                    onClick={() => onGuide(a)}
+                    aria-label="Check-in guide"
+                    title="Check-in guide"
+                  >
+                    <Icon name="key" size={16} />
+                  </button>
                   <button
                     type="button"
                     className={styles.iconBtn}

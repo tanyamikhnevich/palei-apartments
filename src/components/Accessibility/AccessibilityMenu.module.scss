@@ -1,0 +1,160 @@
+/*
+  The opposite corner from the booking button, so the two never sit on top of
+  each other — in Hebrew they swap sides together.
+*/
+.root {
+  position: fixed;
+  z-index: 1000;
+  bottom: 26px;
+  inset-inline-start: 26px;
+}
+
+.button {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: var(--navy-2);
+  color: #fff;
+  box-shadow: 0 6px 20px rgba(15, 25, 35, 0.3);
+  cursor: pointer;
+  transition: transform 0.2s var(--ease), background 0.2s var(--ease);
+
+  &:hover {
+    background: var(--accent-press);
+    transform: scale(1.05);
+  }
+}
+
+.panel {
+  position: absolute;
+  bottom: calc(100% + 12px);
+  inset-inline-start: 0;
+  width: min(300px, calc(100vw - 32px));
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: var(--shadow-lg);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: var(--fs-base);
+}
+
+.close {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 50%;
+  background: var(--mist);
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.label {
+  margin-top: 4px;
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+
+.sizes {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.size,
+.toggle,
+.reset {
+  min-height: 46px;
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  color: var(--ink);
+  font-family: inherit;
+  font-size: var(--fs-md);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.size {
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 14px;
+  text-align: start;
+}
+
+/* Chosen: said with a filled box as well as with colour. */
+.on {
+  border-color: var(--navy-2);
+  background: var(--accent-tint);
+}
+
+.check {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border: 2px solid var(--ink-soft);
+  border-radius: 6px;
+  color: #fff;
+}
+
+.on .check {
+  border-color: var(--navy-2);
+  background: var(--navy-2);
+}
+
+.reset {
+  margin-top: 4px;
+  border-style: dashed;
+  color: var(--ink-soft);
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+}
+
+@media (max-width: 760px) {
+  .root {
+    bottom: 18px;
+    inset-inline-start: 16px;
+  }
+
+  .button {
+    width: 48px;
+    height: 48px;
+  }
+}
+
+/* Clear of the booking bar an apartment's page pins to the bottom. */
+@media (max-width: 980px) {
+  .overBar {
+    bottom: calc(92px + env(safe-area-inset-bottom));
+  }
+}

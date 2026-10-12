@@ -61,6 +61,21 @@ export async function DELETE(request: Request, { params }: RouteContext) {
       return jsonError('Apartment not found', 404);
     }
 
+    /*
+      The way in goes with the apartment: its guide, its door codes and every
+      guest link. Not allowed to fail the delete — a link to an apartment that
+      is gone already opens nothing, so this is tidying, not a safeguard.
+    */
+    try {
+      await db.batch([
+        db.delete(schema.accessCodes).where(eq(schema.accessCodes.apartmentId, params.id)),
+        db.delete(schema.checkInGuides).where(eq(schema.checkInGuides.apartmentId, params.id)),
+        db.delete(schema.guestPasses).where(eq(schema.guestPasses.apartmentId, params.id)),
+      ]);
+    } catch (e) {
+      console.warn('DELETE /api/apartments/[id]: check-in guide not removed', e);
+    }
+
     revalidateTag(APARTMENTS_TAG);
     return NextResponse.json({ ok: true });
   } catch (e) {

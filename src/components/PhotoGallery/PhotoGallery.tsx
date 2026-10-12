@@ -5,7 +5,10 @@ import Image from 'next/image';
 import Icon from '@/components/ui/Icon/Icon';
 import Placeholder from '@/components/ui/Placeholder/Placeholder';
 import { isPhotoUrl } from '@/lib/apartmentMedia';
+import { useLanguage } from '@/i18n/LanguageProvider';
 import { isAvifImagePath } from '@/lib/imageUpload';
+import { useCalmMotion } from '@/lib/useCalmMotion';
+import PhotoLightbox from './PhotoLightbox';
 import styles from './PhotoGallery.module.scss';
 
 type PhotoGalleryProps = {
@@ -22,6 +25,8 @@ type PhotoGalleryProps = {
    * than the frame and lose the label when cropped.
    */
   fit?: 'cover' | 'contain';
+  /** Lets a click on the photo open it full screen, with swipe on phones. */
+  lightbox?: boolean;
   children?: React.ReactNode;
 };
 
@@ -34,8 +39,12 @@ export default function PhotoGallery({
   autoPlayMs = 0,
   showDots = true,
   fit = 'cover',
+  lightbox = false,
   children,
 }: PhotoGalleryProps) {
+  const { t } = useLanguage();
+  // A visitor who asked for no motion gets a gallery that waits to be turned.
+  const calm = useCalmMotion();
   const urls = useMemo(() => photos.filter((p) => isPhotoUrl(p)), [photos]);
   // Callers rebuild the photos array on every render, so reset on content
   // rather than on identity — otherwise any parent re-render would snap the
@@ -48,29 +57,45 @@ export default function PhotoGallery({
   // frame or pressing an arrow. A grid of 15 cards otherwise asks for 45 photos
   // on first paint instead of 15.
   const [engaged, setEngaged] = useState(autoPlayMs > 0);
+  // The slideshow runs only until the guest pages by hand. Left running, its
+  // timer would fire right after their own click and skip a photo.
+  const [autoPlay, setAutoPlay] = useState(true);
+  const [zoomed, setZoomed] = useState(false);
   const count = urls.length;
   const hasMultiple = count > 1;
 
-  const go = useCallback(
+  const step = useCallback(
     (delta: number) => {
       if (count < 2) return;
-      setEngaged(true);
       setIndex((i) => (i + delta + count) % count);
     },
     [count]
   );
 
+  /** A move the guest made themselves — arrows, dots or the full-screen view. */
+  const takeOver = () => {
+    setEngaged(true);
+    setAutoPlay(false);
+  };
+
+  const go = (delta: number) => {
+    takeOver();
+    step(delta);
+  };
+
   useEffect(() => {
     setIndex(0);
     setLoaded(new Set());
     setEngaged(autoPlayMs > 0);
+    setAutoPlay(true);
+    setZoomed(false);
   }, [photoKey, autoPlayMs]);
 
   useEffect(() => {
-    if (!hasMultiple || !autoPlayMs) return;
-    const id = window.setInterval(() => go(1), autoPlayMs);
+    if (!hasMultiple || !autoPlayMs || !autoPlay || calm) return;
+    const id = window.setInterval(() => step(1), autoPlayMs);
     return () => window.clearInterval(id);
-  }, [hasMultiple, autoPlayMs, go]);
+  }, [hasMultiple, autoPlayMs, autoPlay, calm, step]);
 
   const current = urls[index];
 
@@ -88,11 +113,20 @@ export default function PhotoGallery({
   const markLoaded = (url: string) =>
     setLoaded((prev) => (prev.has(url) ? prev : new Set(prev).add(url)));
 
+  const canZoom = lightbox && Boolean(current);
+  const openLightbox = () => {
+    takeOver();
+    setZoomed(true);
+  };
+
   return (
     <div className={`${styles.gallery} ${className}`.trim()}>
       <div
-        className={`${styles.frame} ${fit === 'contain' ? styles.contain : ''}`.trim()}
+        className={[styles.frame, fit === 'contain' && styles.contain, canZoom && styles.zoomable]
+          .filter(Boolean)
+          .join(' ')}
         onPointerEnter={() => setEngaged(true)}
+        onClick={canZoom ? openLightbox : undefined}
       >
         {current ? (
           <>
@@ -121,7 +155,7 @@ export default function PhotoGallery({
             <button
               type="button"
               className={`${styles.nav} ${styles.navPrev}`}
-              aria-label="Previous photo"
+              aria-label={t('a11y.prevPhoto')}
               onClick={(e) => {
                 e.stopPropagation();
                 go(-1);
@@ -132,7 +166,7 @@ export default function PhotoGallery({
             <button
               type="button"
               className={`${styles.nav} ${styles.navNext}`}
-              aria-label="Next photo"
+              aria-label={t('a11y.nextPhoto')}
               onClick={(e) => {
                 e.stopPropagation();
                 go(1);
@@ -147,10 +181,10 @@ export default function PhotoGallery({
                     key={url}
                     type="button"
                     className={`${styles.dot} ${i === index ? styles.dotOn : ''}`}
-                    aria-label={`Photo ${i + 1}`}
+                    aria-label={t('a11y.photoN').replace('{n}', String(i + 1))}
                     onClick={(e) => {
                       e.stopPropagation();
-                      setEngaged(true);
+                      takeOver();
                       setIndex(i);
                     }}
                   />
@@ -159,8 +193,33 @@ export default function PhotoGallery({
             )}
           </>
         )}
+        {canZoom && (
+          <button
+            type="button"
+            className={styles.expand}
+            aria-label={t('a11y.openGallery')}
+            onClick={(e) => {
+              e.stopPropagation();
+              openLightbox();
+            }}
+          >
+            <Icon name="expand" size={15} />
+            {index + 1} / {count}
+          </button>
+        )}
         {children}
       </div>
+      {zoomed && (
+        <PhotoLightbox
+          photos={urls}
+          alt={alt}
+          startIndex={index}
+          onClose={(i) => {
+            setIndex(i);
+            setZoomed(false);
+          }}
+        />
+      )}
     </div>
   );
 }

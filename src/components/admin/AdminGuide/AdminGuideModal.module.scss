@@ -1,0 +1,465 @@
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--bg);
+}
+
+.sectionHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.sectionTitle {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.hint {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+.error {
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px solid var(--busy-line);
+  border-radius: var(--r-sm);
+  background: var(--busy-bg);
+  color: var(--busy-fg);
+  font-size: 13px;
+  white-space: pre-line;
+}
+
+.saved {
+  margin-inline-end: auto;
+  align-self: center;
+  color: var(--ok-fg);
+  font-size: 13.5px;
+  font-weight: 600;
+}
+
+.grid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.grid3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+/* Codes */
+.codeRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 0.8fr) minmax(0, 1.4fr) auto auto;
+  align-items: center;
+  gap: 8px;
+}
+
+.codeInput {
+  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+.badge,
+.badgeOn {
+  display: inline-block;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: var(--mist-2);
+  color: var(--ink-soft);
+  font-size: 11.5px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.badgeOn,
+.tone_ok {
+  background: var(--ok-bg);
+  color: var(--ok-fg);
+}
+
+.tone_seen {
+  background: var(--accent-tint);
+  color: var(--accent-press);
+}
+
+.tone_idle {
+  background: var(--warn-bg);
+  color: var(--warn-fg);
+}
+
+.iconBtn {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 8px;
+  background: var(--mist);
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: 0.15s;
+
+  &:hover:not(:disabled) {
+    background: var(--mist-2);
+    color: var(--ink);
+  }
+
+  &:disabled {
+    opacity: 0.35;
+    cursor: default;
+  }
+}
+
+.up {
+  transform: rotate(-90deg);
+}
+
+.down {
+  transform: rotate(90deg);
+}
+
+.addBtn {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border: 1px dashed var(--line-2);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--navy);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover {
+    border-color: var(--navy);
+  }
+}
+
+.textBtn {
+  border: none;
+  background: none;
+  padding: 4px 2px;
+  color: var(--ink-soft);
+  font-family: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+
+  &:hover {
+    color: var(--busy-fg);
+  }
+}
+
+/* Language tabs */
+.langs {
+  display: inline-flex;
+  padding: 3px;
+  border-radius: 999px;
+  background: var(--mist-2);
+}
+
+.langBtn {
+  border: none;
+  border-radius: 999px;
+  padding: 5px 12px;
+  background: none;
+  color: var(--ink-soft);
+  font-family: inherit;
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.langOn {
+  background: var(--surface);
+  color: var(--navy);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Steps */
+.copyFrom {
+  font-size: 13px;
+  padding-block: 9px;
+}
+
+.stage {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
+.stageTitle {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.step {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+}
+
+.stepPhotos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.stepPhoto {
+  position: relative;
+  width: 108px;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border-radius: 8px;
+  background: var(--mist);
+}
+
+.stepImg {
+  object-fit: cover;
+}
+
+.stepPhotoDrag {
+  cursor: grab;
+  transition: opacity 0.15s, box-shadow 0.15s, transform 0.15s;
+
+  &:active {
+    cursor: grabbing;
+  }
+}
+
+.stepPhotoDragging {
+  opacity: 0.35;
+}
+
+/* Where the dragged photo will land. */
+.stepPhotoTarget {
+  box-shadow: 0 0 0 2px var(--accent);
+  transform: scale(1.04);
+}
+
+.stepPhotoTag {
+  position: absolute;
+  inset-block-end: 4px;
+  inset-inline-start: 4px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: rgba(15, 25, 35, 0.65);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.stepPhotoDel {
+  position: absolute;
+  inset-block-start: 4px;
+  inset-inline-end: 4px;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(15, 25, 35, 0.65);
+  color: #fff;
+  cursor: pointer;
+
+  &:hover {
+    background: var(--busy-fg);
+  }
+}
+
+.stepPhotoAdd {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  border: 1px dashed var(--line-2);
+  color: var(--ink-soft);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    border-color: var(--navy);
+    color: var(--navy);
+  }
+
+  &:disabled {
+    cursor: progress;
+  }
+}
+
+.stepText {
+  min-height: 76px;
+  font-size: 14px;
+}
+
+.stepTools {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.stepCode {
+  width: auto;
+  flex: 1;
+  min-width: 190px;
+  padding-block: 8px;
+  font-size: 13px;
+}
+
+.stepOrder {
+  display: inline-flex;
+  gap: 4px;
+  margin-inline-start: auto;
+}
+
+/* Guest links */
+.passForm {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.pass {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+}
+
+.passOff {
+  opacity: 0.6;
+}
+
+.passHead {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+
+  > div {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    font-size: 14px;
+  }
+}
+
+.passDates {
+  color: var(--ink-soft);
+  font-size: 12.5px;
+}
+
+@media (max-width: 600px) {
+  .section {
+    padding: 14px 12px;
+  }
+
+  .grid2,
+  .grid3,
+  .passForm {
+    grid-template-columns: 1fr;
+  }
+
+  /* Each code becomes a small block: what it opens, the code, then when. */
+  .codeRow {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    padding: 10px;
+    border: 1px solid var(--line);
+    border-radius: var(--r-sm);
+    background: var(--surface);
+
+    > :nth-child(1),
+    > :nth-child(2) {
+      grid-column: 1 / -1;
+    }
+  }
+
+  .sectionHead {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .langs {
+    align-self: stretch;
+  }
+
+  .langBtn {
+    flex: 1;
+    padding-block: 9px;
+  }
+
+  .stepPhoto {
+    width: calc((100% - 16px) / 3);
+  }
+
+  /* 16px, or iOS zooms the page in every time a field is tapped. */
+  .stepText,
+  .stepCode,
+  .copyFrom,
+  .codeInput {
+    font-size: 16px;
+  }
+
+  .stepCode {
+    min-width: 100%;
+  }
+
+  .iconBtn {
+    width: 40px;
+    height: 40px;
+  }
+
+  .stepPhotoDel {
+    width: 28px;
+    height: 28px;
+  }
+
+  .textBtn {
+    padding: 10px 4px;
+  }
+
+  .saved {
+    width: 100%;
+    margin: 0;
+    text-align: center;
+  }
+}

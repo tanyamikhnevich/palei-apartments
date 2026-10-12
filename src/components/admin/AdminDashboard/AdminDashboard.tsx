@@ -6,6 +6,7 @@ import AdminSidebar, {
   ADMIN_VIEWS,
   type AdminView,
 } from '@/components/admin/AdminSidebar/AdminSidebar';
+import AdminTabBar from '@/components/admin/AdminTabBar/AdminTabBar';
 import AdminTopbar from '@/components/admin/AdminTopbar/AdminTopbar';
 import AdminApartmentTable from '@/components/admin/AdminApartmentTable/AdminApartmentTable';
 import AdminApartmentCard, {
@@ -13,6 +14,7 @@ import AdminApartmentCard, {
 } from '@/components/admin/AdminApartmentCard/AdminApartmentCard';
 import AdminListBar, { type AdminListMode } from '@/components/admin/AdminListBar/AdminListBar';
 import AdminApartmentModal from '@/components/admin/AdminApartmentModal/AdminApartmentModal';
+import AdminGuideModal from '@/components/admin/AdminGuide/AdminGuideModal';
 import AdminSettings from '@/components/admin/AdminSettings/AdminSettings';
 import AdminCars from '@/components/admin/AdminCars/AdminCars';
 import BookingsTable from '@/components/admin/BookingsTable/BookingsTable';
@@ -57,6 +59,8 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [fromDb, setFromDb] = useState(false);
   const [modalApt, setModalApt] = useState<Apartment | null | undefined>(undefined);
+  /** The apartment whose check-in guide is open. */
+  const [guideApt, setGuideApt] = useState<Apartment | undefined>(undefined);
   const [requestCount, setRequestCount] = useState(0);
   const [reviewCount, setReviewCount] = useState(0);
   /*
@@ -225,6 +229,7 @@ export default function AdminDashboard() {
                       key={apt.id}
                       apt={apt}
                       onEdit={openEdit}
+                      onGuide={setGuideApt}
                       onDelete={handleDelete}
                       onToggle={handleToggle}
                     />
@@ -234,6 +239,7 @@ export default function AdminDashboard() {
                 <AdminApartmentTable
                   apartments={filtered}
                   onEdit={openEdit}
+                  onGuide={setGuideApt}
                   onDelete={handleDelete}
                   onToggle={handleToggle}
                 />
@@ -274,11 +280,25 @@ export default function AdminDashboard() {
         </div>
       </div>
 
+      <AdminTabBar
+        view={view}
+        onViewChange={changeView}
+        counts={{ bookings: requestCount, reviews: reviewCount }}
+      />
+
       {modalApt !== undefined && (
         <AdminApartmentModal
           initial={modalApt}
           onClose={() => setModalApt(undefined)}
           onSave={handleSave}
+        />
+      )}
+
+      {guideApt && (
+        <AdminGuideModal
+          apartment={guideApt}
+          apartments={list}
+          onClose={() => setGuideApt(undefined)}
         />
       )}
     </div>

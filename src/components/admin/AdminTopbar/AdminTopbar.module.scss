@@ -74,29 +74,34 @@
   flex-shrink: 0;
 }
 
+/*
+  On a phone the bar is the first thing on a small screen, and it is sticky:
+  every row it takes is a row of the list it covers. So: menu, title and the
+  add button share one line, the search takes the second, and the explanatory
+  line under the title is left to the bigger screens.
+*/
 @media (max-width: 860px) {
   .topbar {
-    padding: 14px 20px;
+    padding: 10px 16px;
     flex-wrap: wrap;
-    gap: 12px 16px;
+    gap: 10px 12px;
   }
 
   .burger {
     display: grid;
     order: -1;
+    flex: none;
   }
 
-  .titleBlock {
-    flex: 1;
-    min-width: calc(100% - 56px);
-
-    h1 {
-      font-size: 20px;
-    }
+  .titleBlock h1 {
+    font-size: 19px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .sub {
-    font-size: 13px;
+    display: none;
   }
 
   .search {
@@ -106,27 +111,32 @@
 
     input {
       width: 100%;
+      /* Below 16px iOS zooms the whole page in when the field is focused. */
+      font-size: 16px;
     }
   }
 
   .addBtn {
     order: 2;
-    margin-left: auto;
+    flex: none;
   }
 }
 
 @media (max-width: 480px) {
   .topbar {
-    padding: 12px 16px;
+    padding: 10px 12px;
   }
 
-  .titleBlock h1 {
-    font-size: 18px;
+  /* Just the plus — the title beside it already says what it adds. */
+  .addLabel {
+    display: none;
   }
 
   .addBtn {
-    padding-left: 14px;
-    padding-right: 14px;
-    font-size: 13px;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    justify-content: center;
+    border-radius: 12px;
   }
 }

@@ -19,7 +19,8 @@
     "db:cars:migrate": "tsx src/db/cars/migrate.ts",
     "db:flowers:generate": "drizzle-kit generate --config drizzle.flowers.config.ts",
     "db:flowers:migrate": "tsx src/db/flowers/migrate.ts",
-    "flowers:bot:setup": "tsx scripts/flowersBotSetup.ts"
+    "flowers:bot:setup": "tsx scripts/flowersBotSetup.ts",
+    "guide:bot:setup": "tsx scripts/guideBotSetup.ts"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.1.0",

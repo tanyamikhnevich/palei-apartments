@@ -111,14 +111,37 @@
   margin-top: 32px;
 }
 
-/* Slide dots */
-.dots {
+/* Slide dots, and the button that stops the photos changing */
+.controls {
   position: absolute;
   bottom: 26px;
   inset-inline-end: 32px;
   display: flex;
-  gap: 9px;
+  align-items: center;
+  gap: 14px;
   z-index: 2;
+}
+
+.pause {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  border-radius: 50%;
+  background: rgba(15, 25, 35, 0.45);
+  color: #fff;
+  backdrop-filter: blur(3px);
+
+  &:hover {
+    background: rgba(15, 25, 35, 0.7);
+  }
+}
+
+.dots {
+  display: flex;
+  gap: 9px;
 }
 
 .dot {
@@ -187,7 +210,7 @@
     }
   }
 
-  .dots {
+  .controls {
     inset-inline-end: 20px;
     bottom: 18px;
   }

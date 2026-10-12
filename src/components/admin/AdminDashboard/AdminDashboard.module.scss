@@ -64,13 +64,14 @@
     overflow: visible;
   }
 
+  /* The last row must scroll clear of the tab bar pinned to the bottom. */
   .content {
-    padding: 22px 20px 48px;
+    padding: 22px 20px calc(96px + env(safe-area-inset-bottom));
   }
 }
 
 @media (max-width: 480px) {
   .content {
-    padding: 16px 16px 40px;
+    padding: 14px 12px calc(92px + env(safe-area-inset-bottom));
   }
 }

@@ -257,3 +257,23 @@
   .carHead { flex-wrap: wrap; }
   .grid { grid-template-columns: 1fr; }
 }
+
+@media (max-width: 560px) {
+  /* Name and price on the first line, the buttons on their own below. */
+  .carHead {
+    flex-wrap: wrap;
+    gap: 10px 12px;
+    padding: 12px;
+  }
+
+  .carActions {
+    width: 100%;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+
+  .iconBtn {
+    width: 42px;
+    height: 42px;
+  }
+}

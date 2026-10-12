@@ -392,8 +392,57 @@
 }
 
 @media (max-width: 720px) {
+  .toolbar {
+    gap: 10px;
+  }
+
+  /* Month stepping across the full width, with room to hit the arrows. */
+  .nav {
+    width: 100%;
+    gap: 8px;
+  }
+
+  .navBtn {
+    width: 40px;
+    height: 40px;
+    flex: none;
+  }
+
+  .monthLabel {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .todayBtn {
+    padding: 10px 14px;
+  }
+
+  .right {
+    width: 100%;
+    gap: 10px;
+
+    .select {
+      width: 100%;
+      min-width: 0;
+    }
+  }
+
+  .legend {
+    gap: 6px 12px;
+  }
+
+  .legendItem {
+    font-size: 12px;
+  }
+
   .grid {
     --apt-w: 104px;
+  }
+
+  /* The page scrolls on a phone, so the strip only has to leave room for the
+     top bar above it and the tab bar below. */
+  .scroller {
+    max-height: calc(100dvh - 190px);
   }
 
   .aptHeadCell,
@@ -406,6 +455,16 @@
     padding-bottom: 8px;
   }
 
+  /* Two lines of a name tell flats apart; one line of an ellipsis does not. */
+  .aptName {
+    white-space: normal;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    line-height: 1.25;
+  }
+
   .dayNum {
     width: 22px;
     height: 22px;
@@ -414,5 +473,10 @@
 
   .monthName {
     font-size: 13px;
+  }
+
+  .note {
+    font-size: 12px;
+    line-height: 1.5;
   }
 }

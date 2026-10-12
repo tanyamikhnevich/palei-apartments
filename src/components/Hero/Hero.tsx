@@ -5,6 +5,7 @@ import ApartmentSearch from '@/components/ApartmentSearch/ApartmentSearch';
 import Button from '@/components/ui/Button/Button';
 import Icon from '@/components/ui/Icon/Icon';
 import { useLanguage } from '@/i18n/LanguageProvider';
+import { useCalmMotion } from '@/lib/useCalmMotion';
 import styles from './Hero.module.scss';
 
 const TRUST_KEYS = [
@@ -37,6 +38,9 @@ export default function Hero() {
   const [active, setActive] = useState(0);
   /* Bumped when a dot is tapped, to restart the cycle from that slide. */
   const [cycle, setCycle] = useState(0);
+  /* Photos that change by themselves need a way to make them stop. */
+  const [paused, setPaused] = useState(false);
+  const calm = useCalmMotion();
 
   const go = useCallback((index: number) => {
     setActive((index + SLIDES.length) % SLIDES.length);
@@ -52,14 +56,11 @@ export default function Hero() {
     letting them carry on behind the cursor.
   */
   useEffect(() => {
-    const reduced =
-      typeof window !== 'undefined' &&
-      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (reduced) return;
+    if (calm || paused) return;
 
     const id = setInterval(() => setActive((i) => (i + 1) % SLIDES.length), SLIDE_MS);
     return () => clearInterval(id);
-  }, [cycle]);
+  }, [cycle, calm, paused]);
 
   return (
     <section className={styles.hero} id="top">
@@ -112,18 +113,32 @@ export default function Hero() {
           </div>
         </div>
 
-        <div className={styles.dots} role="tablist" aria-label={t('hero.slides')}>
-          {SLIDES.map(({ src }, i) => (
+        <div className={styles.controls}>
+          {/* Nothing to pause when the visitor already asked for no motion. */}
+          {!calm && (
             <button
-              key={src}
               type="button"
-              role="tab"
-              aria-selected={i === active}
-              aria-label={t('hero.slideN').replace('{n}', String(i + 1))}
-              className={`${styles.dot} ${i === active ? styles.dotOn : ''}`}
-              onClick={() => go(i)}
-            />
-          ))}
+              className={styles.pause}
+              aria-label={t(paused ? 'a11y.playSlides' : 'a11y.pauseSlides')}
+              aria-pressed={paused}
+              onClick={() => setPaused((p) => !p)}
+            >
+              <Icon name={paused ? 'play' : 'pause'} size={14} />
+            </button>
+          )}
+          <div className={styles.dots} role="tablist" aria-label={t('hero.slides')}>
+            {SLIDES.map(({ src }, i) => (
+              <button
+                key={src}
+                type="button"
+                role="tab"
+                aria-selected={i === active}
+                aria-label={t('hero.slideN').replace('{n}', String(i + 1))}
+                className={`${styles.dot} ${i === active ? styles.dotOn : ''}`}
+                onClick={() => go(i)}
+              />
+            ))}
+          </div>
         </div>
       </div>
 

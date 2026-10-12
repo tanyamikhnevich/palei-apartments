@@ -80,8 +80,9 @@ export default function AdminTopbar({
             icon="plus"
             className={styles.addBtn}
             onClick={onAddApartment}
+            aria-label="Add apartment"
           >
-            Add apartment
+            <span className={styles.addLabel}>Add apartment</span>
           </Button>
         </>
       )}

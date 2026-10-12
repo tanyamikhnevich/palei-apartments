@@ -2,13 +2,15 @@
 
 import { Fragment, useCallback, useEffect, useRef, useState } from 'react';
 import type { Booking, BookingStatus } from '@/types/apartment';
+import type { GuestPass } from '@/types/guide';
+import GuestLinkBox from '@/components/admin/AdminGuide/GuestLinkBox';
 import Badge from '@/components/ui/Badge/Badge';
 import type { BadgeTone } from '@/components/ui/Badge/Badge';
 import Button from '@/components/ui/Button/Button';
 import Icon from '@/components/ui/Icon/Icon';
 import AdminPager from '@/components/admin/ui/AdminPager';
 import { pageOfIndex, pageSlice } from '@/lib/adminPaging';
-import { fetchBookings, updateBookingStatus } from '@/lib/api/client';
+import { createGuestPass, fetchBookings, updateBookingStatus } from '@/lib/api/client';
 import styles from './BookingsTable.module.scss';
 
 function bookingTone(status: BookingStatus): BadgeTone {
@@ -38,6 +40,8 @@ export default function BookingsTable({ focusId, onShowInCalendar }: BookingsTab
    * server had gone to the trouble of writing.
    */
   const [rowError, setRowError] = useState<{ id: string; message: string } | null>(null);
+  /** The check-in guide link being shown, under the row it belongs to. */
+  const [guestLink, setGuestLink] = useState<{ id: string; pass: GuestPass } | null>(null);
   const [page, setPage] = useState(0);
   const focusRef = useRef<HTMLTableRowElement | null>(null);
 
@@ -78,6 +82,26 @@ export default function BookingsTable({ focusId, onShowInCalendar }: BookingsTab
       setRowError({
         id: booking.id,
         message: e instanceof Error ? e.message : 'Could not update this booking.',
+      });
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  /*
+    Asking twice for the same stay returns the same link, so this is safe to
+    press again to find a link that was already sent.
+  */
+  const showGuestLink = async (booking: Booking) => {
+    if (guestLink?.id === booking.id) return setGuestLink(null);
+    setBusyId(booking.id);
+    setRowError(null);
+    try {
+      setGuestLink({ id: booking.id, pass: await createGuestPass({ bookingId: booking.id }) });
+    } catch (e) {
+      setRowError({
+        id: booking.id,
+        message: e instanceof Error ? e.message : 'Could not create the guest link.',
       });
     } finally {
       setBusyId(null);
@@ -132,24 +156,32 @@ export default function BookingsTable({ focusId, onShowInCalendar }: BookingsTab
                   ref={r.id === focusId ? focusRef : undefined}
                   className={r.id === focusId ? styles.focused : undefined}
                 >
-                  <td>
+                  <td className={styles.guestCell}>
                     <div className={styles.guestName}>
                       {r.guest}
                       {r.guestContact && <span className={styles.contact}>{r.guestContact}</span>}
                     </div>
                   </td>
-                  <td className={styles.muted}>{r.apt}</td>
-                  <td className={styles.muted}>{r.dates}</td>
-                  <td className={styles.muted}>{r.guests}</td>
-                  <td>
+                  {/* The labels are what the column heads say; a phone shows
+                      each stay as a card, where there are no heads to read. */}
+                  <td className={styles.muted} data-label="Apartment">
+                    {r.apt}
+                  </td>
+                  <td className={styles.muted} data-label="Dates">
+                    {r.dates}
+                  </td>
+                  <td className={styles.muted} data-label="Guests">
+                    {r.guests}
+                  </td>
+                  <td data-label="Channel">
                     <Badge>{r.channel}</Badge>
                   </td>
-                  <td>
+                  <td className={styles.statusCell}>
                     <Badge tone={bookingTone(r.status)} dot>
                       {r.status}
                     </Badge>
                   </td>
-                  <td>
+                  <td className={styles.actionCell}>
                     <div className={styles.actions}>
                       {onShowInCalendar && (
                         <button
@@ -184,6 +216,20 @@ export default function BookingsTable({ focusId, onShowInCalendar }: BookingsTab
                         </>
                       )}
 
+                      {/* Only a confirmed stay has a door to be let through. */}
+                      {r.status === 'Confirmed' && (
+                        <button
+                          type="button"
+                          className={styles.calendarLink}
+                          title="The guest’s personal check-in guide"
+                          disabled={busy}
+                          onClick={() => void showGuestLink(r)}
+                        >
+                          <Icon name="key" size={15} />
+                          Guest link
+                        </button>
+                      )}
+
                       {/* Confirmed too early, or the guest wrote back to cancel. */}
                       {r.status === 'Confirmed' && (
                         <Button size="sm" variant="ghost" disabled={busy} onClick={() => decline(r)}>
@@ -215,8 +261,16 @@ export default function BookingsTable({ focusId, onShowInCalendar }: BookingsTab
                   </td>
                 </tr>
 
+                {guestLink?.id === r.id && guestLink.pass.path && (
+                  <tr className={`${styles.errorRow} ${styles.attached}`}>
+                    <td colSpan={7}>
+                      <GuestLinkBox pass={guestLink.pass} titleFor={() => r.apt} />
+                    </td>
+                  </tr>
+                )}
+
                 {failed && (
-                  <tr className={styles.errorRow}>
+                  <tr className={`${styles.errorRow} ${styles.attached}`}>
                     <td colSpan={7}>
                       <div className={styles.errorBox}>
                         <Icon name="shield" size={16} />

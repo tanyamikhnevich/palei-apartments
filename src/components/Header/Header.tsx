@@ -98,7 +98,7 @@ export default function Header() {
           />
         </button>
 
-        <nav className={styles.nav} aria-label="Main navigation">
+        <nav className={styles.nav} aria-label={t('a11y.mainNav')}>
           {NAV.map(({ key, href }) => {
             const target = localeHref(href);
             const active = pathname === target || pathname.startsWith(`${target}/`);

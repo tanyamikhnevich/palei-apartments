@@ -177,3 +177,64 @@
     grid-template-columns: 1fr;
   }
 }
+
+/*
+  Fifteen full-width photo cards are a very long scroll for a list whose job
+  is "find the flat, tap edit". On a phone each card lies on its side: photo
+  on the left, the name, the price and the buttons beside it.
+*/
+@media (max-width: 560px) {
+  .grid {
+    gap: 12px;
+  }
+
+  .card {
+    flex-direction: row;
+  }
+
+  .media {
+    flex: none;
+    width: 34%;
+    aspect-ratio: auto;
+    min-height: 100%;
+  }
+
+  .statusBadge {
+    top: 8px;
+    left: 8px;
+  }
+
+  .body {
+    min-width: 0;
+    padding: 12px;
+    gap: 8px;
+  }
+
+  .name {
+    font-size: 15px;
+    line-height: 1.25;
+  }
+
+  .loc {
+    font-size: 12.5px;
+  }
+
+  .tags,
+  .specs {
+    display: none;
+  }
+
+  .row {
+    padding-top: 8px;
+  }
+
+  .price b {
+    font-size: 17px;
+  }
+
+  /* Thumb-sized: these three are the whole point of the row. */
+  .iconBtn {
+    width: 40px;
+    height: 40px;
+  }
+}

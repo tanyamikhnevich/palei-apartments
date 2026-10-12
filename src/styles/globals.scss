@@ -57,7 +57,8 @@
 
   --ink:       #151e27;
   --ink-soft:  #5b6875;
-  --ink-faint: #8593a1;
+  /* The lightest text still has to be read: 5:1 on white, 4.5:1 on mist. */
+  --ink-faint: #64717e;
   --line:      #e7edf3;
   --line-2:    #d4dee7;
 
@@ -191,6 +192,116 @@ button {
   background: var(--accent-tint);
 }
 
+/*
+  Keyboard focus, everywhere, in one place. Two rings — white inside, navy
+  outside — so it shows on a photo, on the navy footer and on a white card
+  alike; a single blue line vanished on two of the three.
+
+  `:focus-visible`, so a mouse click on a button leaves no ring behind. Sits
+  this early in the sheet on purpose: the form fields below draw their own
+  focus state and must be able to override it.
+*/
+:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 1px;
+  box-shadow: 0 0 0 5px var(--navy-2);
+}
+
+/*
+  Focus that was put somewhere by script — the page's content after "skip to
+  content" — is a reading position, not a control. No ring around a whole page.
+*/
+[tabindex='-1']:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+/* Reached with the first press of Tab, invisible until then. */
+.skip-link {
+  position: fixed;
+  top: 10px;
+  inset-inline-start: 10px;
+  z-index: 2000;
+  padding: 0.8em 1.2em;
+  border-radius: var(--r-sm);
+  background: var(--navy-2);
+  color: #fff;
+  font-weight: 700;
+  transform: translateY(-300%);
+
+  &:focus {
+    transform: none;
+  }
+}
+
+/* ============================================================
+   Accessibility modes — set from the accessibility menu, as
+   `data-a11y-*` on <html>. See `src/lib/a11y.ts`.
+   ============================================================ */
+
+/*
+  Larger text. The type scale is in rem, so the root size carries the whole
+  page with it — headings, buttons, the header's own height.
+*/
+html[data-a11y-text='1'] {
+  font-size: 112.5%;
+}
+
+html[data-a11y-text='2'] {
+  font-size: 125%;
+}
+
+/*
+  On iOS the root size belongs to Dynamic Type (see the top of this sheet), and
+  a percentage here would throw the reader's own setting away. There the text
+  is scaled on top of it instead.
+*/
+@supports (-webkit-touch-callout: none) {
+  html[data-a11y-text='1'] {
+    font: -apple-system-body;
+    -webkit-text-size-adjust: 112.5%;
+  }
+
+  html[data-a11y-text='2'] {
+    font: -apple-system-body;
+    -webkit-text-size-adjust: 125%;
+  }
+}
+
+/* Stronger contrast: the same palette with the greys and blues pushed apart. */
+html[data-a11y-contrast] {
+  --bg: #ffffff;
+  --mist: #eef2f6;
+  --ink: #000000;
+  --ink-soft: #1f2933;
+  --ink-faint: #323f4b;
+  --line: #6b7785;
+  --line-2: #3e4c59;
+  --accent: #0b4f82;
+  --accent-press: #083b62;
+  --accent-grad: linear-gradient(120deg, #0b4f82 0%, #083b62 100%);
+  --navy: #10283b;
+  --navy-soft: #10283b;
+}
+
+/* Nothing moves: no animation, no transition, no glide. Slideshows on a
+   timer are stopped in script — see `useCalmMotion`. */
+html[data-a11y-calm] *,
+html[data-a11y-calm] *::before,
+html[data-a11y-calm] *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* Every link looks like one, wherever it is and however it was styled. */
+html[data-a11y-links] a {
+  text-decoration: underline !important;
+  text-decoration-thickness: 2px !important;
+  text-underline-offset: 3px;
+}
+
 h1, h2, h3, h4 {
   margin: 0;
   font-weight: 700;
@@ -287,6 +398,19 @@ p {
   &:focus {
     border-color: var(--accent);
     box-shadow: 0 0 0 4px var(--accent-tint);
+  }
+}
+
+/*
+  iOS zooms the whole page in when a focused field's text is under 16px, and
+  does not zoom back out. `--fs-md` is a shade below that, so on phones the
+  fields take the floor instead.
+*/
+@media (max-width: 760px) {
+  .input,
+  .select,
+  .textarea {
+    font-size: max(16px, var(--fs-md));
   }
 }
 

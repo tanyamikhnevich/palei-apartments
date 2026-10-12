@@ -48,6 +48,35 @@ function isInternal(pathname: string): boolean {
   );
 }
 
+/**
+ * A guest's personal check-in guide. It can show door codes, so it gets the
+ * panel's treatment: out of every index and cache, and the address — which is
+ * the credential — is never passed on to a site the guest taps through to.
+ */
+function isGuestGuide(pathname: string): boolean {
+  // `/house/` is the sticker inside the apartment: no codes, but the Wi-Fi
+  // password, and the same guest holding the same phone.
+  return pathname.startsWith('/stay/') || pathname.startsWith('/house/');
+}
+
+function markGuide(response: NextResponse): NextResponse {
+  response.headers.set('Referrer-Policy', 'no-referrer');
+  return markPrivate(response);
+}
+
+/**
+ * The first of the reader's languages that we publish in. `iw` is what older
+ * Android builds still call Hebrew.
+ */
+function browserLocale(header: string | null): Locale | null {
+  for (const part of (header ?? '').split(',')) {
+    const tag = part.split(';')[0].trim().toLowerCase().split('-')[0];
+    const code = tag === 'iw' ? 'he' : tag;
+    if (isLocale(code)) return code;
+  }
+  return null;
+}
+
 /** Query parameter that carries the visitor's language from one of our domains to another. */
 const LANG_PARAM = 'lang';
 
@@ -172,7 +201,16 @@ export async function middleware(request: NextRequest) {
   }
 
   const host = request.headers.get('host');
-  const hostLocale = localeForHost(host);
+  const guide = isGuestGuide(bare);
+  /*
+    A guide is opened from a link in a chat, by someone who may never have seen
+    the site. The domain says nothing about them — an Airbnb guest from Paris
+    gets the same link as one from Haifa — so here the phone's own language is
+    the front door instead.
+  */
+  const hostLocale = guide
+    ? browserLocale(request.headers.get('accept-language')) ?? localeForHost(host)
+    : localeForHost(host);
   const chose = request.cookies.get(LOCALE_CHOICE_COOKIE);
 
   /*
@@ -245,7 +283,8 @@ export async function middleware(request: NextRequest) {
   if (!prefixed && hostLocale !== DEFAULT_LOCALE && !chose) {
     const url = request.nextUrl.clone();
     url.pathname = localePath(bare, hostLocale);
-    return NextResponse.redirect(url, 307);
+    const redirect = NextResponse.redirect(url, 307);
+    return guide ? markGuide(redirect) : redirect;
   }
 
   const headers = new Headers(request.headers);
@@ -253,12 +292,14 @@ export async function middleware(request: NextRequest) {
   headers.set(PATHNAME_HEADER, bare);
 
   if (locale === DEFAULT_LOCALE) {
-    return NextResponse.next({ request: { headers } });
+    const response = NextResponse.next({ request: { headers } });
+    return guide ? markGuide(response) : response;
   }
 
   const url = request.nextUrl.clone();
   url.pathname = bare;
-  return NextResponse.rewrite(url, { request: { headers } });
+  const response = NextResponse.rewrite(url, { request: { headers } });
+  return guide ? markGuide(response) : response;
 }
 
 export const config = {

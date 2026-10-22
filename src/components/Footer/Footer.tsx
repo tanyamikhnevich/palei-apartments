@@ -53,8 +53,12 @@ export default function Footer() {
             <h5>{t('footer.contact')}</h5>
             <ul>
               <li>
-                {/* The number the owner typed in the panel, not a copy of it. */}
-                <a href={telLink(contactPhone)}>{displayPhone(contactPhone)}</a>
+                {/* The number the owner typed in the panel, not a copy of it.
+                    `dir="ltr"` keeps "+972 50 …" in order on the Hebrew page,
+                    where the RTL flow would otherwise flip its digit groups. */}
+                <a href={telLink(contactPhone)} dir="ltr">
+                  {displayPhone(contactPhone)}
+                </a>
               </li>
               <li>
                 {/* Was an `href="#"`, which is a link that teaches visitors ours

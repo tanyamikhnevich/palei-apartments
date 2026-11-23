@@ -120,6 +120,7 @@ export const ru = {
     viewDetails: 'Подробнее',
     showMore: 'Показать ещё',
     showLess: 'Свернуть',
+    viewOnAirbnb: 'Смотреть на Airbnb',
     filterAll: 'Все',
     clearFilters: 'Сбросить фильтры',
     showMap: 'Показать на карте',

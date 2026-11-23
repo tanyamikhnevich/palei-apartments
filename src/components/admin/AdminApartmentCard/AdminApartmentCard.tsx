@@ -96,6 +96,18 @@ export default function AdminApartmentCard({
         <div className={styles.row} style={{ borderTop: 'none', paddingTop: 0, marginTop: 0 }}>
           <span className={styles.availLabel}>{isListed ? 'On website' : 'Hidden'}</span>
           <div className={styles.actions}>
+            {apt.airbnbUrl && (
+              <a
+                className={styles.iconBtn}
+                href={apt.airbnbUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Open on Airbnb"
+                title="Open on Airbnb"
+              >
+                <Icon name="external" size={16} />
+              </a>
+            )}
             <button
               type="button"
               className={styles.iconBtn}

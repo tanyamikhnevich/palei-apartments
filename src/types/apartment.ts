@@ -91,6 +91,8 @@ export interface Apartment {
   availability?: ApartmentAvailability;
   /** Secret segment of this apartment's public iCal export URL. */
   icalToken?: string;
+  /** This apartment's listing on Airbnb; public, shown on its page. */
+  airbnbUrl?: string;
 }
 
 export interface Booking {

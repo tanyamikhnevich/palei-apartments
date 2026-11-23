@@ -123,6 +123,7 @@ export const en = {
     viewDetails: 'View details',
     showMore: 'Show more',
     showLess: 'Show less',
+    viewOnAirbnb: 'View on Airbnb',
     filterAll: 'All',
     clearFilters: 'Clear filters',
     showMap: 'Show on map',

@@ -67,6 +67,18 @@ export default function AdminApartmentTable({
                     onClick={() => onToggle(a)}
                     aria-label="Toggle availability"
                   />
+                  {a.airbnbUrl && (
+                    <a
+                      className={styles.iconBtn}
+                      href={a.airbnbUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label="Open on Airbnb"
+                      title="Open on Airbnb"
+                    >
+                      <Icon name="external" size={16} />
+                    </a>
+                  )}
                   <button
                     type="button"
                     className={styles.iconBtn}

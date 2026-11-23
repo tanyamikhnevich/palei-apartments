@@ -124,6 +124,7 @@ export const fr: Translation<Messages> = {
     viewDetails: 'Voir les détails',
     showMore: 'Afficher plus',
     showLess: 'Afficher moins',
+    viewOnAirbnb: 'Voir sur Airbnb',
     filterAll: 'Tous',
     clearFilters: 'Effacer les filtres',
     showMap: 'Afficher sur la carte',

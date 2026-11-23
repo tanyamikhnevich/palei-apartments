@@ -171,6 +171,25 @@
   }
 }
 
+.airbnbLink {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  width: fit-content;
+  gap: 6px;
+  margin-top: 14px;
+  font-size: var(--fs-md);
+  font-weight: 700;
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color 0.15s;
+
+  &:hover {
+    color: var(--accent);
+  }
+}
+
 .descChevron {
   transform: rotate(90deg);
   transition: transform 0.25s var(--ease);

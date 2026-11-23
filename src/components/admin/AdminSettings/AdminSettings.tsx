@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react';
 import Button from '@/components/ui/Button/Button';
 import { AdminInput, AdminSelect } from '@/components/admin/ui/AdminField';
 import AdminAccount from '@/components/admin/AdminAccount/AdminAccount';
+import AdminHomeFeatured from '@/components/admin/AdminSettings/AdminHomeFeatured';
+import type { Apartment } from '@/types/apartment';
 import {
   CURRENCY_OPTIONS,
   DEFAULT_BUSINESS_SETTINGS,
@@ -55,7 +57,20 @@ function validateField(key: FieldKey, value: string): string | undefined {
   return undefined;
 }
 
-export default function AdminSettings() {
+type AdminSettingsProps = {
+  apartments: Apartment[];
+  featuredIds: string[];
+  /** Whether the home page selection can be edited and saved yet. */
+  featuredReady: boolean;
+  onFeaturedSaved: (ids: string[]) => void;
+};
+
+export default function AdminSettings({
+  apartments,
+  featuredIds,
+  featuredReady,
+  onFeaturedSaved,
+}: AdminSettingsProps) {
   const [settings, setSettings] = useState<BusinessSettings>(DEFAULT_BUSINESS_SETTINGS);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -200,6 +215,13 @@ export default function AdminSettings() {
           {saving ? 'Saving…' : 'Save settings'}
         </Button>
       </div>
+
+      <AdminHomeFeatured
+        apartments={apartments}
+        featuredIds={featuredIds}
+        ready={featuredReady}
+        onSaved={onFeaturedSaved}
+      />
 
       <AdminAccount />
     </div>

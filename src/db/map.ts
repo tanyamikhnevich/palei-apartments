@@ -10,6 +10,7 @@ import type { CalendarFeed } from '@/types/calendar';
 import type { Review } from '@/types/review';
 import { DEFAULT_AVAILABILITY } from '@/lib/availability';
 import { isPhotoUrl } from '@/lib/apartmentMedia';
+import { normalizeAirbnbUrl } from '@/lib/airbnb';
 import type { ApartmentLocales } from './schema';
 import { formatDateRange } from '@/lib/dates';
 import type { BusinessSettings } from '@/types/settings';
@@ -49,6 +50,7 @@ export function rowToApartment(row: ApartmentRow): Apartment {
     lng: row.lng ?? undefined,
     availability: row.availability ?? DEFAULT_AVAILABILITY,
     icalToken: row.icalToken ?? undefined,
+    airbnbUrl: row.airbnbUrl ?? undefined,
     locales: sanitizeLocales(row.locales),
   };
 }
@@ -81,6 +83,7 @@ export function apartmentToInsert(apt: Apartment): Omit<ApartmentRow, 'createdAt
     lng: apt.lng ?? null,
     availability: apt.availability ?? DEFAULT_AVAILABILITY,
     icalToken: apt.icalToken ?? createIcalToken(),
+    airbnbUrl: normalizeAirbnbUrl(apt.airbnbUrl),
     locales: sanitizeLocales(apt.locales),
   };
 }

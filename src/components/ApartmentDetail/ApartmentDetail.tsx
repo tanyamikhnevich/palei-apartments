@@ -388,6 +388,18 @@ export default function ApartmentDetail({ apt }: ApartmentDetailProps) {
               </button>
             )}
           </div>
+
+          {apt.airbnbUrl && (
+            <a
+              className={styles.airbnbLink}
+              href={apt.airbnbUrl}
+              target="_blank"
+              rel="noopener noreferrer nofollow"
+            >
+              {t('apartments.viewOnAirbnb')}
+              <Icon name="external" size={15} />
+            </a>
+          )}
         </section>
 
         {/* `#book` is where the floating booking CTA lands. */}

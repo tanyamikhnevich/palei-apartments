@@ -58,6 +58,7 @@ export default function AdminDashboard() {
   const [list, setList] = useState<Apartment[]>([]);
   const [loading, setLoading] = useState(true);
   const [fromDb, setFromDb] = useState(false);
+  const [featuredIds, setFeaturedIds] = useState<string[]>([]);
   const [modalApt, setModalApt] = useState<Apartment | null | undefined>(undefined);
   /** The apartment whose check-in guide is open. */
   const [guideApt, setGuideApt] = useState<Apartment | undefined>(undefined);
@@ -94,9 +95,10 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     fetchApartments()
-      .then(({ apartments, fromDb: db }) => {
+      .then(({ apartments, fromDb: db, featuredIds: featured }) => {
         setList(apartments);
         setFromDb(db);
+        setFeaturedIds(featured);
       })
       .finally(() => setLoading(false));
   }, []);
@@ -276,7 +278,14 @@ export default function AdminDashboard() {
 
           {view === 'reviews' && <ReviewsTable apartments={list} />}
 
-          {view === 'settings' && <AdminSettings />}
+          {view === 'settings' && (
+            <AdminSettings
+              apartments={list}
+              featuredIds={featuredIds}
+              featuredReady={fromDb && !loading}
+              onFeaturedSaved={setFeaturedIds}
+            />
+          )}
         </div>
       </div>
 

@@ -57,6 +57,8 @@ function httpProblem(res: Response): string {
 export type ApartmentsLoadResult = {
   apartments: Apartment[];
   fromDb: boolean;
+  /** The apartments the home page leads with, in order. */
+  featuredIds: string[];
 };
 
 export type FetchApartmentsOptions = {
@@ -70,17 +72,32 @@ export async function fetchApartments(
   const qs = options.publicOnly ? '?public=1' : '';
   try {
     const res = await apiFetch(`/api/apartments${qs}`, { cache: 'no-store' });
-    const data = await parseJson<{ apartments: Apartment[]; source?: 'database' | 'mock' }>(res);
+    const data = await parseJson<{
+      apartments: Apartment[];
+      featuredIds?: string[];
+      source?: 'database' | 'mock';
+    }>(res);
     return {
       apartments: data.apartments,
       fromDb: data.source === 'database',
+      featuredIds: data.featuredIds ?? [],
     };
   } catch (e) {
     console.warn('fetchApartments fallback', e);
     const { filterListedApartments } = await import('@/lib/apartmentVisibility');
     const list = options.publicOnly ? filterListedApartments(fallbackApartments) : fallbackApartments;
-    return { apartments: list, fromDb: false };
+    return { apartments: list, fromDb: false, featuredIds: [] };
   }
+}
+
+export async function saveHomeFeatured(ids: string[]): Promise<string[]> {
+  const res = await apiFetch('/api/home-featured', {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ids }),
+  });
+  const data = await parseJson<{ ids: string[] }>(res);
+  return data.ids;
 }
 
 export async function createApartment(apt: Apartment): Promise<Apartment> {

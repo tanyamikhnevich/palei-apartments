@@ -7,6 +7,7 @@ import type { Apartment } from '@/types/apartment';
 import { dbUnavailableResponse, isDbConfigured, jsonError } from '@/lib/api/errors';
 import { requireAdminAccess } from '@/lib/auth/guard';
 import { APARTMENTS_TAG } from '@/lib/cacheTags';
+import { isValidAirbnbInput } from '@/lib/airbnb';
 
 type RouteContext = { params: { id: string } };
 
@@ -21,6 +22,7 @@ export async function PATCH(request: Request, { params }: RouteContext) {
     if (body.id !== params.id) {
       return jsonError('Apartment id mismatch');
     }
+    if (!isValidAirbnbInput(body.airbnbUrl)) return jsonError('Invalid Airbnb link');
 
     const db = getDb();
     const updated = await db

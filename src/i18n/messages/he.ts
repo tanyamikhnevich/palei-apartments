@@ -112,6 +112,7 @@ export const he = {
     viewDetails: 'פרטים',
     showMore: 'הצגת עוד',
     showLess: 'הצגה מצומצמת',
+    viewOnAirbnb: 'צפייה ב‑Airbnb',
     filterAll: 'הכל',
     clearFilters: 'ניקוי סינון',
     showMap: 'הצג במפה',

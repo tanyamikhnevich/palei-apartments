@@ -8,6 +8,7 @@ import Icon from '@/components/ui/Icon/Icon';
 import AdminAvailabilityCalendar from '@/components/admin/AdminAvailabilityCalendar/AdminAvailabilityCalendar';
 import AdminCalendarSync from '@/components/admin/AdminCalendarSync/AdminCalendarSync';
 import AdminTagPicker from '@/components/admin/AdminTagPicker/AdminTagPicker';
+import { isValidAirbnbInput, normalizeAirbnbUrl } from '@/lib/airbnb';
 import { photoLabelFromTags } from '@/lib/apartmentTags';
 import PhotoManager from '@/components/admin/ui/PhotoManager';
 import { AdminField, AdminInput, AdminTextarea, blurOnWheel } from '@/components/admin/ui/AdminField';
@@ -19,6 +20,8 @@ import { currencyForArea } from '@/lib/regions';
 import { DEFAULT_AREA, REGIONS } from '@/types/region';
 
 const STATUSES: ApartmentStatus[] = ['Available', 'Booked', 'Maintenance'];
+const AIRBNB_FIELD_ID = 'apartment-airbnb-url';
+const AIRBNB_ERROR = 'Paste a listing link like airbnb.com/rooms/12345678';
 
 function emptyEnCopy(): ApartmentLocaleCopy {
   return {
@@ -82,6 +85,8 @@ export default function AdminApartmentModal({ initial, onClose, onSave }: AdminA
     };
   });
 
+  const [airbnbError, setAirbnbError] = useState<string | undefined>();
+
   const en = form.locales.en;
   /* Prices are entered in the currency of the region the apartment sits in. */
   const currencySymbol = CURRENCY_SYMBOL[currencyForArea(form.area)];
@@ -116,10 +121,17 @@ export default function AdminApartmentModal({ initial, onClose, onSave }: AdminA
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!en.title.trim() || !en.location.trim()) return;
+    if (!isValidAirbnbInput(form.airbnbUrl)) {
+      // The Save button is at the far end of a long form from this field.
+      setAirbnbError(AIRBNB_ERROR);
+      document.getElementById(AIRBNB_FIELD_ID)?.focus();
+      return;
+    }
     const photoLabel = photoLabelFromTags(form.tagIds);
     const enCopy = { ...en, photoLabel };
     onSave({
       ...form,
+      airbnbUrl: normalizeAirbnbUrl(form.airbnbUrl) ?? undefined,
       photos: form.photos?.length ? form.photos : undefined,
       priceTiers: form.priceTiers?.length ? form.priceTiers : undefined,
       services: form.services?.filter((s) => s.name.trim()).length
@@ -193,6 +205,19 @@ export default function AdminApartmentModal({ initial, onClose, onSave }: AdminA
                 ))}
               </select>
             </AdminField>
+            <AdminInput
+              id={AIRBNB_FIELD_ID}
+              label="Airbnb link"
+              inputMode="url"
+              placeholder="https://www.airbnb.com/rooms/…"
+              value={form.airbnbUrl ?? ''}
+              error={airbnbError}
+              onChange={(e) => {
+                setField('airbnbUrl', e.target.value);
+                setAirbnbError(undefined);
+              }}
+              onBlur={() => setAirbnbError(isValidAirbnbInput(form.airbnbUrl) ? undefined : AIRBNB_ERROR)}
+            />
           </div>
 
           <div className={styles.grid}>

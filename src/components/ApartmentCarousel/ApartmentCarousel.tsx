@@ -8,16 +8,16 @@ import Button from '@/components/ui/Button/Button';
 import Icon from '@/components/ui/Icon/Icon';
 import { useLanguage } from '@/i18n/LanguageProvider';
 import { fetchApartments } from '@/lib/api/client';
+import { HOME_FEATURED_LIMIT, pickHomeFeatured } from '@/lib/homeFeatured';
 import { apartmentsInCountry } from '@/lib/regions';
 import styles from './ApartmentCarousel.module.scss';
 
-/** The home page shows a taste of the list, not the list itself. */
-const CAROUSEL_LIMIT = 3;
-const SKELETON_COUNT = 3;
+const SKELETON_COUNT = HOME_FEATURED_LIMIT;
 
 export default function ApartmentCarousel() {
   const { t, href } = useLanguage();
   const [apartments, setApartments] = useState<Apartment[]>([]);
+  const [featuredIds, setFeaturedIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [index, setIndex] = useState(0);
   const [atStart, setAtStart] = useState(true);
@@ -26,11 +26,15 @@ export default function ApartmentCarousel() {
 
   useEffect(() => {
     fetchApartments({ publicOnly: true })
-      .then(({ apartments: list }) => setApartments(apartmentsInCountry(list, 'IL')))
+      .then(({ apartments: list, featuredIds: featured }) => {
+        setApartments(apartmentsInCountry(list, 'IL'));
+        setFeaturedIds(featured);
+      })
       .finally(() => setLoading(false));
   }, []);
 
-  const displayed = apartments.slice(0, CAROUSEL_LIMIT);
+  /** The home page shows a taste of the list, chosen in the admin panel. */
+  const displayed = pickHomeFeatured(apartments, featuredIds);
 
   /** One card plus its gap — the distance a single arrow click travels. */
   const step = () => {

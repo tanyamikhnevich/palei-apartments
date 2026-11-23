@@ -7,6 +7,8 @@ import type { Apartment } from '@/types/apartment';
 import { dbUnavailableResponse, isDbConfigured, jsonError } from '@/lib/api/errors';
 import { requireAdminAccess } from '@/lib/auth/guard';
 import { APARTMENTS_TAG } from '@/lib/cacheTags';
+import { isValidAirbnbInput } from '@/lib/airbnb';
+import { readFeaturedIds, readPublicFeaturedIds } from '@/lib/server/homeFeatured';
 
 /**
  * The guest-facing catalogue, cached.
@@ -48,16 +50,21 @@ export async function GET(request: Request) {
 
   try {
     if (publicOnly) {
-      return NextResponse.json({
-        apartments: await readPublicApartments(),
-        source: 'database' as const,
-      });
+      const [apartments, featuredIds] = await Promise.all([
+        readPublicApartments(),
+        readPublicFeaturedIds(),
+      ]);
+      return NextResponse.json({ apartments, featuredIds, source: 'database' as const });
     }
 
     // Admin sees the unfiltered, uncached truth — it is editing it.
-    const rows = await getDb().select().from(schema.apartments).orderBy(asc(schema.apartments.id));
+    const [rows, featuredIds] = await Promise.all([
+      getDb().select().from(schema.apartments).orderBy(asc(schema.apartments.id)),
+      readFeaturedIds(),
+    ]);
     return NextResponse.json({
       apartments: rows.map(rowToApartment),
+      featuredIds,
       source: 'database' as const,
     });
   } catch (e) {
@@ -77,6 +84,7 @@ export async function POST(request: Request) {
     if (!body?.id || !body.locales?.en?.title) {
       return jsonError('Invalid apartment payload');
     }
+    if (!isValidAirbnbInput(body.airbnbUrl)) return jsonError('Invalid Airbnb link');
 
     const db = getDb();
     const now = new Date();

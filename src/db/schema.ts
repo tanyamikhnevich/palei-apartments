@@ -49,6 +49,8 @@ export const apartments = pgTable('apartments', {
   availability: jsonb('availability').$type<ApartmentAvailability>(),
   /** Secret path segment of the public iCal export other platforms subscribe to. */
   icalToken: varchar('ical_token', { length: 64 }),
+  /** This apartment's listing on Airbnb; shown to guests on its page. */
+  airbnbUrl: text('airbnb_url'),
   locales: jsonb('locales').notNull().$type<ApartmentLocales>(),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
@@ -246,6 +248,16 @@ export const houseLinks = pgTable('house_links', {
   apartmentId: varchar('apartment_id', { length: 64 }).primaryKey(),
   token: varchar('token', { length: 64 }).notNull().unique(),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+});
+
+/**
+ * The apartments the home page leads with, in order. A table of its own rather
+ * than a column on `business_settings`: if this is ever missing, only the
+ * order of the home row falls back, and the contact details keep loading.
+ */
+export const homeFeatured = pgTable('home_featured', {
+  apartmentId: varchar('apartment_id', { length: 64 }).primaryKey(),
+  position: integer('position').notNull(),
 });
 
 export type CheckInGuideRow = typeof checkInGuides.$inferSelect;
